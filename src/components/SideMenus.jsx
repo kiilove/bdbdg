@@ -38,7 +38,7 @@ const SideMenus = () => {
           <img src={Logo} className="w-14" />
         </div>
         <span className="text-3xl font-bold text-white flex justify-center items-center h-full">
-          BGBGg
+          BDBDg
         </span>
       </div>
       <div className="flex bg-gray-600" style={{ height: "1px" }}></div>
