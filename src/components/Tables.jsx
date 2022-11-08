@@ -4,7 +4,8 @@ import { useState } from "react";
 const Tables = (props) => {
   const [tableHeaders, setTableHeader] = useState(props.headers);
   const [tableData, setTableData] = useState(props.data);
-  console.log(tableHeaders);
+  //console.log(tableHeaders);
+  console.log(tableData);
   return (
     <div className="flex w-full">
       <table className="w-full text-sm text-left text-gray-500">

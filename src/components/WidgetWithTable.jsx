@@ -7,7 +7,7 @@ import React from "react";
 import Tables from "./Tables";
 
 const WidgetWithTable = (props) => {
-  console.log(props.data.tableHeaders);
+  console.log(props.data.tableData);
   return (
     <div
       className="flex w-full  h-96 p-8 rounded-lg flex-col align-top justify-start gap-y-3"
