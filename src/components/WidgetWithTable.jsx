@@ -7,6 +7,7 @@ import React from "react";
 import Tables from "./Tables";
 
 const WidgetWithTable = (props) => {
+  console.log(props.data.tableHeaders);
   return (
     <div
       className="flex w-full  h-96 p-8 rounded-lg flex-col align-top justify-start gap-y-3"
@@ -32,7 +33,10 @@ const WidgetWithTable = (props) => {
       <div className="flex items-center justify-start w-full h-64 rounded-xl  gap-x-2 flex-wrap overflow-y-auto">
         <div className="flex w-full justify-center">
           {props.data.tableData ? (
-            <Tables data={props.data.tableData} />
+            <Tables
+              headers={props.data.tableHeaders}
+              data={props.data.tableData}
+            />
           ) : (
             <span className="text-white text-lg">
               현재 표시할 내용이 없습니다.

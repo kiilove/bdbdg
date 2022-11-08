@@ -10,21 +10,56 @@ import {
   faUsersLine,
 } from "@fortawesome/free-solid-svg-icons";
 import WidgetWithTable from "./WidgetWithTable";
-import Tables from "./Tables";
+import { getDocsData } from "../firebases/getDatas";
+import { useState } from "react";
+import { useEffect } from "react";
 
-const RefereeTableData = {
-  headers: ["ID", "이름", "지역", "비고"],
-  rows: [
-    { idx: 1, id: "00123", name: "심판1", location: "서울 강서" },
-    { idx: 3, id: "02123", name: "심판3", location: "서울 강남" },
-    { idx: 5, id: "05123", name: "심판5", location: "서울 강동" },
-    { idx: 7, id: "10123", name: "심판7", location: "서울 강북" },
-    { idx: 9, id: "00193", name: "심판9", location: "서울 중앙" },
-    { idx: 11, id: "02115", name: "심판11", location: "경기 서부" },
-  ],
+const REFEREE_HEADERS = ["ID", "이름", "지역"];
+const RefereeTableDatas = (rows) => {
+  let madeData = {};
+  let rowsArray = [];
+
+  try {
+    const madeRows = rows.map((item, idx) => {
+      rowsArray.push({
+        id: item.basicInfo.refId,
+        name: item.basicInfo.refName,
+        location: item.basicInfo.refLocation,
+      });
+    });
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    return rowsArray;
+  }
 };
 
 const IngCup = () => {
+  const [resReferee, setResReferee] = useState([]);
+  const [resRefereeTableData, setResRefereeTableData] = useState([]);
+  const getRefereeData = async () => {
+    try {
+      await getDocsData({ documentName: "referee" }).then((res) =>
+        setResReferee((prev) => (prev = res))
+      );
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      if (resReferee.length > 0) {
+        console.log("loading...");
+      }
+    }
+  };
+
+  useEffect(() => {
+    getRefereeData();
+  }, []);
+
+  useEffect(() => {
+    setResRefereeTableData(RefereeTableDatas(resReferee));
+    console.log(resRefereeTableData);
+  }, [resReferee]);
+
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
       <div className="flex w-full gap-x-8">
@@ -80,7 +115,8 @@ const IngCup = () => {
             data={{
               title: "심판",
               titleIcon: faScaleBalanced,
-              tableData: RefereeTableData,
+              tableHeaders: REFEREE_HEADERS,
+              tableData: resRefereeTableData,
             }}
           />
         </div>

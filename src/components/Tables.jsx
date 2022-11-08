@@ -2,15 +2,16 @@ import React from "react";
 import { useState } from "react";
 
 const Tables = (props) => {
+  const [tableHeaders, setTableHeader] = useState(props.headers);
   const [tableData, setTableData] = useState(props.data);
-  //console.log(tableData);
+  console.log(tableHeaders);
   return (
     <div className="flex w-full">
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs text-gray-400 uppercase border-b border-gray-700">
           <tr>
-            {tableData.headers &&
-              tableData.headers.map((item) => (
+            {tableHeaders &&
+              tableHeaders.map((item) => (
                 <th className="py-3 px-6" key={item}>
                   {item}
                 </th>
