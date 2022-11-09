@@ -3,15 +3,15 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 const Tables = (props) => {
-  const [tableHeaders, setTableHeader] = useState([]);
+  const [tableHeaders, setTableHeaders] = useState([]);
   const [tableData, setTableData] = useState([]);
   //console.log(tableHeaders);
   //console.log(props.data);
 
   useEffect(() => {
-    setTableHeader(props.headers);
+    setTableHeaders(props.headers);
     setTableData(props.data);
-    //console.log(tableData);
+    console.log(tableHeaders);
   }, [props]);
 
   return (
@@ -20,7 +20,7 @@ const Tables = (props) => {
         <thead className="text-xs text-gray-400 uppercase border-b border-gray-700">
           <tr>
             {tableHeaders &&
-              tableHeaders.map((item) => (
+              tableHeaders.map((item, idx) => (
                 <th className="py-3 px-6" key={item}>
                   {item}
                 </th>
@@ -29,18 +29,19 @@ const Tables = (props) => {
         </thead>
         <tbody>
           {tableData &&
-            tableData.map((item, idx) => (
-              <tr className=" border-b border-gray-700">
-                <td className="text-white text-sm font-semibold py-3 px-6">
-                  {item.id}
-                </td>
-                <td className="text-white text-sm font-semibold py-3 px-6">
-                  {item.name}
-                </td>
-                <td className="text-white text-sm font-semibold py-3 px-6">
-                  {item.location}
-                </td>
-              </tr>
+            tableData.map((items, idx) => (
+              <>
+                <tr className=" border-b border-gray-700" key={items + idx}>
+                  {items.map((item, index) => (
+                    <td
+                      className="text-white text-sm font-semibold py-3 px-6"
+                      key={item + index}
+                    >
+                      {item}
+                    </td>
+                  ))}
+                </tr>
+              </>
             ))}
         </tbody>
       </table>

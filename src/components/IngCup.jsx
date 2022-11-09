@@ -14,18 +14,39 @@ import { getDocsData } from "../firebases/getDatas";
 import { useState } from "react";
 import { useEffect } from "react";
 
-const REFEREE_HEADERS = ["ID", "이름", "지역"];
+const REFEREE_HEADERS = ["ID", "이름", "이메일"];
+const PLAYER_HEADERS = ["ID", "이름", "이메일"];
+
 const RefereeTableDatas = (rows) => {
   let madeData = {};
   let rowsArray = [];
 
   try {
     const madeRows = rows.map((item, idx) => {
-      rowsArray.push({
-        id: item.basicInfo.refId,
-        name: item.basicInfo.refName,
-        location: item.basicInfo.refLocation,
-      });
+      rowsArray.push([
+        item.basicInfo.refId,
+        item.basicInfo.refName,
+        item.basicInfo.refEmail,
+      ]);
+    });
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    return rowsArray;
+  }
+};
+
+const PlayerTableDatas = (rows) => {
+  let madeData = {};
+  let rowsArray = [];
+
+  try {
+    const madeRows = rows.map((item, idx) => {
+      rowsArray.push([
+        item.basicInfo.playerId,
+        item.basicInfo.playerName,
+        item.basicInfo.playerEmail,
+      ]);
     });
   } catch (error) {
     console.log(error.message);
@@ -35,8 +56,25 @@ const RefereeTableDatas = (rows) => {
 };
 
 const IngCup = () => {
+  const [resDatas, setResDatas] = useState([]);
   const [resReferee, setResReferee] = useState([]);
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
+  const [resPlayer, setResPlayer] = useState([]);
+  const [resPlayerTableData, setResPlayerTableData] = useState([]);
+
+  // 22-11-09 여기부분 다시 작성해야함 만들다 말았음
+  // 첫번째 then 이후에 switch문으로 props.documentName별 state 변경하고
+  // finally에서 madeRow 함수 실행시켜볼까 하고 있었음.
+  const getDatas = async (props) => {
+    try {
+      await getDocsData({ documentName: props.documentName }).then((res) =>
+        setResDatas((prev) => (prev = res))
+      );
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+    }
+  };
   const getRefereeData = async () => {
     try {
       await getDocsData({ documentName: "referee" }).then((res) =>
@@ -46,19 +84,34 @@ const IngCup = () => {
       console.log(error.message);
     } finally {
       if (resReferee.length > 0) {
-        console.log("loading...");
+        console.log("Referee loading...");
+      }
+    }
+  };
+  const getPlayerData = async () => {
+    try {
+      await getDocsData({ documentName: "player" }).then((res) =>
+        setResPlayer((prev) => (prev = res))
+      );
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      if (resPlayer.length > 0) {
+        console.log("Player loading...");
       }
     }
   };
 
   useEffect(() => {
     getRefereeData();
+    getPlayerData();
   }, []);
 
   useEffect(() => {
     setResRefereeTableData(RefereeTableDatas(resReferee));
+    setResPlayerTableData(PlayerTableDatas(resPlayer));
     //console.log(resRefereeTableData);
-  }, [resReferee]);
+  }, [resReferee, resPlayer]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
@@ -120,35 +173,15 @@ const IngCup = () => {
             }}
           />
         </div>
-        <div
-          className="flex w-1/2 h-96 p-8 rounded-lg flex-col align-top justify-start gap-y-3"
-          style={{ backgroundColor: "rgba(7,11,41,0.6" }}
-        >
-          <div className="flex items-center justify-start bg-slate-800 w-full h-14 rounded-xl px-5 gap-x-2">
-            <div className="flex justify-between w-full">
-              <div className="flex justify-center items-center">
-                <FontAwesomeIcon
-                  icon={faUsersLine}
-                  className="text-white text-xl mr-2"
-                />
-                <span className="text-white text-xl ">참가선수</span>
-              </div>
-
-              <div className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl">
-                <FontAwesomeIcon
-                  icon={faPenToSquare}
-                  className="text-white text-lg"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-start justify-start w-full h-64 rounded-xl gap-x-2 flex-wrap overflow-y-auto">
-            <div className="flex w-full justify-center rounded-lg ">
-              {/* <span className="text-white text-lg">
-                현재 참가 등록한 선수가 없습니다.
-              </span> */}
-            </div>
-          </div>
+        <div className="flex w-1/2 h-96">
+          <WidgetWithTable
+            data={{
+              title: "출전선수",
+              titleIcon: faScaleBalanced,
+              tableHeaders: PLAYER_HEADERS,
+              tableData: resPlayerTableData,
+            }}
+          />
         </div>
       </div>
     </div>
