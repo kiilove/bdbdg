@@ -57,7 +57,7 @@ const IngCup = () => {
 
   useEffect(() => {
     setResRefereeTableData(RefereeTableDatas(resReferee));
-    console.log(resRefereeTableData);
+    //console.log(resRefereeTableData);
   }, [resReferee]);
 
   return (
