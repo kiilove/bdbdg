@@ -1,11 +1,19 @@
 import React from "react";
+import { useEffect } from "react";
 import { useState } from "react";
 
 const Tables = (props) => {
-  const [tableHeaders, setTableHeader] = useState(props.headers);
-  const [tableData, setTableData] = useState(props.data);
+  const [tableHeaders, setTableHeader] = useState([]);
+  const [tableData, setTableData] = useState([]);
   //console.log(tableHeaders);
-  console.log(tableData);
+  //console.log(props.data);
+
+  useEffect(() => {
+    setTableHeader(props.headers);
+    setTableData(props.data);
+    //console.log(tableData);
+  }, [props]);
+
   return (
     <div className="flex w-full">
       <table className="w-full text-sm text-left text-gray-500">
@@ -20,8 +28,8 @@ const Tables = (props) => {
           </tr>
         </thead>
         <tbody>
-          {tableData.rows &&
-            tableData.rows.map((item, idx) => (
+          {tableData &&
+            tableData.map((item, idx) => (
               <tr className=" border-b border-gray-700">
                 <td className="text-white text-sm font-semibold py-3 px-6">
                   {item.id}
