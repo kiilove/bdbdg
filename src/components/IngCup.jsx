@@ -17,46 +17,33 @@ import { useEffect } from "react";
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
 
-const RefereeTableDatas = (rows) => {
+const makeTableDatas = (rows, props) => {
   let madeData = {};
   let rowsArray = [];
+  let madeRows = [];
 
-  try {
-    const madeRows = rows.map((item, idx) => {
+  if (props.documentName === "referee") {
+    madeRows = rows.map((item, idx) => {
       rowsArray.push([
         item.basicInfo.refId,
         item.basicInfo.refName,
         item.basicInfo.refEmail,
       ]);
     });
-  } catch (error) {
-    console.log(error.message);
-  } finally {
-    return rowsArray;
-  }
-};
-
-const PlayerTableDatas = (rows) => {
-  let madeData = {};
-  let rowsArray = [];
-
-  try {
-    const madeRows = rows.map((item, idx) => {
+  } else if (props.documentName === "player") {
+    madeRows = rows.map((item, idx) => {
       rowsArray.push([
         item.basicInfo.playerId,
         item.basicInfo.playerName,
         item.basicInfo.playerEmail,
       ]);
     });
-  } catch (error) {
-    console.log(error.message);
-  } finally {
-    return rowsArray;
   }
+  console.log("makeTableDatas finished");
+  return rowsArray;
 };
 
 const IngCup = () => {
-  const [resDatas, setResDatas] = useState([]);
   const [resReferee, setResReferee] = useState([]);
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
   const [resPlayer, setResPlayer] = useState([]);
@@ -65,52 +52,38 @@ const IngCup = () => {
   // 22-11-09 여기부분 다시 작성해야함 만들다 말았음
   // 첫번째 then 이후에 switch문으로 props.documentName별 state 변경하고
   // finally에서 madeRow 함수 실행시켜볼까 하고 있었음.
+  // 22-11-10 코드 재사용 성공 했으나 DOM문제로 UserEffect를 사용하기로 변경했음
   const getDatas = async (props) => {
     try {
-      await getDocsData({ documentName: props.documentName }).then((res) =>
-        setResDatas((prev) => (prev = res))
-      );
+      await getDocsData({ documentName: props.documentName }).then((res) => {
+        switch (props.documentName) {
+          case "referee":
+            setResReferee((prev) => (prev = res));
+          case "player":
+            setResPlayer((prev) => (prev = res));
+          default:
+            break;
+        }
+      });
     } catch (error) {
       console.log(error.message);
     } finally {
-    }
-  };
-  const getRefereeData = async () => {
-    try {
-      await getDocsData({ documentName: "referee" }).then((res) =>
-        setResReferee((prev) => (prev = res))
-      );
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      if (resReferee.length > 0) {
-        console.log("Referee loading...");
-      }
-    }
-  };
-  const getPlayerData = async () => {
-    try {
-      await getDocsData({ documentName: "player" }).then((res) =>
-        setResPlayer((prev) => (prev = res))
-      );
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      if (resPlayer.length > 0) {
-        console.log("Player loading...");
-      }
+      console.log("getDatas Finished");
     }
   };
 
   useEffect(() => {
-    getRefereeData();
-    getPlayerData();
+    getDatas({ documentName: "referee" });
+    getDatas({ documentName: "player" });
   }, []);
 
   useEffect(() => {
-    setResRefereeTableData(RefereeTableDatas(resReferee));
-    setResPlayerTableData(PlayerTableDatas(resPlayer));
-    //console.log(resRefereeTableData);
+    setResRefereeTableData(
+      makeTableDatas(resReferee, { documentName: "referee" })
+    );
+    setResPlayerTableData(
+      makeTableDatas(resPlayer, { documentName: "player" })
+    );
   }, [resReferee, resPlayer]);
 
   return (

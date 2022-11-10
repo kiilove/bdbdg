@@ -6,12 +6,12 @@ const Tables = (props) => {
   const [tableHeaders, setTableHeaders] = useState([]);
   const [tableData, setTableData] = useState([]);
   //console.log(tableHeaders);
-  //console.log(props.data);
+  // console.log(props.data);
 
   useEffect(() => {
     setTableHeaders(props.headers);
     setTableData(props.data);
-    console.log(tableHeaders);
+    // console.log(tableHeaders);
   }, [props]);
 
   return (

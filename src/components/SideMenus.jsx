@@ -16,12 +16,14 @@ const menuItems = [
   { id: 6, title: "멤버 모음", link: "/refereemanager", icon: faPeopleRoof },
 
   { id: 8, title: "관리자", link: "/admin", icon: faUserSecret },
+  { id: 10, title: "테스트페이지", link: "/test", icon: faUserSecret },
 ];
 const SideMenus = () => {
   const [selected, setSelected] = useState("");
 
   const handleMenuClick = (props) => {
     setSelected(() => props.title);
+    window.location.href = props.link;
   };
 
   useEffect(() => {
@@ -52,7 +54,9 @@ const SideMenus = () => {
             className={`flex w-full h-14  justify-start items-center px-2 rounded-xl hover:cursor-pointer ${
               item.title === selected && " bg-stone-800"
             }`}
-            onClick={() => handleMenuClick({ title: item.title })}
+            onClick={() =>
+              handleMenuClick({ title: item.title, link: item.link })
+            }
           >
             <div
               id="menuItemIconBox"

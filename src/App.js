@@ -1,8 +1,11 @@
 import "./App.css";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import BackgroundImage from "./assets/images//bg/mainBg.jpg";
 import SideMenus from "./components/SideMenus";
 import TopMenus from "./components/TopMenus";
 import CupMain from "./pages/CupMain";
+import IngCup from "./components/IngCup";
+import DragTable from "./components/DragTable";
 
 function App() {
   return (
@@ -18,8 +21,13 @@ function App() {
         <div className="flex w-full h-18">
           <TopMenus />
         </div>
-        <div className="flex w-full min-h-screen">
-          <CupMain />
+        <div className="flex w-full min-h-screen ">
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<CupMain component={<IngCup />} />} />
+              <Route path="/test" element={<DragTable />} />
+            </Routes>
+          </BrowserRouter>
         </div>
       </div>
     </div>
