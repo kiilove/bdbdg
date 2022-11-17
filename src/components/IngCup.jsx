@@ -4,18 +4,68 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPencil,
   faPenToSquare,
+  faPeopleLine,
   faPeopleRoof,
   faPlusCircle,
   faScaleBalanced,
+  faSitemap,
   faUsersLine,
 } from "@fortawesome/free-solid-svg-icons";
 import WidgetWithTable from "./WidgetWithTable";
 import { getDocsData } from "../firebases/getDatas";
 import { useState } from "react";
 import { useEffect } from "react";
+import WidgetWithTableDragable from "./WidgetWithTableDragable";
 
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
+const GAME_HEADERS = [
+  "경기순서",
+  "종목명",
+  "필요 심판 / 배정된 심판",
+  "필요 선수 / 배정된 선수",
+  "체점표 준비",
+  "준비율",
+];
+
+const tempGameData = [
+  [
+    "1",
+    "171cm 남자클래식",
+    "9 / 5",
+    "10 / 4",
+    "준비중",
+    "50%",
+    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
+  ],
+  [
+    "2",
+    "181cm 남자클래식",
+    "9 / 8",
+    "10 / 8",
+    "완료",
+    "90%",
+    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
+  ],
+  [
+    "3",
+    "160cm 여자클래식",
+    "9 / 5",
+    "10 / 4",
+    "준비중",
+    "50%",
+    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
+  ],
+  [
+    "4",
+    "170cm 여자스포츠",
+    "9 / 8",
+    "10 / 8",
+    "완료",
+    "90%",
+    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
+  ],
+];
 
 const makeTableDatas = (rows, props) => {
   let madeData = {};
@@ -139,7 +189,7 @@ const IngCup = () => {
         <div className="flex w-1/2 h-96">
           <WidgetWithTable
             data={{
-              title: "심판",
+              title: "참가심판",
               titleIcon: faScaleBalanced,
               tableHeaders: REFEREE_HEADERS,
               tableData: resRefereeTableData,
@@ -150,12 +200,22 @@ const IngCup = () => {
           <WidgetWithTable
             data={{
               title: "출전선수",
-              titleIcon: faScaleBalanced,
+              titleIcon: faPeopleLine,
               tableHeaders: PLAYER_HEADERS,
               tableData: resPlayerTableData,
             }}
           />
         </div>
+      </div>
+      <div className="flex w-full h-96">
+        <WidgetWithTableDragable
+          data={{
+            title: "개최종목",
+            titleIcon: faSitemap,
+            tableHeaders: GAME_HEADERS,
+            tableData: tempGameData,
+          }}
+        />
       </div>
     </div>
   );

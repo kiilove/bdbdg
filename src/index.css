@@ -7,7 +7,7 @@ body {
   font-family: "Noto Sans KR", "Apple SD Gothic", "맑은고딕", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 code {

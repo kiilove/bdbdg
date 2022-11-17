@@ -1,77 +1,91 @@
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-const initial = Array.from({ length: 10 }, (v, k) => k).map((k) => {
-  const custom = {
-    id: `id-${k}`,
-    content: `Quote ${k}`,
-  };
+const finalSpaceCharacters = [
+  {
+    id: "gary",
+    name: "Gary Goodspeed",
+    thumb: "/images/gary.png",
+  },
+  {
+    id: "cato",
+    name: "Little Cato",
+    thumb: "/images/cato.png",
+  },
+  {
+    id: "kvn",
+    name: "KVN",
+    thumb: "/images/kvn.png",
+  },
+  {
+    id: "mooncake",
+    name: "Mooncake",
+    thumb: "/images/mooncake.png",
+  },
+  {
+    id: "quinn",
+    name: "Quinn Ergon",
+    thumb: "/images/quinn.png",
+  },
+];
 
-  return custom;
-});
+const DragTest = () => {
+  const [characters, updateCharacters] = useState(finalSpaceCharacters);
 
-const grid = 8;
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [remove] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, remove);
+  function handleOnDragEnd(result) {
+    if (!result.destination) return;
 
-  return result;
-};
+    const items = Array.from(characters);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
 
-const Quote = ({ quoate, index }) => {
-  return (
-    <Draggable draggableId={quoate.id} index={index}>
-      {(provided) => {
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-        >
-          {quoate.contet}
-        </div>;
-      }}
-    </Draggable>
-  );
-};
-
-const QuoteList = React.memo(function QuoteList({ quotes }) {
-  return quotes.map((quote, index) => (
-    <Quote quote={quote} index={index} key={quote.id} />
-  ));
-});
-const DragTable = () => {
-  const [state, setState] = useState({ quotes: initial });
-
-  function onDragEnd(result) {
-    if (!result.destination) {
-      return;
-    }
-
-    if (result.destination.index === result.source.index) {
-      return;
-    }
-
-    const quotes = reorder(
-      state.quotes,
-      result.source.index,
-      result.destination.index
-    );
-
-    setState({ quotes });
+    updateCharacters(items);
   }
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="list">
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
-            <QuoteList quotes={state.quotes} />
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className="App">
+      <header className="App-header">
+        <h1>Final Space Characters</h1>
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <Droppable droppableId="characters">
+            {(provided) => (
+              <ul
+                className="characters"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {characters.map(({ id, name, thumb }, index) => {
+                  return (
+                    <Draggable key={id} draggableId={id} index={index}>
+                      {(provided) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <div className="characters-thumb">
+                            <img src={thumb} alt={`${name} Thumb`} />
+                          </div>
+                          <p>{name}</p>
+                        </li>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+              </ul>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </header>
+      <p>
+        Images from{" "}
+        <a href="https://final-space.fandom.com/wiki/Final_Space_Wiki">
+          Final Space Wiki
+        </a>
+      </p>
+    </div>
   );
 };
 
-export default DragTable;
+export default DragTest;

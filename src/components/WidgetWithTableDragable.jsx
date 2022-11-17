@@ -4,9 +4,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { BasicTable } from "./Tables";
+import { TableDragable } from "./Tables";
 
-const WidgetWithTable = (props) => {
+const WidgetWithTableDragable = (props) => {
   // console.log(props.data.tableData);
   return (
     <div
@@ -33,7 +33,7 @@ const WidgetWithTable = (props) => {
       <div className="flex items-center justify-start w-full h-64 rounded-xl  gap-x-2 flex-wrap overflow-y-auto">
         <div className="flex w-full justify-center">
           {props.data.tableData ? (
-            <BasicTable
+            <TableDragable
               headers={props.data.tableHeaders}
               data={props.data.tableData}
             />
@@ -48,4 +48,4 @@ const WidgetWithTable = (props) => {
   );
 };
 
-export default WidgetWithTable;
+export default WidgetWithTableDragable;
