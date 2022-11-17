@@ -6,9 +6,11 @@ import {
   faPenToSquare,
   faPeopleLine,
   faPeopleRoof,
+  faPlus,
   faPlusCircle,
   faScaleBalanced,
   faSitemap,
+  faTimes,
   faUsersLine,
 } from "@fortawesome/free-solid-svg-icons";
 import WidgetWithTable from "./WidgetWithTable";
@@ -16,6 +18,8 @@ import { getDocsData } from "../firebases/getDatas";
 import { useState } from "react";
 import { useEffect } from "react";
 import WidgetWithTableDragable from "./WidgetWithTableDragable";
+import { NewCup, NewGame } from "./Modals";
+import { Modal } from "@mui/material";
 
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
@@ -98,6 +102,19 @@ const IngCup = () => {
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
   const [resPlayer, setResPlayer] = useState([]);
   const [resPlayerTableData, setResPlayerTableData] = useState([]);
+  const [modal, setModal] = useState(false);
+  const [modalComponent, setModalComponent] = useState();
+
+  const handleOpenModal = ({ component }) => {
+    console.log(component);
+    setModalComponent(() => component);
+    setModal(() => true);
+  };
+
+  const handleCloseModal = () => {
+    setModalComponent("");
+    setModal(() => false);
+  };
 
   // 22-11-09 여기부분 다시 작성해야함 만들다 말았음
   // 첫번째 then 이후에 switch문으로 props.documentName별 state 변경하고
@@ -138,6 +155,32 @@ const IngCup = () => {
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
+      <Modal open={modal} onClose={handleCloseModal}>
+        <div
+          className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
+          style={{
+            backgroundColor: "rgba(7,11,41,0.9",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
+          <div className="flex w-full">
+            <div className="flex w-1/2">
+              {widgetTitle({ title: "대회 정보 수정" })}
+            </div>
+            <div
+              className="flex w-1/2 justify-end items-center hover:cursor-pointer"
+              onClick={() => handleCloseModal()}
+            >
+              <FontAwesomeIcon
+                icon={faTimes}
+                className="text-white text-2xl font-bold"
+              />
+            </div>
+          </div>
+          {modalComponent}
+        </div>
+      </Modal>
       <div className="flex w-full gap-x-8">
         <div
           className="flex w-1/3 justify-center p-5  rounded-lg"
@@ -156,7 +199,10 @@ const IngCup = () => {
             <span className="text-white font-extrabold text-4xl">
               경기용인보디빌딩대회 13회
             </span>
-            <div className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl">
+            <div
+              className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+              onClick={() => handleOpenModal({ component: <NewCup /> })}
+            >
               <FontAwesomeIcon
                 icon={faPenToSquare}
                 className="text-white text-lg"
@@ -212,6 +258,8 @@ const IngCup = () => {
           data={{
             title: "개최종목",
             titleIcon: faSitemap,
+            actionIcon: faPlus,
+            actionComponent: <NewGame />,
             tableHeaders: GAME_HEADERS,
             tableData: tempGameData,
           }}
