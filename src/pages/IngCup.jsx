@@ -1,4 +1,4 @@
-import { pageTitle, widgetTitle } from "./Titles";
+import { pageTitle, widgetTitle } from "../components/Titles";
 import PosterBg from "../assets/images//bg/posterBg.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -13,12 +13,12 @@ import {
   faTimes,
   faUsersLine,
 } from "@fortawesome/free-solid-svg-icons";
-import WidgetWithTable from "./WidgetWithTable";
+import WidgetWithTable from "../components/WidgetWithTable";
 import { getDocsData } from "../firebases/getDatas";
 import { useState } from "react";
 import { useEffect } from "react";
-import WidgetWithTableDragable from "./WidgetWithTableDragable";
-import { NewCup, NewGame } from "./Modals";
+import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
+import { NewCup, NewGame } from "../components/Modals";
 import { Modal } from "@mui/material";
 
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
@@ -76,7 +76,7 @@ const makeTableDatas = (rows, props) => {
   let rowsArray = [];
   let madeRows = [];
 
-  if (props.documentName === "referee") {
+  if (props.collectionName === "referee") {
     madeRows = rows.map((item, idx) => {
       rowsArray.push([
         item.basicInfo.refId,
@@ -84,7 +84,7 @@ const makeTableDatas = (rows, props) => {
         item.basicInfo.refEmail,
       ]);
     });
-  } else if (props.documentName === "player") {
+  } else if (props.collectionName === "player") {
     madeRows = rows.map((item, idx) => {
       rowsArray.push([
         item.basicInfo.playerId,
@@ -98,6 +98,7 @@ const makeTableDatas = (rows, props) => {
 };
 
 const IngCup = () => {
+  const [cupId, setCupId] = useState();
   const [resReferee, setResReferee] = useState([]);
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
   const [resPlayer, setResPlayer] = useState([]);
@@ -122,16 +123,18 @@ const IngCup = () => {
   // 22-11-10 코드 재사용 성공 했으나 DOM문제로 UserEffect를 사용하기로 변경했음
   const getDatas = async (props) => {
     try {
-      await getDocsData({ documentName: props.documentName }).then((res) => {
-        switch (props.documentName) {
-          case "referee":
-            setResReferee((prev) => (prev = res));
-          case "player":
-            setResPlayer((prev) => (prev = res));
-          default:
-            break;
+      await getDocsData({ collectionName: props.collectionName }).then(
+        (res) => {
+          switch (props.collectionName) {
+            case "referee":
+              setResReferee((prev) => (prev = res));
+            case "player":
+              setResPlayer((prev) => (prev = res));
+            default:
+              break;
+          }
         }
-      });
+      );
     } catch (error) {
       console.log(error.message);
     } finally {
@@ -140,16 +143,16 @@ const IngCup = () => {
   };
 
   useEffect(() => {
-    getDatas({ documentName: "referee" });
-    getDatas({ documentName: "player" });
+    getDatas({ collectionName: "referee" });
+    getDatas({ collectionName: "player" });
   }, []);
 
   useEffect(() => {
     setResRefereeTableData(
-      makeTableDatas(resReferee, { documentName: "referee" })
+      makeTableDatas(resReferee, { collectionName: "referee" })
     );
     setResPlayerTableData(
-      makeTableDatas(resPlayer, { documentName: "player" })
+      makeTableDatas(resPlayer, { collectionName: "player" })
     );
   }, [resReferee, resPlayer]);
 
@@ -159,7 +162,7 @@ const IngCup = () => {
         <div
           className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
           style={{
-            backgroundColor: "rgba(7,11,41,0.9",
+            backgroundColor: "rgba(7,11,41,0.9)",
             transform: "translate(-50%, -50%)",
           }}
         >
