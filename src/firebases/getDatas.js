@@ -4,7 +4,7 @@ import { db } from "../firebase";
 export const getDocsData = async (props) => {
   let dataArray = [];
   try {
-    const resDocs = await getDocs(collection(db, props.documentName));
+    const resDocs = await getDocs(collection(db, props.collectionName));
     resDocs.forEach((docs) => {
       dataArray.push({ id: docs.id, ...docs.data() });
     });

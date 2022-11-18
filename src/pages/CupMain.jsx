@@ -1,4 +1,4 @@
-import IngCup from "../components/IngCup";
+import IngCup from "./IngCup";
 import { pageTitle } from "../components/Titles";
 
 const CupMain = (props) => {

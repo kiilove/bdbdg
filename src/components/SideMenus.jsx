@@ -8,10 +8,11 @@ import {
   faPeopleRoof,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const menuItems = [
   { id: 1, title: "Dashboard", link: "/dashboard", icon: faGaugeHigh },
-  { id: 2, title: "경기 새로시작", link: "/newgame", icon: faTrophy },
+  { id: 2, title: "경기 새로시작", link: "/newcup", icon: faTrophy },
   { id: 4, title: "경기 기록관", link: "/gamelist", icon: faLandmarkDome },
   { id: 6, title: "멤버 모음", link: "/refereemanager", icon: faPeopleRoof },
 
@@ -39,9 +40,11 @@ const SideMenus = () => {
         <div className="flex justify-center items-center">
           <img src={Logo} className="w-14" />
         </div>
-        <span className="text-3xl font-bold text-white flex justify-center items-center h-full">
-          BDBDg
-        </span>
+        <Link to="/">
+          <span className="text-3xl font-bold text-white flex justify-center items-center h-full">
+            BDBDg
+          </span>
+        </Link>
       </div>
       <div className="flex bg-gray-600" style={{ height: "1px" }}></div>
       <div
