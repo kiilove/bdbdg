@@ -64,8 +64,6 @@ export const NewCup = (props) => {
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    } else {
-      setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.files[0] }));
     }
   };
 
