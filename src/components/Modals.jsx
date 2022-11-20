@@ -5,6 +5,7 @@ import { formTitle, widgetTitle } from "./Titles";
 import { useEffect } from "react";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../firebase";
+import { async } from "@firebase/util";
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
@@ -22,44 +23,60 @@ const saveButton = () => (
   </div>
 );
 
-const uploadImage = (e) => {
+const makeFileName = (filename, salt) => {
+  const currentDate = new Date();
+  const currentTime = currentDate.getTime();
+  const prevFilename = filename.split(".");
+  return String(salt).toUpperCase() + currentTime + "." + prevFilename[1];
+};
+
+const uploadImage = (e, state) => {
+  let uploadURL = "";
   const imageFile = e.target.files[0];
   const imageFileName = e.target.files[0].name;
-  console.log(imageFileName);
-  const storageRef = ref(storage, `images/poster/${imageFileName}`);
-  const uploadTask = uploadBytesResumable(storageRef, imageFile);
+  const newFileName = makeFileName(imageFileName, "p");
 
-  uploadTask.on(
-    "state_changed",
-    (snapshot) => {
-      // Observe state change events such as progress, pause, and resume
-      // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      console.log("Upload is " + progress + "% done");
-      switch (snapshot.state) {
-        case "paused":
-          console.log("Upload is paused");
-          break;
-        case "running":
-          console.log("Upload is running");
-          break;
+  const storageRef = ref(storage, `images/poster/${newFileName}`);
+  const uploadTask = uploadBytesResumable(storageRef, imageFile);
+  try {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        // Handle unsuccessful uploads
+      },
+      () => {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          state(downloadURL);
+        });
       }
-    },
-    (error) => {
-      // Handle unsuccessful uploads
-    },
-    () => {
-      // Handle successful uploads on complete
-      // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-        console.log("File available at", downloadURL);
-      });
-    }
-  );
+    );
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    console.log("UPLOAD", uploadURL);
+  }
 };
 
 export const NewCup = (props) => {
   const [cupInfo, setCupInfo] = useState({});
+  const [uploadedImage, setUploadedImage] = useState();
 
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
@@ -71,6 +88,10 @@ export const NewCup = (props) => {
     console.log(cupInfo);
   }, [cupInfo]);
 
+  useEffect(() => {
+    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImage }));
+  }, [uploadedImage]);
+
   return (
     <div
       className="flex w-full h-full gap-x-16 box-border"
@@ -78,24 +99,53 @@ export const NewCup = (props) => {
     >
       <div className="flex w-1/3 flex-col">
         <div className="flex justify-center items-start mt-3">
+          {/* 이미지 업로드 폼 시작 */}
           <div className="flex justify-center items-center w-full">
             <label
               for="cupPoster"
-              className="flex flex-col justify-center items-center w-full h-96 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer  hover:bg-blue-800"
+              className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              <div className="flex flex-col justify-center items-center">
-                <p className="mb-2 text-sm text-white">대회 포스터 </p>
-              </div>
+              {uploadedImage ? (
+                <div className="flex flex-col justify-center items-center">
+                  <img src={uploadedImage} alt="" className=" object-fill" />
+                </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center h-32">
+                  <svg
+                    aria-hidden="true"
+                    class="mb-3 w-10 h-10 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    ></path>
+                  </svg>
+                  <p className="mb-2 text-sm text-white font-bold">
+                    대회 포스터 업로드
+                  </p>
+                  <p className="text-xs text-gray-200 font-light">
+                    SVG, PNG, JPG
+                  </p>
+                </div>
+              )}
+
               <input
                 type="file"
                 id="cupPoster"
                 name="cupPoster"
                 className="hidden"
                 // onChange={(e) => setImageFiles([e.target.files[0]])}
-                onChange={(e) => uploadImage(e)}
+                onChange={(e) => uploadImage(e, setUploadedImage)}
               />
             </label>
           </div>
+          {/* 이미지 업로드 폼 끝 */}
         </div>
         <div></div>
       </div>
