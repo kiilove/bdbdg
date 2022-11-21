@@ -76,7 +76,7 @@ const uploadImage = (e, state) => {
 
 export const NewCup = (props) => {
   const [cupInfo, setCupInfo] = useState({});
-  const [uploadedImage, setUploadedImage] = useState();
+  const [uploadedImageURL, setUploadedImageURL] = useState();
 
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
@@ -85,12 +85,12 @@ export const NewCup = (props) => {
   };
 
   useEffect(() => {
-    console.log(cupInfo);
+    props.cupInfo((prev) => (prev = cupInfo));
   }, [cupInfo]);
 
   useEffect(() => {
-    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImage }));
-  }, [uploadedImage]);
+    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImageURL }));
+  }, [uploadedImageURL]);
 
   return (
     <div
@@ -105,9 +105,9 @@ export const NewCup = (props) => {
               for="cupPoster"
               className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              {uploadedImage ? (
+              {uploadedImageURL ? (
                 <div className="flex flex-col justify-center items-center">
-                  <img src={uploadedImage} alt="" className=" object-fill" />
+                  <img src={uploadedImageURL} alt="" className=" object-fill" />
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center h-32">
@@ -141,7 +141,7 @@ export const NewCup = (props) => {
                 name="cupPoster"
                 className="hidden"
                 // onChange={(e) => setImageFiles([e.target.files[0]])}
-                onChange={(e) => uploadImage(e, setUploadedImage)}
+                onChange={(e) => uploadImage(e, setUploadedImageURL)}
               />
             </label>
           </div>
