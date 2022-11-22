@@ -2,6 +2,7 @@ import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import React, { useEffect, useState } from "react";
+import "./stepper.css";
 import { NewCup } from "../components/Modals";
 
 const nextButton = () => (
@@ -23,7 +24,6 @@ const stepsArray = [
   { id: 4, title: "종목구성" },
 ];
 
-const stepperLine = "h-3";
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
   const [step, setStep] = useState(1);
@@ -35,23 +35,15 @@ const NewCupPage = () => {
     <div className="flex w-full h-full flex-col gap-y-8">
       <div className="flex w-full gap-x-8 flex-col">
         <div className="flex w-full justify-center items-center p-10 h-20">
-          <ul className="stepper">
-            <li className="stepper-step stepper-active">
-              <div className="stepper-head">
-                <span className="stepper-head-icon bg-green-200 w-7 h-7">
-                  {" "}
-                  1{" "}
-                </span>
-                <span className="stepper-head-text text-white"> step1 </span>
-              </div>
-            </li>
-            <li className="stepper-step stepper-active">
-              <div className="stepper-head">
-                <span className="stepper-head-icon bg-green-200 w-3"> 1 </span>
-                <span className="stepper-head-text text-white"> step1 </span>
-              </div>
-            </li>
-          </ul>
+          <ol className="stepper">
+            {stepsArray.map((step, idx) => (
+              <li className="stepper-item before:bg-blue-500">
+                <div className="">
+                  <h3 className="text-white my-3">{step.title}</h3>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
         {/* <div className="flex w-full justify-center items-center p-10 h-20 ">
           <div className="w-7 h-7 rounded-full bg-white"></div>
