@@ -73,7 +73,7 @@ const NewCupPage = () => {
           <ol className="stepper">
             {stepsArray.map((item, idx) =>
               idx <= step - 1 ? (
-                <li className="stepper-item before:bg-white">
+                <li className="stepper-item-active">
                   <div className="">
                     <h3 className="text-white my-3 font-semibold">
                       {item.title}

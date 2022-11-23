@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formTitle, widgetTitle } from "./Titles";
 import { useEffect } from "react";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../firebase";
 import { async } from "@firebase/util";
+import { OutlineButton } from "../assets/forms/button";
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
@@ -236,5 +237,190 @@ export const NewGame = () => {
     </div>
   );
 };
-export const TransferReferee = () => {};
-export const TransferPlayer = () => {};
+export const TransferReferee = ({ rootData }) => {
+  const [checked, setChecked] = useState([]);
+  const [pool, setPool] = useState([]);
+  const [assign, setAssign] = useState([]);
+
+  console.log(rootData);
+  function not(a, b) {
+    return a.filter((value) => b.indexOf(value) === -1);
+  }
+
+  function intersection(a, b) {
+    //console.log(a);
+    return a.filter((value) => b.indexOf(value) !== -1);
+  }
+
+  const poolChecked = intersection(checked, pool);
+  const assignChecked = intersection(checked, assign);
+
+  const handleToggle = (value) => () => {
+    const currentIndex = checked.indexOf(value);
+    const newChecked = [...checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setChecked(newChecked);
+    console.log(checked);
+  };
+
+  const handleAllAssign = () => {
+    setAssign(assign.concat(pool));
+    setPool([]);
+  };
+
+  const handleCheckedAssign = () => {
+    setAssign(assign.concat(poolChecked));
+    setPool(not(pool, poolChecked));
+    setChecked(not(checked, poolChecked));
+    //console.log(assign);
+  };
+
+  const handleCheckedPool = () => {
+    setPool(pool.concat(assignChecked));
+    setAssign(not(assign, assignChecked));
+    setChecked(not(checked, assignChecked));
+    //console.log(pool);
+  };
+
+  const handleAllPool = () => {
+    setPool(pool.concat(assign));
+    setAssign([]);
+  };
+
+  useEffect(() => {
+    setPool((prev) => (prev = rootData));
+  }, []);
+
+  const customList = (items) => {
+    //console.log(items[0]);
+    return (
+      <div className="flex w-full h-72 overflow-auto">
+        <div className="flex flex-col gap-y-2 w-full p-1">
+          {items.map((value, idx) => (
+            <div
+              className={`flex h-13 w-full p-3 justify-center items-center border border-gray-300 rounded-md  ${
+                checked.indexOf(value) !== -1 && " border-sky-600 "
+              }`}
+            >
+              <div className="flex items-center h-5 justify-center ">
+                <input
+                  type="checkbox"
+                  tabIndex={-1}
+                  checked={checked.indexOf(value[0]) !== -1}
+                  id={`itemsRefereeCheckbox-${value[0]}`}
+                  onClick={handleToggle(value)}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 hidden"
+                />
+              </div>
+              <div className="ml-2 text-md w-full h-full">
+                <label
+                  id
+                  htmlFor={`itemsRefereeCheckbox-${value[0]}`}
+                  className="font-medium text-gray-900 dark:text-gray-300 w-full h-full flex "
+                >
+                  <div className="flex w-full items-center gap-x-3">
+                    <div className="flex flex-col">
+                      <p className="text-md font-semibold text-gray-700">
+                        {value}
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  return (
+    <div
+      className="flex w-full h-full gap-x-16 box-border"
+      style={{ minWidth: "800px", maxWidth: "1000px" }}
+    >
+      <div className="flex w-full">
+        <div className="flex w-full px-10 py-5">
+          <div className="flex flex-col w-2/5 bg-red-200 rounded-lg p-2 gap-y-2">
+            <div className="flex bg-white rounded-lg p-3">전체</div>
+            <div className="flex w-full justify-start bg-white rounded-lg p-3">
+              {pool ? customList(pool) : <div></div>}
+            </div>
+          </div>
+          <div className="flex flex-col w-1/5 justify-center items-center gap-y-3 p-y-10">
+            <button
+              type="button"
+              onClick={handleAllAssign}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {">>"}
+            </button>
+            <button
+              type="button"
+              onClick={handleCheckedAssign}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {">"}
+            </button>
+            <button
+              type="button"
+              onClick={handleCheckedPool}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {"<"}
+            </button>
+            <button
+              type="button"
+              onClick={handleAllPool}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {"<<"}
+            </button>
+          </div>
+          <div className="flex flex-col w-2/5 bg-sky-200 rounded-lg p-2 gap-y-2">
+            <div className="flex bg-white rounded-lg p-3">배정됨</div>
+            <div className="flex w-full justify-start bg-white rounded-lg p-3">
+              {assign ? customList(assign) : <div></div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+export const TransferPlayer = ({ rootData }) => {
+  const [pool, setPool] = useState(rootData);
+  return (
+    <div
+      className="flex w-full h-full gap-x-16 box-border"
+      style={{ minWidth: "800px", maxWidth: "1000px" }}
+    >
+      <div className="flex w-full">
+        <div className="flex flex-col">
+          <div
+            className="flex w-full rounded-lg h-full"
+            style={{
+              backgroundColor: "rgba(7,11,41,0.9)",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <div className="flex"></div>
+          </div>
+        </div>
+        <div className="flex flex-col"></div>
+        <div
+          className="flex flex-col"
+          style={{
+            backgroundColor: "rgba(7,11,41,0.9)",
+            transform: "translate(-50%, -50%)",
+          }}
+        ></div>
+      </div>
+    </div>
+  );
+};
