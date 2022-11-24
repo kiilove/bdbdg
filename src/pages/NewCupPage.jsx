@@ -3,32 +3,16 @@ import "./stepper.css";
 import { NewCup, SelectMembers } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { makeTabledata, MakeTabledata } from "../components/MakeTabledata";
-import { unstable_composeClasses } from "@mui/material";
+import { MakeResData, MakeTableData } from "../components/MakeResData";
 
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
+  const [resRefereeData, setResRefereeData] = useState([]);
+  const [resPlayerData, setResPlayerData] = useState([]);
+
   const [refereePool, setRefereePool] = useState([]);
+  const [playerPool, setPlayerPool] = useState([]);
   const [step, setStep] = useState(1);
-  // const stepComponent = (currentStep) => {
-  //   let tempComponent;
-  //   switch (currentStep) {
-  //     case 1:
-  //       tempComponent = <NewCupPage isPage={true} />;
-  //   }
-  //   return tempComponent;
-  // };
-  const nextButton = (
-    <button
-      id="menuItemIconBox"
-      className="flex w-20 h-10 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
-    >
-      <FontAwesomeIcon
-        icon={faArrowRight}
-        className="text-xl text-white font-extrabold"
-      />
-    </button>
-  );
 
   const stepsArray = [
     {
@@ -39,9 +23,15 @@ const NewCupPage = () => {
     {
       id: 2,
       title: "심판배정",
-      component: <SelectMembers isPage={true} rootData={refereePool} />,
+      component: (
+        <SelectMembers isPage={true} rootData={refereePool} type="referee" />
+      ),
     },
-    { id: 3, title: "선수선발" },
+    {
+      id: 3,
+      title: "선수선발",
+      component: <SelectMembers isPage={true} rootData={playerPool} type="player" />,
+    },
     { id: 4, title: "종목구성" },
   ];
   useEffect(() => {
@@ -54,13 +44,21 @@ const NewCupPage = () => {
   }, [step]);
 
   useEffect(() => {
-    console.log(
-      MakeTabledata({
-        collectionName: "referee",
-        setResTableDatas: setRefereePool,
-      })
-    );
+    MakeResData({ setResData: setResRefereeData, collectionName: "referee" });
+    MakeResData({ setResData: setResPlayerData, collectionName: "player" });
   }, []);
+
+  useEffect(() => {
+    setRefereePool(
+      MakeTableData(resRefereeData, { collectionName: "referee" })
+    );
+    setPlayerPool(MakeTableData(resPlayerData, { collectionName: "player" }));
+    //console.log(MakeTableData(resData, { collectionName: "referee" }));
+  }, [resRefereeData, resPlayerData]);
+
+  useEffect(() => {
+    console.log("심판진", refereePool);
+  }, [refereePool]);
 
   const handleStep = (action) => {
     switch (action) {

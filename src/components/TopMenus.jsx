@@ -45,7 +45,7 @@ const TopMenus = () => {
               <input
                 id="topSearchInput"
                 type="text"
-                className="outline-none bg-transparent text-white placeholder:text-white"
+                className="outline-none border-none focus:ring-0 bg-transparent text-white placeholder:text-white"
                 placeholder="검색..."
               />
             </div>

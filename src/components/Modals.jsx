@@ -295,7 +295,7 @@ export const SelectMembers = ({ rootData, type }) => {
 
   useEffect(() => {
     setPool((prev) => (prev = rootData));
-  }, []);
+  }, [type]);
 
   const customList = (items) => {
     //console.log(items[0]);
