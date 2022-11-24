@@ -3,9 +3,12 @@ import "./stepper.css";
 import { NewCup, SelectMembers } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { makeTabledata, MakeTabledata } from "../components/MakeTabledata";
+import { unstable_composeClasses } from "@mui/material";
 
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
+  const [refereePool, setRefereePool] = useState([]);
   const [step, setStep] = useState(1);
   // const stepComponent = (currentStep) => {
   //   let tempComponent;
@@ -36,7 +39,7 @@ const NewCupPage = () => {
     {
       id: 2,
       title: "심판배정",
-      component: <SelectMembers isPage={true} cupInfo={setCupInfo} />,
+      component: <SelectMembers isPage={true} rootData={refereePool} />,
     },
     { id: 3, title: "선수선발" },
     { id: 4, title: "종목구성" },
@@ -49,6 +52,15 @@ const NewCupPage = () => {
     }
     console.log(step);
   }, [step]);
+
+  useEffect(() => {
+    console.log(
+      MakeTabledata({
+        collectionName: "referee",
+        setResTableDatas: setRefereePool,
+      })
+    );
+  }, []);
 
   const handleStep = (action) => {
     switch (action) {
