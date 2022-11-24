@@ -237,12 +237,12 @@ export const NewGame = () => {
     </div>
   );
 };
-export const TransferReferee = ({ rootData }) => {
+export const SelectMembers = ({ rootData, type }) => {
   const [checked, setChecked] = useState([]);
   const [pool, setPool] = useState([]);
   const [assign, setAssign] = useState([]);
 
-  console.log(rootData);
+  console.log(type);
   function not(a, b) {
     return a.filter((value) => b.indexOf(value) === -1);
   }
@@ -304,18 +304,18 @@ export const TransferReferee = ({ rootData }) => {
         <div className="flex flex-col gap-y-2 w-full p-1">
           {items.map((value, idx) => (
             <div
-              className={`flex h-13 w-full p-3 justify-center items-center border border-gray-300 rounded-md  ${
-                checked.indexOf(value) !== -1 && " border-sky-600 "
+              className={`flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800  ${
+                checked.indexOf(value) !== -1 && " border-sky-700 "
               }`}
             >
               <div className="flex items-center h-5 justify-center ">
                 <input
                   type="checkbox"
                   tabIndex={-1}
-                  checked={checked.indexOf(value[0]) !== -1}
+                  checked={checked.indexOf(value) !== -1}
                   id={`itemsRefereeCheckbox-${value[0]}`}
                   onClick={handleToggle(value)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 hidden"
+                  className="w-4 h-4 bg-pink-100 border-pink-300 text-pink-500 focus:ring-red-200 border-0 rounded-lg focus:ring-0"
                 />
               </div>
               <div className="ml-2 text-md w-full h-full">
@@ -326,9 +326,8 @@ export const TransferReferee = ({ rootData }) => {
                 >
                   <div className="flex w-full items-center gap-x-3">
                     <div className="flex flex-col">
-                      <p className="text-md font-semibold text-gray-700">
-                        {value}
-                      </p>
+                      <p className=" text-sm text-gray-300">{value[1]}</p>
+                      <span className=" text-xs text-gray-500">{value[2]}</span>
                     </div>
                   </div>
                 </label>
@@ -345,18 +344,25 @@ export const TransferReferee = ({ rootData }) => {
       style={{ minWidth: "800px", maxWidth: "1000px" }}
     >
       <div className="flex w-full">
-        <div className="flex w-full px-10 py-5">
-          <div className="flex flex-col w-2/5 bg-red-200 rounded-lg p-2 gap-y-2">
-            <div className="flex bg-white rounded-lg p-3">전체</div>
-            <div className="flex w-full justify-start bg-white rounded-lg p-3">
+        <div className="flex w-full py-5">
+          <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-2 gap-y-2">
+            <div className="flex rounded-lg p-3">
+              <span className="text-white font-semibold">
+                전체목록({pool && pool.length})
+              </span>
+            </div>
+            <div className="flex w-full justify-start  rounded-lg p-3">
               {pool ? customList(pool) : <div></div>}
             </div>
           </div>
-          <div className="flex flex-col w-1/5 justify-center items-center gap-y-3 p-y-10">
+          <div className="flex flex-col w-2/12 justify-center items-center gap-y-3 p-y-10">
             <button
               type="button"
               onClick={handleAllAssign}
-              className={OutlineButton({ type: "default", extra: "w-20" })}
+              className={OutlineButton({
+                type: "default",
+                extra: "w-20",
+              })}
             >
               {">>"}
             </button>
@@ -382,44 +388,15 @@ export const TransferReferee = ({ rootData }) => {
               {"<<"}
             </button>
           </div>
-          <div className="flex flex-col w-2/5 bg-sky-200 rounded-lg p-2 gap-y-2">
-            <div className="flex bg-white rounded-lg p-3">배정됨</div>
-            <div className="flex w-full justify-start bg-white rounded-lg p-3">
-              {assign ? customList(assign) : <div></div>}
+          <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-2 gap-y-2">
+            <div className="flex rounded-lg p-3">
+              <span className="text-white font-semibold">배정됨</span>
+            </div>
+            <div className="flex w-full justify-start  rounded-lg p-3">
+              {pool ? customList(assign) : <div></div>}
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
-export const TransferPlayer = ({ rootData }) => {
-  const [pool, setPool] = useState(rootData);
-  return (
-    <div
-      className="flex w-full h-full gap-x-16 box-border"
-      style={{ minWidth: "800px", maxWidth: "1000px" }}
-    >
-      <div className="flex w-full">
-        <div className="flex flex-col">
-          <div
-            className="flex w-full rounded-lg h-full"
-            style={{
-              backgroundColor: "rgba(7,11,41,0.9)",
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <div className="flex"></div>
-          </div>
-        </div>
-        <div className="flex flex-col"></div>
-        <div
-          className="flex flex-col"
-          style={{
-            backgroundColor: "rgba(7,11,41,0.9)",
-            transform: "translate(-50%, -50%)",
-          }}
-        ></div>
       </div>
     </div>
   );

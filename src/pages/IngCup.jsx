@@ -21,6 +21,7 @@ import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
 import {
   NewCup,
   NewGame,
+  SelectMembers,
   TransferPlayer,
   TransferReferee,
 } from "../components/Modals";
@@ -248,7 +249,7 @@ const IngCup = () => {
               tableHeaders: REFEREE_HEADERS,
               tableData: resRefereeTableData,
               modalComponent: (
-                <TransferReferee rootData={resRefereeTableData} />
+                <SelectMembers rootData={resRefereeTableData} type="referee" />
               ),
             }}
           />
@@ -260,7 +261,9 @@ const IngCup = () => {
               titleIcon: faPeopleLine,
               tableHeaders: PLAYER_HEADERS,
               tableData: resPlayerTableData,
-              modalComponent: <TransferPlayer />,
+              modalComponent: (
+                <SelectMembers rootData={resPlayerTableData} type="player" />
+              ),
             }}
           />
         </div>

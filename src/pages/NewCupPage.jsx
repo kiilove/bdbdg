@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./stepper.css";
-import { NewCup } from "../components/Modals";
+import { NewCup, SelectMembers } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -33,7 +33,11 @@ const NewCupPage = () => {
       title: "대회정보",
       component: <NewCup isPage={true} cupInfo={setCupInfo} />,
     },
-    { id: 2, title: "심판배정" },
+    {
+      id: 2,
+      title: "심판배정",
+      component: <SelectMembers isPage={true} cupInfo={setCupInfo} />,
+    },
     { id: 3, title: "선수선발" },
     { id: 4, title: "종목구성" },
   ];
