@@ -76,9 +76,11 @@ const uploadImage = (e, state) => {
 };
 
 export const NewCup = (props) => {
-  const [cupInfo, setCupInfo] = useState({});
-  const [uploadedImageURL, setUploadedImageURL] = useState("");
-
+  const [cupInfo, setCupInfo] = useState(props.cupInfo);
+  const [uploadedImageURL, setUploadedImageURL] = useState(
+    props.cupInfo.cupPoster
+  );
+  //console.log(props.cupInfo);
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -86,7 +88,7 @@ export const NewCup = (props) => {
   };
 
   useEffect(() => {
-    props.cupInfo((prev) => (prev = cupInfo));
+    props.setCupInfo((prev) => (prev = cupInfo));
   }, [cupInfo]);
 
   useEffect(() => {
@@ -106,9 +108,13 @@ export const NewCup = (props) => {
               for="cupPoster"
               className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              {uploadedImageURL ? (
+              {uploadedImageURL || props.cupInfo.cupPoster ? (
                 <div className="flex flex-col justify-center items-center">
-                  <img src={uploadedImageURL} alt="" className=" object-fill" />
+                  <img
+                    src={props.cupInfo.cupPoster}
+                    alt=""
+                    className=" object-fill"
+                  />
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center h-32">
@@ -128,7 +134,7 @@ export const NewCup = (props) => {
                     ></path>
                   </svg>
                   <p className="mb-2 text-sm text-white font-bold">
-                    대회 포스터 업로드
+                    {props.cupInfo.cupPoster && props.cupInfo.cupPoster}
                   </p>
                   <p className="text-xs text-gray-200 font-light">
                     SVG, PNG, JPG
@@ -156,6 +162,7 @@ export const NewCup = (props) => {
             type="text"
             name="cupName"
             id="cupName"
+            value={cupInfo.cupName}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
@@ -167,6 +174,7 @@ export const NewCup = (props) => {
             maxLength="3"
             name="cupCount"
             id="cupCount"
+            value={cupInfo.cupCount}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
@@ -180,6 +188,7 @@ export const NewCup = (props) => {
             type="text"
             name="cupOrg"
             id="cupOrg"
+            value={cupInfo.cupOrg}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
@@ -190,6 +199,7 @@ export const NewCup = (props) => {
             type="text"
             name="cupLocation"
             id="cupLocation"
+            value={cupInfo.cupLocation}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
@@ -200,6 +210,7 @@ export const NewCup = (props) => {
             type="text"
             name="cupDate"
             id="cupDate"
+            value={cupInfo.cupDate}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
@@ -217,6 +228,22 @@ export const NewCup = (props) => {
   );
 };
 export const NewPlayer = () => {};
+export const Startpage = () => {
+  return (
+    <div
+      className="flex w-full h-full bg-transparent flex-col"
+      style={{ minWidth: "800px" }}
+    >
+      <div className="flex w-full flex-col p-10  h-32">
+        <div className="flex w-full">
+          <h1 className="text-white text-2xl font-extrabold w-full text-center align-middle">
+            새로운 대회를 준비합니다.
+          </h1>
+        </div>
+      </div>
+    </div>
+  );
+};
 export const NewGame = () => {
   return (
     <div

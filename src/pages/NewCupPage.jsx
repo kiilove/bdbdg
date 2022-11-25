@@ -1,30 +1,38 @@
 import React, { useEffect, useState } from "react";
 import "./stepper.css";
-import { NewCup, SelectMembers } from "../components/Modals";
+import { NewCup, SelectMembers, Startpage } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { MakeResData, MakeTableData } from "../components/MakeResData";
-import { addDocData } from "../firebases/addDatas";
+import { addDocData, updateSetDoc } from "../firebases/addDatas";
+import { ThreeDots } from "react-loader-spinner";
 
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
+  const [refereeInfo, setRefereeInfo] = useState({});
+  const [playerInfo, setPlayerInfo] = useState({});
+  const [gameInfo, setGameInfo] = useState({});
+  const [cups, setCups] = useState({});
   const [resRefereeData, setResRefereeData] = useState([]);
   const [resPlayerData, setResPlayerData] = useState([]);
 
   const [refereePool, setRefereePool] = useState([]);
   const [playerPool, setPlayerPool] = useState([]);
   const [step, setStep] = useState(1);
-
+  const [snapshotID, setSnapshotID] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const stepsArray = [
     {
       id: 0,
       title: "시작하기",
-      component: "",
+      component: <Startpage />,
     },
     {
       id: 1,
       title: "대회정보",
-      component: <NewCup isPage={true} cupInfo={setCupInfo} />,
+      component: (
+        <NewCup isPage={true} setCupInfo={setCupInfo} cupInfo={cupInfo} />
+      ),
     },
     {
       id: 2,
@@ -42,31 +50,6 @@ const NewCupPage = () => {
     },
     { id: 4, title: "종목구성" },
   ];
-  useEffect(() => {
-    if (step < 1) {
-      setStep((prev) => (prev = 1));
-    } else if (step >= stepsArray.length) {
-      setStep((prev) => (prev = stepsArray.length));
-    }
-    console.log(step);
-  }, [step]);
-
-  useEffect(() => {
-    MakeResData({ setResData: setResRefereeData, collectionName: "referee" });
-    MakeResData({ setResData: setResPlayerData, collectionName: "player" });
-  }, []);
-
-  useEffect(() => {
-    setRefereePool(
-      MakeTableData(resRefereeData, { collectionName: "referee" })
-    );
-    setPlayerPool(MakeTableData(resPlayerData, { collectionName: "player" }));
-    //console.log(MakeTableData(resData, { collectionName: "referee" }));
-  }, [resRefereeData, resPlayerData]);
-
-  useEffect(() => {
-    console.log("대회정보", cupInfo);
-  }, [cupInfo]);
 
   const handleStep = (action) => {
     switch (action) {
@@ -87,6 +70,61 @@ const NewCupPage = () => {
         break;
     }
   };
+
+  const handleStart = () => {
+    addDocData({
+      collectionName: "cups",
+      data: cupInfo,
+      fieldName: "basicInfo",
+      setSnapshotID,
+      setIsLoading,
+    });
+  };
+
+  const handleUpdate = () => {
+    setCups((prev) => (prev = { cupInfo, refereeInfo, playerInfo, gameInfo }));
+  };
+  useEffect(() => {
+    handleUpdate();
+    if (step < 1) {
+      setStep((prev) => (prev = 1));
+    } else if (step >= stepsArray.length) {
+      setStep((prev) => (prev = stepsArray.length));
+    }
+    //console.log(step);
+  }, [step]);
+
+  useEffect(() => {
+    updateSetDoc({
+      collectionName: "cups",
+      data: cups,
+      snapshotID,
+      setIsLoading,
+    });
+  }, [cups]);
+
+  useEffect(() => {
+    MakeResData({ setResData: setResRefereeData, collectionName: "referee" });
+    MakeResData({ setResData: setResPlayerData, collectionName: "player" });
+  }, []);
+
+  useEffect(() => {
+    setRefereePool(
+      MakeTableData(resRefereeData, { collectionName: "referee" })
+    );
+    setPlayerPool(MakeTableData(resPlayerData, { collectionName: "player" }));
+    //console.log(MakeTableData(resData, { collectionName: "referee" }));
+  }, [resRefereeData, resPlayerData]);
+
+  useEffect(() => {
+    if (snapshotID.length > 0) {
+      setStep(2);
+    }
+  }, [snapshotID]);
+
+  useEffect(() => {
+    console.log(cupInfo);
+  }, [cupInfo]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
@@ -119,32 +157,61 @@ const NewCupPage = () => {
           style={{ backgroundColor: "rgba(7,11,41,0.5)", minWidth: "900px" }}
         >
           <div className="flex w-full">{stepsArray[step - 1].component}</div>
-          <div className="flex justify-between mt-5">
-            <div className="flex">
-              <button
-                id="menuItemIconBox"
-                className="flex w-20 h-10 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
-                onClick={() => handleStep("prev")}
-              >
-                <FontAwesomeIcon
-                  icon={faArrowLeft}
-                  className="text-xl text-white font-extrabold"
-                />
-              </button>
+          {step === 1 ? (
+            <div className="flex justify-center mt-5">
+              <div className="flex">
+                <button
+                  id="menuItemIconBox"
+                  className="flex w-40 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
+                  onClick={() => handleStart()}
+                >
+                  {isLoading ? (
+                    <ThreeDots
+                      height="80"
+                      width="80"
+                      radius="9"
+                      color="#fff"
+                      ariaLabel="three-dots-loading"
+                      wrapperStyle={{}}
+                      wrapperClassName=""
+                      visible={true}
+                    />
+                  ) : (
+                    <span className="text-white text-lg font-bold">
+                      시작하기
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="flex">
-              <button
-                id="menuItemIconBox"
-                className="flex w-20 h-10 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
-                onClick={() => handleStep("next")}
-              >
-                <FontAwesomeIcon
-                  icon={faArrowRight}
-                  className="text-xl text-white font-extrabold"
-                />
-              </button>
+          ) : (
+            <div className="flex justify-between mt-5">
+              <div className="flex">
+                <button
+                  id="menuItemIconBox"
+                  className="flex w-20 h-10 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
+                  onClick={() => handleStep("prev")}
+                >
+                  <FontAwesomeIcon
+                    icon={faArrowLeft}
+                    className="text-xl text-white font-extrabold"
+                  />
+                </button>
+              </div>
+              <div className="flex">
+                <button
+                  id="menuItemIconBox"
+                  className="flex w-20 h-10 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
+                  onClick={() => handleStep("next")}
+                >
+                  <FontAwesomeIcon
+                    icon={faArrowRight}
+                    className="text-xl text-white font-extrabold"
+                  />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
