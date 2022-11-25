@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formTitle, widgetTitle } from "./Titles";
 import { useEffect } from "react";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../firebase";
 import { async } from "@firebase/util";
+import { OutlineButton } from "../assets/forms/button";
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
@@ -76,23 +77,21 @@ const uploadImage = (e, state) => {
 
 export const NewCup = (props) => {
   const [cupInfo, setCupInfo] = useState({});
-  const [uploadedImage, setUploadedImage] = useState();
+  const [uploadedImageURL, setUploadedImageURL] = useState();
 
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    } else {
-      setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.files[0] }));
     }
   };
 
   useEffect(() => {
-    console.log(cupInfo);
+    props.cupInfo((prev) => (prev = cupInfo));
   }, [cupInfo]);
 
   useEffect(() => {
-    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImage }));
-  }, [uploadedImage]);
+    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImageURL }));
+  }, [uploadedImageURL]);
 
   return (
     <div
@@ -107,9 +106,9 @@ export const NewCup = (props) => {
               for="cupPoster"
               className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              {uploadedImage ? (
+              {uploadedImageURL ? (
                 <div className="flex flex-col justify-center items-center">
-                  <img src={uploadedImage} alt="" className=" object-fill" />
+                  <img src={uploadedImageURL} alt="" className=" object-fill" />
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center h-32">
@@ -143,7 +142,7 @@ export const NewCup = (props) => {
                 name="cupPoster"
                 className="hidden"
                 // onChange={(e) => setImageFiles([e.target.files[0]])}
-                onChange={(e) => uploadImage(e, setUploadedImage)}
+                onChange={(e) => uploadImage(e, setUploadedImageURL)}
               />
             </label>
           </div>
@@ -238,5 +237,167 @@ export const NewGame = () => {
     </div>
   );
 };
-export const TransferReferee = () => {};
-export const TransferPlayer = () => {};
+export const SelectMembers = ({ rootData, type }) => {
+  const [checked, setChecked] = useState([]);
+  const [pool, setPool] = useState([]);
+  const [assign, setAssign] = useState([]);
+
+  console.log(type);
+  function not(a, b) {
+    return a.filter((value) => b.indexOf(value) === -1);
+  }
+
+  function intersection(a, b) {
+    //console.log(a);
+    return a.filter((value) => b.indexOf(value) !== -1);
+  }
+
+  const poolChecked = intersection(checked, pool);
+  const assignChecked = intersection(checked, assign);
+
+  const handleToggle = (value) => () => {
+    const currentIndex = checked.indexOf(value);
+    const newChecked = [...checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setChecked(newChecked);
+    console.log(checked);
+  };
+
+  const handleAllAssign = () => {
+    setAssign(assign.concat(pool));
+    setPool([]);
+  };
+
+  const handleCheckedAssign = () => {
+    setAssign(assign.concat(poolChecked));
+    setPool(not(pool, poolChecked));
+    setChecked(not(checked, poolChecked));
+    //console.log(assign);
+  };
+
+  const handleCheckedPool = () => {
+    setPool(pool.concat(assignChecked));
+    setAssign(not(assign, assignChecked));
+    setChecked(not(checked, assignChecked));
+    //console.log(pool);
+  };
+
+  const handleAllPool = () => {
+    setPool(pool.concat(assign));
+    setAssign([]);
+  };
+
+  useEffect(() => {
+    setPool((prev) => (prev = rootData));
+  }, [type]);
+
+  const customList = (items) => {
+    //console.log(items[0]);
+    return (
+      <div className="flex w-full h-72 overflow-auto">
+        <div className="flex flex-col gap-y-2 w-full p-1">
+          {items.map((value, idx) => (
+            <div
+              className={`flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800  ${
+                checked.indexOf(value) !== -1 && " border-sky-700 "
+              }`}
+            >
+              <div className="flex items-center h-5 justify-center ">
+                <input
+                  type="checkbox"
+                  tabIndex={-1}
+                  checked={checked.indexOf(value) !== -1}
+                  id={`itemsRefereeCheckbox-${value[0]}`}
+                  onClick={handleToggle(value)}
+                  className="w-4 h-4 bg-pink-100 border-pink-300 text-pink-500 focus:ring-red-200 border-0 rounded-lg focus:ring-0"
+                />
+              </div>
+              <div className="ml-2 text-md w-full h-full">
+                <label
+                  id
+                  htmlFor={`itemsRefereeCheckbox-${value[0]}`}
+                  className="font-medium text-gray-900 dark:text-gray-300 w-full h-full flex "
+                >
+                  <div className="flex w-full items-center gap-x-3">
+                    <div className="flex flex-col">
+                      <p className=" text-sm text-gray-300">{value[1]}</p>
+                      <span className=" text-xs text-gray-500">{value[2]}</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  return (
+    <div
+      className="flex w-full h-full gap-x-16 box-border"
+      style={{ minWidth: "800px", maxWidth: "1000px" }}
+    >
+      <div className="flex w-full">
+        <div className="flex w-full py-5">
+          <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-2 gap-y-2">
+            <div className="flex rounded-lg p-3">
+              <span className="text-white font-semibold">
+                전체목록({pool && pool.length})
+              </span>
+            </div>
+            <div className="flex w-full justify-start  rounded-lg p-3">
+              {pool ? customList(pool) : <div></div>}
+            </div>
+          </div>
+          <div className="flex flex-col w-2/12 justify-center items-center gap-y-3 p-y-10">
+            <button
+              type="button"
+              onClick={handleAllAssign}
+              className={OutlineButton({
+                type: "default",
+                extra: "w-20",
+              })}
+            >
+              {">>"}
+            </button>
+            <button
+              type="button"
+              onClick={handleCheckedAssign}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {">"}
+            </button>
+            <button
+              type="button"
+              onClick={handleCheckedPool}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {"<"}
+            </button>
+            <button
+              type="button"
+              onClick={handleAllPool}
+              className={OutlineButton({ type: "default", extra: "w-20" })}
+            >
+              {"<<"}
+            </button>
+          </div>
+          <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-2 gap-y-2">
+            <div className="flex rounded-lg p-3">
+              <span className="text-white font-semibold">배정됨</span>
+            </div>
+            <div className="flex w-full justify-start  rounded-lg p-3">
+              {pool ? customList(assign) : <div></div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

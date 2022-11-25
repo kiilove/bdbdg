@@ -18,7 +18,13 @@ import { getDocsData } from "../firebases/getDatas";
 import { useState } from "react";
 import { useEffect } from "react";
 import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
-import { NewCup, NewGame } from "../components/Modals";
+import {
+  NewCup,
+  NewGame,
+  SelectMembers,
+  TransferPlayer,
+  TransferReferee,
+} from "../components/Modals";
 import { Modal } from "@mui/material";
 
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
@@ -242,6 +248,9 @@ const IngCup = () => {
               titleIcon: faScaleBalanced,
               tableHeaders: REFEREE_HEADERS,
               tableData: resRefereeTableData,
+              modalComponent: (
+                <SelectMembers rootData={resRefereeTableData} type="referee" />
+              ),
             }}
           />
         </div>
@@ -252,6 +261,9 @@ const IngCup = () => {
               titleIcon: faPeopleLine,
               tableHeaders: PLAYER_HEADERS,
               tableData: resPlayerTableData,
+              modalComponent: (
+                <SelectMembers rootData={resPlayerTableData} type="player" />
+              ),
             }}
           />
         </div>
