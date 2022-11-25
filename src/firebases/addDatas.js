@@ -1,12 +1,12 @@
-import { collection, doc, setDoc } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc, setDocs } from "firebase/firestore";
 import { db } from "../firebase";
 
-export const addDocData = async (props) => {
+export const addDocData = async ({ collectionName, data, fieldName }) => {
   try {
-    const saveSnapshot = await setDoc(collection(db, props.collectionName), {
-      [props.fieldName]: props.data,
+    const saveSnapshot = await addDoc(collection(db, collectionName), {
+      [fieldName]: data,
     });
-    saveSnapshot;
+    console.log(saveSnapshot.id);
   } catch (error) {
     console.log(error.message);
   } finally {

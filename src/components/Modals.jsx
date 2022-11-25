@@ -10,7 +10,7 @@ import { OutlineButton } from "../assets/forms/button";
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
-  "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white";
+  "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
 const saveButton = () => (
   <div
@@ -77,7 +77,7 @@ const uploadImage = (e, state) => {
 
 export const NewCup = (props) => {
   const [cupInfo, setCupInfo] = useState({});
-  const [uploadedImageURL, setUploadedImageURL] = useState();
+  const [uploadedImageURL, setUploadedImageURL] = useState("");
 
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
@@ -148,7 +148,6 @@ export const NewCup = (props) => {
           </div>
           {/* 이미지 업로드 폼 끝 */}
         </div>
-        <div></div>
       </div>
       <div className="flex w-2/3 h-full flex-col flex-wrap box-border">
         <div className="flex w-full">{formTitle({ title: "대회명" })}</div>
@@ -266,7 +265,7 @@ export const SelectMembers = ({ rootData, type }) => {
     }
 
     setChecked(newChecked);
-    console.log(checked);
+    //console.log(checked);
   };
 
   const handleAllAssign = () => {
@@ -295,6 +294,8 @@ export const SelectMembers = ({ rootData, type }) => {
 
   useEffect(() => {
     setPool((prev) => (prev = rootData));
+    setChecked([]);
+    setAssign([]);
   }, [type]);
 
   const customList = (items) => {

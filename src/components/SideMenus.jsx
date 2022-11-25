@@ -54,7 +54,7 @@ const SideMenus = () => {
         {menuItems.map((item, idx) => (
           <div
             id="menuItemBox"
-            className={`flex w-full h-14  justify-start items-center px-2 rounded-xl hover:cursor-pointer ${
+            className={`flex w-full h-14 justify-start items-center px-2 rounded-xl hover:cursor-pointer ${
               item.title === selected && " bg-stone-800"
             }`}
             onClick={() =>

@@ -4,6 +4,7 @@ import { NewCup, SelectMembers } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { MakeResData, MakeTableData } from "../components/MakeResData";
+import { addDocData } from "../firebases/addDatas";
 
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
@@ -15,6 +16,11 @@ const NewCupPage = () => {
   const [step, setStep] = useState(1);
 
   const stepsArray = [
+    {
+      id: 0,
+      title: "시작하기",
+      component: "",
+    },
     {
       id: 1,
       title: "대회정보",
@@ -30,7 +36,9 @@ const NewCupPage = () => {
     {
       id: 3,
       title: "선수선발",
-      component: <SelectMembers isPage={true} rootData={playerPool} type="player" />,
+      component: (
+        <SelectMembers isPage={true} rootData={playerPool} type="player" />
+      ),
     },
     { id: 4, title: "종목구성" },
   ];
@@ -57,8 +65,8 @@ const NewCupPage = () => {
   }, [resRefereeData, resPlayerData]);
 
   useEffect(() => {
-    console.log("심판진", refereePool);
-  }, [refereePool]);
+    console.log("대회정보", cupInfo);
+  }, [cupInfo]);
 
   const handleStep = (action) => {
     switch (action) {
