@@ -263,24 +263,23 @@ export const NewGame = () => {
     </div>
   );
 };
-export const SelectMembers = ({ rootData, type }) => {
+function not(a, b) {
+  return a.filter((value) => b.indexOf(value) === -1);
+}
+
+function intersection(a, b) {
+  //console.log(a);
+  return a.filter((value) => b.indexOf(value) !== -1);
+}
+
+export const SelectMembers = ({ rootData, type, setRebuildAssign }) => {
   const [checked, setChecked] = useState([]);
   const [pool, setPool] = useState([]);
   const [assign, setAssign] = useState([]);
 
-  console.log(type);
-  function not(a, b) {
-    return a.filter((value) => b.indexOf(value) === -1);
-  }
-
-  function intersection(a, b) {
-    //console.log(a);
-    return a.filter((value) => b.indexOf(value) !== -1);
-  }
-
   const poolChecked = intersection(checked, pool);
   const assignChecked = intersection(checked, assign);
-
+  // 토글했을때 어뜨케 저장을 시키지?
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
@@ -324,6 +323,10 @@ export const SelectMembers = ({ rootData, type }) => {
     setChecked([]);
     setAssign([]);
   }, [type]);
+
+  useEffect(() => {
+    setRebuildAssign(assign);
+  }, [assign]);
 
   const customList = (items) => {
     //console.log(items[0]);

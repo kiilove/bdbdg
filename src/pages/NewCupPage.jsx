@@ -18,6 +18,8 @@ const NewCupPage = () => {
 
   const [refereePool, setRefereePool] = useState([]);
   const [playerPool, setPlayerPool] = useState([]);
+  const [refereeAssign, setRefereeAssign] = useState({});
+  const [playerAssign, setPlayerAssign] = useState({});
   const [step, setStep] = useState(1);
   const [snapshotID, setSnapshotID] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,14 +40,24 @@ const NewCupPage = () => {
       id: 2,
       title: "심판배정",
       component: (
-        <SelectMembers isPage={true} rootData={refereePool} type="referee" />
+        <SelectMembers
+          isPage={true}
+          rootData={refereePool}
+          type="referee"
+          setRebuildAssign={setRefereeAssign}
+        />
       ),
     },
     {
       id: 3,
       title: "선수선발",
       component: (
-        <SelectMembers isPage={true} rootData={playerPool} type="player" />
+        <SelectMembers
+          isPage={true}
+          rootData={playerPool}
+          type="player"
+          setRebuildAssign={setPlayerAssign}
+        />
       ),
     },
     { id: 4, title: "종목구성" },
@@ -83,16 +95,19 @@ const NewCupPage = () => {
 
   const handleUpdate = () => {
     setCups((prev) => (prev = { cupInfo, refereeInfo, playerInfo, gameInfo }));
+    console.log(cups);
+    console.log(refereeAssign);
   };
   useEffect(() => {
     handleUpdate();
+
     if (step < 1) {
       setStep((prev) => (prev = 1));
     } else if (step >= stepsArray.length) {
       setStep((prev) => (prev = stepsArray.length));
     }
     //console.log(step);
-  }, [step]);
+  }, [step, refereeAssign, playerAssign]);
 
   useEffect(() => {
     updateSetDoc({
@@ -109,23 +124,62 @@ const NewCupPage = () => {
   }, []);
 
   useEffect(() => {
-    setRefereePool(
-      MakeTableData(resRefereeData, { collectionName: "referee" })
-    );
-    setPlayerPool(MakeTableData(resPlayerData, { collectionName: "player" }));
+    // 선택된 심판 있다면 전체 목록에서 선택된 심판 제외시킨후 refrereePool설정
+    if (refereeAssign) {
+      const refereeRemovedAssign = resRefereeData.filter(
+        (item) => !refereeAssign.includes(item)
+      );
+      setRefereePool(
+        MakeTableData(refereeRemovedAssign, { collectionName: "referee" })
+      );
+    } else {
+      setRefereePool(
+        MakeTableData(resRefereeData, { collectionName: "referee" })
+      );
+    }
+
+    // 선택된 선수가 있다면 전체 목록에서 선택된 선수 제외시킨후 playerPool설정
+    if (playerAssign) {
+      const playerRemovedAssign = resPlayerData.filter(
+        (item) => !playerAssign.includes(item)
+      );
+      setPlayerPool(
+        MakeTableData(playerRemovedAssign, { collectionName: "player" })
+      );
+    } else {
+      setPlayerPool(MakeTableData(resPlayerData, { collectionName: "player" }));
+    }
+
+    console.log("심판선택", refereeAssign);
+    console.log("선수선택", playerAssign);
     //console.log(MakeTableData(resData, { collectionName: "referee" }));
-  }, [resRefereeData, resPlayerData]);
+  }, [refereeAssign, playerAssign]);
 
   useEffect(() => {
     if (snapshotID.length > 0) {
       setStep(2);
     }
+    MakeResData({
+      setResData: setRefereeAssign,
+      collectionName: "cups",
+      documentName: snapshotID,
+    });
+
+    MakeResData({
+      setResData: setPlayerAssign,
+      collectionName: "cups",
+      documentName: snapshotID,
+    });
   }, [snapshotID]);
 
   useEffect(() => {
     console.log(cupInfo);
   }, [cupInfo]);
 
+  useEffect(() => {
+    setRefereeInfo({ assign: refereeAssign });
+    setPlayerInfo({ assign: playerAssign });
+  }, [refereeAssign, playerAssign]);
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
       <div className="flex w-full gap-x-8 flex-col">
