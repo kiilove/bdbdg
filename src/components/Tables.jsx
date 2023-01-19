@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 export const BasicTable = (props) => {
   const [tableHeaders, setTableHeaders] = useState([]);
   const [tableData, setTableData] = useState([]);
+
   //console.log(tableHeaders);
   // console.log(props.data);
 

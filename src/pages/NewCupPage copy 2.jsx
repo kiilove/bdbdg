@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from "react";
 import "./stepper.css";
-import { SelectPlayers, SelectReferees, Startpage } from "../components/Modals";
+import {
+  NewCup,
+  SelectMembers,
+  SelectPlayers,
+  SelectReferees,
+  Startpage,
+} from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
-
+import { MakeResData, MakeTableData } from "../components/MakeResData";
+import { addDocData } from "../firebases/addDatas";
 import { ThreeDots } from "react-loader-spinner";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { NewCupInfo } from "../modals/NewCupInfo";
 
 const NewCupPage = () => {
-  const [cupInfo, setCupInfo] = useState({ cupPoster: "" });
+  const [cupInfo, setCupInfo] = useState({});
   const [refereeInfo, setRefereeInfo] = useState({});
   const [playerInfo, setPlayerInfo] = useState({});
   const [gameInfo, setGameInfo] = useState({});
-  const [cupData, setCupData] = useState({});
+  const [cups, setCups] = useState({});
   const [resRefereeData, setResRefereeData] = useState([]);
   const [resPlayerData, setResPlayerData] = useState([]);
 
@@ -34,7 +41,9 @@ const NewCupPage = () => {
     {
       id: 1,
       title: "대회정보",
-      component: <NewCupInfo prevState={setCupInfo} prevInfo={cupInfo} />,
+      component: (
+        <NewCupInfo isPage={true} setCupInfo={setCupInfo} cupInfo={cupInfo} />
+      ),
     },
     {
       id: 2,
@@ -81,52 +90,35 @@ const NewCupPage = () => {
     }
   };
 
-  const handleStart = async () => {
-    setIsLoading(true);
-    try {
-      const snapShot = await addDoc(collection(db, "cups"), {
-        cupInfo: { cupName: "", cupPoster: "" },
-      });
-      setSnapshotID(snapShot.id);
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-
-    console.log(snapshotID);
+  const handleStart = () => {
+    console.log(cupInfo);
   };
-  const handleCupDataWithInputChange = () => {
-    if (cupInfo.cupPoster == undefined) {
-      setCupInfo({ ...cupInfo, cupPoster: "" });
-    }
-    setCupData({
+
+  const handleInputUpdate = () => {
+    setCups({
       cupInfo,
-      refereeAssign,
-      playerAssign,
+      refrees: refereeAssign,
+      players: playerAssign,
+      gameInfo,
     });
   };
 
   useEffect(() => {
+    handleInputUpdate();
+
     if (step < 1) {
       setStep((prev) => (prev = 1));
     } else if (step >= stepsArray.length) {
       setStep((prev) => (prev = stepsArray.length));
     }
     //console.log(step);
-  }, [step]);
-
-  useEffect(() => {
-    console.log(cupInfo);
-    handleCupDataWithInputChange();
-    console.log(cupData);
-  }, [cupInfo]);
+  }, [step, refereeAssign, playerAssign, cupInfo]);
 
   const updateSetDoc = async () => {
     try {
       const updateDoc = await setDoc(
         doc(db, "cups", snapshotID),
-        { ...cupData },
+        { cups },
         { merge: true }
       );
       console.log("temp", updateDoc);
@@ -136,16 +128,39 @@ const NewCupPage = () => {
       console.log("updateSetDoc", "Successfully updated");
     }
   };
+  useEffect(() => {
+    console.log(cups);
+    console.log(snapshotID);
+    snapshotID && updateSetDoc();
+  }, [cups]);
+
+  useEffect(() => {
+    MakeResData({ setResData: setResRefereeData, collectionName: "referee" });
+    MakeResData({ setResData: setResPlayerData, collectionName: "player" });
+  }, []);
+
+  useEffect(() => {
+    console.log("refereeData", resRefereeData);
+  }, [resRefereeData]);
+
+  useEffect(() => {
+    console.log("playerData", resPlayerData);
+  }, [resPlayerData]);
+
+  useEffect(() => {
+    console.log("refereeAssign", refereeAssign);
+  }, [refereeAssign]);
 
   useEffect(() => {
     if (snapshotID.length > 0) {
       setStep(2);
     }
+    MakeResData({
+      setResData: setRefereeAssign,
+      collectionName: "cups",
+      documentName: snapshotID,
+    });
   }, [snapshotID]);
-
-  useEffect(() => {
-    updateSetDoc();
-  }, [cupData]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">

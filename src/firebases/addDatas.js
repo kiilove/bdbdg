@@ -31,15 +31,16 @@ export const updateSetDoc = async ({
   setIsLoading,
 }) => {
   setIsLoading(true);
+  console.log("update", data);
   try {
     const updateDoc = await setDoc(
       doc(db, collectionName, snapshotID),
       {
-        basicInfo: data,
+        data,
       },
       { merge: true }
     );
-    console.log(updateDoc);
+    //console.log(updateDoc);
   } catch (error) {
     console.log(error.message);
   } finally {

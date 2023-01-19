@@ -1,0 +1,20 @@
+[debug] [2023-01-19T07:48:19.141Z] ----------------------------------------------------------------------
+[debug] [2023-01-19T07:48:19.143Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\jncore_dev\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2023-01-19T07:48:19.143Z] CLI Version:   11.16.0
+[debug] [2023-01-19T07:48:19.143Z] Platform:      win32
+[debug] [2023-01-19T07:48:19.143Z] Node Version:  v16.17.1
+[debug] [2023-01-19T07:48:19.147Z] Time:          Thu Jan 19 2023 16:48:19 GMT+0900 (대한민국 표준시)
+[debug] [2023-01-19T07:48:19.147Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-01-19T07:48:19.150Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2023-01-19T07:48:19.220Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-01-19T07:48:19.220Z] > authorizing via signed-in user (kiilovenote@gmail.com)
+[debug] [2023-01-19T07:48:19.220Z] [iam] checking project body-36982 for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2023-01-19T07:48:19.221Z] > refreshing access token with scopes: []
+[debug] [2023-01-19T07:48:19.222Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2023-01-19T07:48:19.222Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-01-19T07:48:19.485Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2023-01-19T07:48:19.485Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-01-19T07:48:19.496Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/body-36982:testIamPermissions [none]
+[debug] [2023-01-19T07:48:19.496Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/body-36982:testIamPermissions x-goog-quota-user=projects/body-36982
+[debug] [2023-01-19T07:48:19.496Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/body-36982:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update"]}

@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "@mui/material";
-import { pageTitle, widgetTitle } from "../components/Titles";
+import { widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPenToSquare,
@@ -11,18 +11,14 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import WidgetWithTable from "../components/WidgetWithTable";
-import { getDocsData } from "../firebases/getDatas";
 import { useState } from "react";
 import { useEffect } from "react";
 import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
-import {
-  NewCup,
-  NewGame,
-  TransferPlayer,
-  TransferReferee,
-} from "../components/Modals";
+import { NewCup, NewGame } from "../components/Modals";
 import { useParams } from "react-router-dom";
-import { MakeResData } from "../components/MakeResData";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { Bars } from "react-loader-spinner";
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
 const GAME_HEADERS = [
@@ -84,6 +80,7 @@ const CupView = () => {
   const [resPlayerTableData, setResPlayerTableData] = useState([]);
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenModal = ({ component }) => {
     console.log(component);
@@ -99,133 +96,154 @@ const CupView = () => {
   useEffect(() => {
     setCupId(() => params.cupId);
   }, [params]);
+  let dataObj;
+  const getDocument = async () => {
+    setIsLoading(true);
+    try {
+      const resDoc = await getDoc(doc(db, "cups", cupId));
+      dataObj = { ...resDoc.data() };
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setResData(dataObj);
+      setIsLoading(false);
+      console.log(resData);
+    }
+  };
 
   useEffect(() => {
-    MakeResData({
-      setResData: setResData,
-      collectionName: "cups",
-      documentName: cupId,
-    });
+    getDocument();
   }, [cupId]);
 
-  // useEffect(() => {
-  //   resData && setCupData(() => resData[0]);
-  //   console.log(cupData);
-  // }, [resData]);
-
   return (
-    <div className="flex w-full h-full flex-col gap-y-8">
-      <Modal open={modal} onClose={handleCloseModal}>
-        <div
-          className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
-          style={{
-            backgroundColor: "rgba(7,11,41,0.9)",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
-          <div className="flex w-full">
-            <div className="flex w-1/2">
-              {widgetTitle({ title: "대회 정보 수정" })}
-            </div>
-            <div
-              className="flex w-1/2 justify-end items-center hover:cursor-pointer"
-              onClick={() => handleCloseModal()}
-            >
-              <FontAwesomeIcon
-                icon={faTimes}
-                className="text-white text-2xl font-bold"
-              />
-            </div>
-          </div>
-          {modalComponent}
+    <>
+      {isLoading ? (
+        <div className="flex w-full h-screen justify-center items-center align-middle">
+          <Bars color="white" />
         </div>
-      </Modal>
-      <div className="flex w-full gap-x-8">
-        <div
-          className="flex w-1/3 justify-center p-5  rounded-lg"
-          style={{ backgroundColor: "rgba(7,11,41,0.7" }}
-        >
-          <img
-            src="https://img0.yna.co.kr/etc/inner/KR/2016/06/13/AKR20160613024900007_01_i_P4.jpg"
-            className="w-60 rounded-2xl"
-          />
-        </div>
-        <div
-          className="flex w-2/3 flex-col px-10 py-8 gap-y-5 rounded-lg"
-          style={{ backgroundColor: "rgba(7,11,41,0.7" }}
-        >
-          <div className="flex justify-start items-top mb-5 gap-x-5">
-            <span className="text-white font-extrabold text-4xl"></span>
-            <div
-              className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-              onClick={() => handleOpenModal({ component: <NewCup /> })}
-            >
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="text-white text-lg"
-              />
-            </div>
-          </div>
+      ) : (
+        resData && (
+          <div className="flex w-full h-full flex-col gap-y-8">
+            <Modal open={modal} onClose={handleCloseModal}>
+              <div
+                className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
+                style={{
+                  backgroundColor: "rgba(7,11,41,0.9)",
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
+                <div className="flex w-full">
+                  <div className="flex w-1/2">
+                    {widgetTitle({ title: "대회 정보 수정" })}
+                  </div>
+                  <div
+                    className="flex w-1/2 justify-end items-center hover:cursor-pointer"
+                    onClick={() => handleCloseModal()}
+                  >
+                    <FontAwesomeIcon
+                      icon={faTimes}
+                      className="text-white text-2xl font-bold"
+                    />
+                  </div>
+                </div>
+                {modalComponent}
+              </div>
+            </Modal>
+            <div className="flex w-full gap-x-8">
+              <div
+                className="flex w-1/3 justify-center p-5  rounded-lg"
+                style={{ backgroundColor: "rgba(7,11,41,0.7" }}
+              >
+                <img
+                  src={resData && resData.cupInfo.cupPoster}
+                  className="w-60 rounded-2xl"
+                />
+              </div>
+              <div
+                className="flex w-2/3 flex-col px-10 py-8 gap-y-5 rounded-lg"
+                style={{ backgroundColor: "rgba(7,11,41,0.7" }}
+              >
+                <div className="flex justify-start items-top mb-5 gap-x-5">
+                  <span className="text-white font-extrabold text-4xl"></span>
+                  <div
+                    className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+                    onClick={() => handleOpenModal({ component: <NewCup /> })}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPenToSquare}
+                      className="text-white text-lg"
+                    />
+                  </div>
+                </div>
 
-          <div className="flex justify-start items-top">
-            <span className="text-white text-xl">
-              대회명 : {resData && resData[0].basicInfo.cupInfo.cupName}
-            </span>
+                <div className="flex justify-start items-top">
+                  <span className="text-white text-xl">
+                    대회명 : {resData && resData.cupInfo.cupName}
+                  </span>
+                </div>
+                <div className="flex justify-start items-top">
+                  <span className="text-white text-xl">
+                    회차 : {resData && resData.cupInfo.cupCount}회
+                  </span>
+                </div>
+                <div className="flex justify-start items-top">
+                  <span className="text-white text-xl">
+                    주최 : {resData && resData.cupInfo.cupOrg}
+                  </span>
+                </div>
+                <div className="flex justify-start items-top">
+                  <span className="text-white text-xl">
+                    장소 : {resData && resData.cupInfo.cupLocation}
+                  </span>
+                </div>
+                <div className="flex justify-start items-top">
+                  <span className="text-white text-xl">
+                    일자 : {resData && resData.cupInfo.cupDate}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex w-full gap-x-8 ">
+              <div className="flex w-1/2 h-96">
+                <WidgetWithTable
+                  data={{
+                    title: "참가심판",
+                    titleIcon: faScaleBalanced,
+                    tableHeaders: REFEREE_HEADERS,
+                    tableData: resRefereeTableData,
+                    modalComponent: "",
+                  }}
+                />
+              </div>
+              <div className="flex w-1/2 h-96">
+                <WidgetWithTable
+                  data={{
+                    title: "출전선수",
+                    titleIcon: faPeopleLine,
+                    tableHeaders: PLAYER_HEADERS,
+                    tableData: resPlayerTableData,
+                    modalComponent: "",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex w-full h-96">
+              <WidgetWithTableDragable
+                data={{
+                  title: "개최종목",
+                  titleIcon: faSitemap,
+                  actionIcon: faPlus,
+                  actionComponent: <NewGame />,
+                  tableHeaders: GAME_HEADERS,
+                  tableData: tempGameData,
+                }}
+              />
+            </div>
           </div>
-          <div className="flex justify-start items-top">
-            <span className="text-white text-xl">회차 : 13회</span>
-          </div>
-          <div className="flex justify-start items-top">
-            <span className="text-white text-xl">
-              주최 : 경기용인보디빌딩협회
-            </span>
-          </div>
-          <div className="flex justify-start items-top">
-            <span className="text-white text-xl">장소 : 용인시청 대경기장</span>
-          </div>
-          <div className="flex justify-start items-top">
-            <span className="text-white text-xl">일자 : 2022-11-01</span>
-          </div>
-        </div>
-      </div>
-      <div className="flex w-full gap-x-8 ">
-        <div className="flex w-1/2 h-96">
-          <WidgetWithTable
-            data={{
-              title: "참가심판",
-              titleIcon: faScaleBalanced,
-              tableHeaders: REFEREE_HEADERS,
-              tableData: resRefereeTableData,
-              modalComponent: "",
-            }}
-          />
-        </div>
-        <div className="flex w-1/2 h-96">
-          <WidgetWithTable
-            data={{
-              title: "출전선수",
-              titleIcon: faPeopleLine,
-              tableHeaders: PLAYER_HEADERS,
-              tableData: resPlayerTableData,
-              modalComponent: "",
-            }}
-          />
-        </div>
-      </div>
-      <div className="flex w-full h-96">
-        <WidgetWithTableDragable
-          data={{
-            title: "개최종목",
-            titleIcon: faSitemap,
-            actionIcon: faPlus,
-            actionComponent: <NewGame />,
-            tableHeaders: GAME_HEADERS,
-            tableData: tempGameData,
-          }}
-        />
-      </div>
-    </div>
+        )
+      )}
+    </>
   );
 };
 

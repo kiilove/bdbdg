@@ -7,8 +7,9 @@ import CupMain from "./pages/CupMain";
 import IngCup from "./pages/IngCup";
 import DragTable from "./components/DragTable";
 import NewCupPage from "./pages/NewCupPage";
-import GameList from "./pages/GameList";
 import CupView from "./pages/CupView";
+import CupList from "./pages/CupList";
+import RefereeList from "./pages/RefereeList";
 
 function App() {
   return (
@@ -32,12 +33,14 @@ function App() {
                 path="/newcup"
                 element={<CupMain component={<NewCupPage />} />}
               />
-              <Route path="/gamelist" element={<GameList />} />
+              <Route path="/cuplist" element={<CupList />} />
               <Route
                 path="/cupview/:cupId"
                 element={<CupMain component={<CupView />} />}
               ></Route>
               <Route path="/test" element={<DragTable />} />
+              />
+              <Route path="/refereelist" element={<RefereeList />} />
             </Routes>
           </div>
         </div>

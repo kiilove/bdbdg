@@ -6,6 +6,9 @@ import {
   faUserSecret,
   faLandmarkDome,
   faPeopleRoof,
+  faIdCardAlt,
+  faScaleBalanced,
+  faPeopleLine,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -13,8 +16,9 @@ import { Link } from "react-router-dom";
 const menuItems = [
   { id: 1, title: "Dashboard", link: "/dashboard", icon: faGaugeHigh },
   { id: 2, title: "경기 새로시작", link: "/newcup", icon: faTrophy },
-  { id: 4, title: "경기 기록관", link: "/gamelist", icon: faLandmarkDome },
-  { id: 6, title: "멤버 모음", link: "/refereemanager", icon: faPeopleRoof },
+  { id: 4, title: "경기 기록관", link: "/cuplist", icon: faLandmarkDome },
+  { id: 5, title: "심판진", link: "/refereelist", icon: faScaleBalanced },
+  { id: 6, title: "선수진", link: "/refereemanager", icon: faPeopleLine },
 
   { id: 8, title: "관리자", link: "/admin", icon: faUserSecret },
   { id: 10, title: "테스트페이지", link: "/test", icon: faUserSecret },
