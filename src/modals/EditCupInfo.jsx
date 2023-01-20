@@ -1,12 +1,18 @@
 import { useEffect } from "react";
-import { storage } from "../firebase";
+import { db, storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useState } from "react";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImages, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { ImageList } from "./ImageList";
+import {
+  faImage,
+  faImages,
+  faSave,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
+import { doc, setDoc } from "firebase/firestore";
 import { Modal } from "@mui/material";
+import { ImageList } from "./ImageList";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
@@ -64,17 +70,36 @@ const makeFileName = (filename, salt) => {
   return String(salt).toUpperCase() + currentTime + "." + prevFilename[1];
 };
 
-export const NewCupInfo = ({ prevState, prevInfo }) => {
+export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
-  const [uploadedImageURL, setUploadedImageURL] = useState();
+  const [cupId, setCupId] = useState();
+  const [uploadedImageURL, setUploadedImageURL] = useState(prevInfo.cupPoster);
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   //console.log(props.cupInfo);
+
+  const updateCupInfo = async () => {
+    try {
+      const updateDoc = await setDoc(
+        doc(db, "cups", cupId),
+        { cupInfo },
+        { merge: true }
+      );
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      prevState({ ...prevState, ...cupInfo });
+      //parentsModalState(() => false);
+
+      console.log("updateSetDoc", "Successfully updated");
+    }
+  };
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
   };
+
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
     setModal(() => true);
@@ -86,8 +111,13 @@ export const NewCupInfo = ({ prevState, prevInfo }) => {
   };
 
   useEffect(() => {
-    prevState({ ...cupInfo });
+    //prevState({ ...cupInfo });
+    console.log(cupInfo);
   }, [cupInfo]);
+
+  useEffect(() => {
+    setCupId(id);
+  }, [id]);
 
   useEffect(() => {
     setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImageURL }));
@@ -170,32 +200,29 @@ export const NewCupInfo = ({ prevState, prevInfo }) => {
                 onChange={(e) => uploadImage(e, setUploadedImageURL)}
               />
             </label>
-            {uploadedImageURL && (
-              <div className="flex w-full">
-                <div
-                  className="flex w-full h-full py-3 rounded-lg"
-                  style={{ backgroundColor: "rgba(7,11,41,1)" }}
-                >
-                  <img
-                    src={uploadedImageURL && uploadedImageURL}
-                    className="flex w-16 h-16 p-1 border border-gray-300 "
-                  />
-                </div>
+            <div className="flex w-full">
+              <div
+                className="flex w-full h-full py-3 rounded-lg"
+                style={{ backgroundColor: "rgba(7,11,41,1)" }}
+              >
+                <img
+                  src={cupInfo.cupPoster && cupInfo.cupPoster}
+                  className="flex w-16 h-16 p-1 border border-gray-300 "
+                />
               </div>
-            )}
-
+            </div>
             <div className="flex w-full">
               <button
-                className="flex justify-center items-center w-full h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
                 onClick={() =>
                   handleOpenModal({ component: <ImageList refType="poster" /> })
                 }
+                className="flex justify-center items-center w-full h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
               >
                 <FontAwesomeIcon
                   icon={faImages}
                   className="text-white text-lg"
                 />
-                <span className="text-white text-sm font-light ml-3">
+                <span className="text-white font-light ml-3">
                   기존 포스터 찾기
                 </span>
               </button>
@@ -263,6 +290,14 @@ export const NewCupInfo = ({ prevState, prevInfo }) => {
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
+        </div>
+        <div className="flex w-full h-16 items-center justify-end">
+          <button
+            onClick={() => updateCupInfo()}
+            className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+          >
+            <FontAwesomeIcon icon={faSave} className="text-white text-lg" />
+          </button>
         </div>
       </div>
     </div>

@@ -25,6 +25,7 @@ import {
   TransferReferee,
 } from "../components/Modals";
 import { Modal } from "@mui/material";
+import { NewCupInfo } from "../modals/NewCupInfo";
 
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
@@ -209,7 +210,7 @@ const IngCup = () => {
             </span>
             <div
               className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-              onClick={() => handleOpenModal({ component: <NewCup /> })}
+              onClick={() => handleOpenModal({ component: <NewCupInfo /> })}
             >
               <FontAwesomeIcon
                 icon={faPenToSquare}

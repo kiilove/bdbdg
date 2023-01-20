@@ -14,11 +14,13 @@ import WidgetWithTable from "../components/WidgetWithTable";
 import { useState } from "react";
 import { useEffect } from "react";
 import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
-import { NewCup, NewGame } from "../components/Modals";
+
 import { useParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { Bars } from "react-loader-spinner";
+import { NewCupInfo } from "../modals/NewCupInfo";
+import { EditCupInfo } from "../modals/EditCupInfo";
 const REFEREE_HEADERS = ["ID", "이름", "이메일"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
 const GAME_HEADERS = [
@@ -73,6 +75,7 @@ const CupView = () => {
   const params = useParams();
   const [cupId, setCupId] = useState();
   const [resData, setResData] = useState();
+  const [cupInfo, setCupInfo] = useState({});
   const [cupData, setCupData] = useState();
   const [resReferee, setResReferee] = useState([]);
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
@@ -106,6 +109,7 @@ const CupView = () => {
       console.log(error.message);
     } finally {
       setResData(dataObj);
+      setCupInfo({ ...dataObj.cupInfo });
       setIsLoading(false);
       console.log(resData);
     }
@@ -156,19 +160,32 @@ const CupView = () => {
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
-                  src={resData && resData.cupInfo.cupPoster}
-                  className="w-60 rounded-2xl"
+                  src={cupInfo && cupInfo.cupPoster}
+                  className="w-full rounded-2xl object-cover object-top"
                 />
               </div>
               <div
                 className="flex w-2/3 flex-col px-10 py-8 gap-y-5 rounded-lg"
-                style={{ backgroundColor: "rgba(7,11,41,0.7" }}
+                style={{ backgroundColor: "rgba(7,11,41,0.7)" }}
               >
                 <div className="flex justify-start items-top mb-5 gap-x-5">
-                  <span className="text-white font-extrabold text-4xl"></span>
+                  <span className="text-white font-extrabold text-4xl">
+                    {cupInfo && cupInfo.cupName} {cupInfo && cupInfo.cupCount}회
+                  </span>
                   <div
                     className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-                    onClick={() => handleOpenModal({ component: <NewCup /> })}
+                    onClick={() =>
+                      handleOpenModal({
+                        component: (
+                          <EditCupInfo
+                            prevState={setCupInfo}
+                            prevInfo={cupInfo}
+                            id={cupId}
+                            parentsModalState={setModal}
+                          />
+                        ),
+                      })
+                    }
                   >
                     <FontAwesomeIcon
                       icon={faPenToSquare}
@@ -179,27 +196,27 @@ const CupView = () => {
 
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    대회명 : {resData && resData.cupInfo.cupName}
+                    대회명 : {cupInfo && cupInfo.cupName}
                   </span>
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    회차 : {resData && resData.cupInfo.cupCount}회
+                    회차 : {cupInfo && cupInfo.cupCount}회
                   </span>
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    주최 : {resData && resData.cupInfo.cupOrg}
+                    주최 : {cupInfo && cupInfo.cupOrg}
                   </span>
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    장소 : {resData && resData.cupInfo.cupLocation}
+                    장소 : {cupInfo && cupInfo.cupLocation}
                   </span>
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    일자 : {resData && resData.cupInfo.cupDate}
+                    일자 : {cupInfo && cupInfo.cupDate}
                   </span>
                 </div>
               </div>
@@ -234,7 +251,7 @@ const CupView = () => {
                   title: "개최종목",
                   titleIcon: faSitemap,
                   actionIcon: faPlus,
-                  actionComponent: <NewGame />,
+                  actionComponent: "",
                   tableHeaders: GAME_HEADERS,
                   tableData: tempGameData,
                 }}
