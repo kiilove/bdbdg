@@ -20,6 +20,86 @@ const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
+const uploadImage = (e, state) => {
+  let uploadURL = "";
+  //console.log(e.target.files.name);
+  const imageFile = e.target.files[0];
+  const imageFileName = e.target.files[0].name;
+  const newFileName = makeFileName(imageFileName, "p");
+
+  const storageRef = ref(storage, `images/poster/${newFileName}`);
+  const uploadTask = uploadBytesResumable(storageRef, imageFile);
+  try {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        // Handle unsuccessful uploads
+      },
+      () => {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          state(downloadURL);
+        });
+      }
+    );
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    console.log("UPLOAD", uploadURL);
+  }
+};
+
+const uploadMultipleImage = (e, state) => {
+  let uploadURL = "";
+  //console.log(e.target.files.name);
+  //const fileList = e.target.files.name;
+
+  const fileList = Array.prototype.slice.call(e.target.files);
+  console.log(fileList);
+  //console.log(fileList);
+  //console.log(fileList[0].name);
+  const uploadFileList = fileList.map((item, idx) => {
+    console.log(item.name);
+  });
+
+  const imageFile = e.target.files[0];
+  const imageFileName = e.target.files[0].name;
+  const newFileName = makeFileName(imageFileName, "p");
+
+  const storageRef = ref(storage, `images/poster/${newFileName}`);
+  const uploadTask = uploadBytesResumable(storageRef, imageFile);
+  try {
+    //console.log(fileList);
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    console.log("UPLOAD", uploadURL);
+  }
+};
+
+const makeFileName = (filename, salt) => {
+  const currentDate = new Date();
+  const currentTime = currentDate.getTime();
+  const prevFilename = filename.split(".");
+  return String(salt).toUpperCase() + currentTime + "." + prevFilename[1];
+};
+
 export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
   const [cupId, setCupId] = useState();
@@ -28,7 +108,6 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   //console.log(props.cupInfo);
-  console.log(prevInfo.cupPoster[0].link);
 
   const updateCupInfo = async () => {
     try {
@@ -69,7 +148,6 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
 
   useEffect(() => {
     //prevState({ ...cupInfo });
-    setUploadedImageURL(resUploadURL);
     console.log(resUploadURL);
   }, [resUploadURL]);
 
@@ -120,13 +198,9 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
               for="cupPoster"
               className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              {prevInfo.cupPoster ? (
+              {uploadedImageURL ? (
                 <div className="flex flex-col justify-center items-center w-full">
-                  <img
-                    src={prevInfo.cupPoster[0].link}
-                    alt=""
-                    className="object-cover"
-                  />
+                  <img src={uploadedImageURL} alt="" className="object-cover" />
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center h-32">
@@ -166,23 +240,16 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
               />
             </label>
             <div className="flex w-full">
-              {cupInfo.cupPoster ? (
-                cupInfo.cupPoster.map((item, idx) => (
-                  <div
-                    className="flex w-full h-full py-3 rounded-lg"
-                    style={{ backgroundColor: "rgba(7,11,41,1)" }}
-                  >
-                    <img
-                      src={item.link}
-                      className="flex w-16 h-16 p-1 border border-gray-300 "
-                    />
-                  </div>
-                ))
-              ) : (
-                <div></div>
-              )}
+              <div
+                className="flex w-full h-full py-3 rounded-lg"
+                style={{ backgroundColor: "rgba(7,11,41,1)" }}
+              >
+                <img
+                  src={cupInfo.cupPoster && cupInfo.cupPoster}
+                  className="flex w-16 h-16 p-1 border border-gray-300 "
+                />
+              </div>
             </div>
-
             <div className="flex w-full">
               <button
                 onClick={() =>

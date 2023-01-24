@@ -1,57 +1,80 @@
 import { useEffect } from "react";
-import { db, storage } from "../firebase";
+import { storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useState } from "react";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faImage,
-  faImages,
-  faSave,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
-import { doc, setDoc } from "firebase/firestore";
-import { Modal } from "@mui/material";
+import { faImages, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { ImageList } from "./ImageList";
-import { UploadMultiple, useUploadMultiple } from "../customhooks/useUpload";
+import { Modal } from "@mui/material";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
-export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
+const uploadImage = (e, state) => {
+  let uploadURL = "";
+  const imageFile = e.target.files[0];
+  const imageFileName = e.target.files[0].name;
+  const newFileName = makeFileName(imageFileName, "p");
+
+  const storageRef = ref(storage, `images/poster/${newFileName}`);
+  const uploadTask = uploadBytesResumable(storageRef, imageFile);
+  try {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
+      },
+      (error) => {
+        // Handle unsuccessful uploads
+      },
+      () => {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          state(downloadURL);
+        });
+      }
+    );
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    console.log("UPLOAD", uploadURL);
+  }
+};
+
+const makeFileName = (filename, salt) => {
+  const currentDate = new Date();
+  const currentTime = currentDate.getTime();
+  const prevFilename = filename.split(".");
+  return String(salt).toUpperCase() + currentTime + "." + prevFilename[1];
+};
+
+export const NewCupInfo = ({ prevState, prevInfo }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
-  const [cupId, setCupId] = useState();
-  const [resUploadURL, setResUploadURL] = useState([]);
-  const [uploadedImageURL, setUploadedImageURL] = useState([]);
+  const [uploadedImageURL, setUploadedImageURL] = useState();
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   //console.log(props.cupInfo);
-  console.log(prevInfo.cupPoster[0].link);
-
-  const updateCupInfo = async () => {
-    try {
-      const updateDoc = await setDoc(
-        doc(db, "cups", cupId),
-        { cupInfo },
-        { merge: true }
-      );
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      prevState({ ...prevState, ...cupInfo });
-      //parentsModalState(() => false);
-
-      console.log("updateSetDoc", "Successfully updated");
-    }
-  };
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
   };
-
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
     setModal(() => true);
@@ -63,19 +86,8 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   };
 
   useEffect(() => {
-    //prevState({ ...cupInfo });
-    console.log(cupInfo);
+    prevState({ ...cupInfo });
   }, [cupInfo]);
-
-  useEffect(() => {
-    //prevState({ ...cupInfo });
-    setUploadedImageURL(resUploadURL);
-    console.log(resUploadURL);
-  }, [resUploadURL]);
-
-  useEffect(() => {
-    setCupId(id);
-  }, [id]);
 
   useEffect(() => {
     setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImageURL }));
@@ -120,13 +132,9 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
               for="cupPoster"
               className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              {prevInfo.cupPoster ? (
+              {uploadedImageURL ? (
                 <div className="flex flex-col justify-center items-center w-full">
-                  <img
-                    src={prevInfo.cupPoster[0].link}
-                    alt=""
-                    className="object-cover"
-                  />
+                  <img src={uploadedImageURL} alt="" className="object-cover" />
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center h-32">
@@ -159,42 +167,35 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
                 id="cupPoster"
                 name="cupPoster"
                 className="hidden"
-                multiple
-                onChange={(e) =>
-                  UploadMultiple(e, "P", "images/poster/", setResUploadURL)
-                }
+                onChange={(e) => uploadImage(e, setUploadedImageURL)}
               />
             </label>
-            <div className="flex w-full">
-              {cupInfo.cupPoster ? (
-                cupInfo.cupPoster.map((item, idx) => (
-                  <div
-                    className="flex w-full h-full py-3 rounded-lg"
-                    style={{ backgroundColor: "rgba(7,11,41,1)" }}
-                  >
-                    <img
-                      src={item.link}
-                      className="flex w-16 h-16 p-1 border border-gray-300 "
-                    />
-                  </div>
-                ))
-              ) : (
-                <div></div>
-              )}
-            </div>
+            {uploadedImageURL && (
+              <div className="flex w-full">
+                <div
+                  className="flex w-full h-full py-3 rounded-lg"
+                  style={{ backgroundColor: "rgba(7,11,41,1)" }}
+                >
+                  <img
+                    src={uploadedImageURL && uploadedImageURL}
+                    className="flex w-16 h-16 p-1 border border-gray-300 "
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="flex w-full">
               <button
+                className="flex justify-center items-center w-full h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
                 onClick={() =>
                   handleOpenModal({ component: <ImageList refType="poster" /> })
                 }
-                className="flex justify-center items-center w-full h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
               >
                 <FontAwesomeIcon
                   icon={faImages}
                   className="text-white text-lg"
                 />
-                <span className="text-white font-light ml-3">
+                <span className="text-white text-sm font-light ml-3">
                   기존 포스터 찾기
                 </span>
               </button>
@@ -262,14 +263,6 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
-        </div>
-        <div className="flex w-full h-16 items-center justify-end">
-          <button
-            onClick={() => updateCupInfo()}
-            className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-          >
-            <FontAwesomeIcon icon={faSave} className="text-white text-lg" />
-          </button>
         </div>
       </div>
     </div>

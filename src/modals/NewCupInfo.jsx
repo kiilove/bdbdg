@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImages, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { ImageList } from "./ImageList";
 import { Modal } from "@mui/material";
+import { UploadMultiple } from "../customhooks/useUpload";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
@@ -153,9 +154,7 @@ export const NewCupInfo = ({ prevState, prevInfo }) => {
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     ></path>
                   </svg>
-                  <p className="mb-2 text-sm text-white font-bold">
-                    {prevInfo.cupPoster && prevInfo.cupPoster}
-                  </p>
+
                   <p className="text-xs text-gray-200 font-light">
                     SVG, PNG, JPG
                   </p>
@@ -167,7 +166,10 @@ export const NewCupInfo = ({ prevState, prevInfo }) => {
                 id="cupPoster"
                 name="cupPoster"
                 className="hidden"
-                onChange={(e) => uploadImage(e, setUploadedImageURL)}
+                multiple
+                onChange={(e) =>
+                  UploadMultiple(e, "P", "images/poster/", setUploadedImageURL)
+                }
               />
             </label>
             {uploadedImageURL && (

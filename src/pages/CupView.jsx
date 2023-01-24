@@ -76,6 +76,7 @@ const CupView = () => {
   const [cupId, setCupId] = useState();
   const [resData, setResData] = useState();
   const [cupInfo, setCupInfo] = useState({});
+  const [posterTitle, setPosterTitle] = useState({});
   const [cupData, setCupData] = useState();
   const [resReferee, setResReferee] = useState([]);
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
@@ -110,6 +111,7 @@ const CupView = () => {
     } finally {
       setResData(dataObj);
       setCupInfo({ ...dataObj.cupInfo });
+
       setIsLoading(false);
       console.log(resData);
     }
@@ -118,6 +120,26 @@ const CupView = () => {
   useEffect(() => {
     getDocument();
   }, [cupId]);
+
+  useEffect(() => {
+    let title = [];
+    if (cupInfo.cupPoster) {
+      // const posterInfo = cupInfo.cupPoster.filter(
+      //   (item) => item.title === true
+      // );
+      // setPosterTitle(posterInfo);
+      // console.log(posterInfo);
+      const posterList = Array.prototype.slice.call(cupInfo.cupPoster);
+      if (posterList) {
+        title = posterList.filter((item) => item.title === true);
+        //setPosterTitle(title);
+        //console.log(posterTitle);
+      }
+    }
+    console.log(title[0]);
+    setPosterTitle(title[0]);
+    console.log(posterTitle);
+  }, [cupInfo]);
 
   return (
     <>
@@ -160,7 +182,7 @@ const CupView = () => {
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
-                  src={cupInfo && cupInfo.cupPoster}
+                  src={posterTitle && posterTitle.link}
                   className="w-full rounded-2xl object-cover object-top"
                 />
               </div>
