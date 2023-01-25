@@ -76,6 +76,7 @@ const CupView = () => {
   const [cupId, setCupId] = useState();
   const [resData, setResData] = useState();
   const [cupInfo, setCupInfo] = useState({});
+  const [posterList, setPosterList] = useState([]);
   const [posterTitle, setPosterTitle] = useState({});
   const [cupData, setCupData] = useState();
   const [resReferee, setResReferee] = useState([]);
@@ -129,7 +130,8 @@ const CupView = () => {
       // );
       // setPosterTitle(posterInfo);
       // console.log(posterInfo);
-      const posterList = Array.prototype.slice.call(cupInfo.cupPoster);
+      const prevList = Array.prototype.slice.call(cupInfo.cupPoster);
+      setPosterList(prevList);
       if (posterList) {
         title = posterList.filter((item) => item.title === true);
         //setPosterTitle(title);

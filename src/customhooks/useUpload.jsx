@@ -3,6 +3,14 @@ import React, { useState } from "react";
 import { storage } from "../firebase";
 
 export const UploadMultiple = (e, type, folder, resState) => {
+  // 기존 파일을 불러와서 그 배열에 새로운 파일 푸시하는 형태로 코드 수정이 필요함
+  // 지금 현재 코드는 새로 업로드한 파일 정보로 덮어씌우면서 기존 사진 파일 정보 날아감
+  // 최초 컵등록시에 빈값으로 세팅하고
+  // 빈값일때 기본 포스트 화면을 띄우도록 세팅하는게 나아보임
+  // link가 없다면 덮어씌우고 link정보가 있다면 추가하는 형태로 작성해야할듯..
+  // 만만치 않음
+  // 23.0.25
+
   let upList = [];
   let downList = [];
   let promises = [];

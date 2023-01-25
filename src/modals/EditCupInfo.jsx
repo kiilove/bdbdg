@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { db, storage } from "../firebase";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { db } from "../firebase";
+
 import { useState } from "react";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,7 +13,7 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { Modal } from "@mui/material";
 import { ImageList } from "./ImageList";
-import { UploadMultiple, useUploadMultiple } from "../customhooks/useUpload";
+import { UploadMultiple } from "../customhooks/useUpload";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
@@ -23,12 +23,26 @@ const inputTextStyle =
 export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
   const [cupId, setCupId] = useState();
-  const [resUploadURL, setResUploadURL] = useState([]);
-  const [uploadedImageURL, setUploadedImageURL] = useState([]);
+  const [resUploadURL, setResUploadURL] = useState([...prevInfo.cupPoster]);
+  const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   //console.log(props.cupInfo);
-  console.log(prevInfo.cupPoster[0].link);
+  //console.log(prevInfo.cupPoster[0].link);
+
+  const handlePosterTitle = () => {
+    if (resUploadURL) {
+      // 오브젝트로 받아오면서 filter시 오류를 뿜어냄
+      // 오브젝트를 배열로 변환하면 해결되겠지만, 이부분에 대한 고려가 더 필요함
+      // 23.01.25
+      console.log(typeof resUploadURL);
+      console.log(resUploadURL);
+      // const title = resUploadURL.filter((item) => item.title === true);
+      // console.log("cupInfo", cupInfo);
+      // console.log("title", title);
+      // setPosterTitle(title[0]);
+    }
+  };
 
   const updateCupInfo = async () => {
     try {
@@ -64,22 +78,24 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
 
   useEffect(() => {
     //prevState({ ...cupInfo });
+    handlePosterTitle();
+    //console.log("포스터타이틀", posterTitle.link);
     console.log(cupInfo);
   }, [cupInfo]);
 
-  useEffect(() => {
-    //prevState({ ...cupInfo });
-    setUploadedImageURL(resUploadURL);
-    console.log(resUploadURL);
-  }, [resUploadURL]);
+  // useEffect(() => {
+  //   //prevState({ ...cupInfo });
+  //   setUploadedImageURL(resUploadURL);
+  //   console.log(resUploadURL);
+  // }, [resUploadURL]);
 
   useEffect(() => {
     setCupId(id);
   }, [id]);
 
   useEffect(() => {
-    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImageURL }));
-  }, [uploadedImageURL]);
+    setCupInfo((prev) => ({ ...prev, cupPoster: resUploadURL }));
+  }, [resUploadURL]);
 
   return (
     <div
@@ -120,13 +136,9 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
               for="cupPoster"
               className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
             >
-              {prevInfo.cupPoster ? (
+              {posterTitle ? (
                 <div className="flex flex-col justify-center items-center w-full">
-                  <img
-                    src={prevInfo.cupPoster[0].link}
-                    alt=""
-                    className="object-cover"
-                  />
+                  <img src={posterTitle.link} alt="" className="object-cover" />
                 </div>
               ) : (
                 <div className="flex flex-col justify-center items-center h-32">
@@ -166,7 +178,7 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
               />
             </label>
             <div className="flex w-full">
-              {cupInfo.cupPoster ? (
+              {typeof cupInfo.cupPoster === Array ? (
                 cupInfo.cupPoster.map((item, idx) => (
                   <div
                     className="flex w-full h-full py-3 rounded-lg"

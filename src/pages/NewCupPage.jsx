@@ -10,7 +10,7 @@ import { db } from "../firebase";
 import { NewCupInfo } from "../modals/NewCupInfo";
 
 const NewCupPage = () => {
-  const [cupInfo, setCupInfo] = useState({ cupPoster: "" });
+  const [cupInfo, setCupInfo] = useState({});
   const [refereeInfo, setRefereeInfo] = useState({});
   const [playerInfo, setPlayerInfo] = useState({});
   const [gameInfo, setGameInfo] = useState({});
@@ -85,7 +85,10 @@ const NewCupPage = () => {
     setIsLoading(true);
     try {
       const snapShot = await addDoc(collection(db, "cups"), {
-        cupInfo: { cupName: "", cupPoster: "" },
+        cupInfo: {
+          cupName: "",
+          cupPoster: [{ id: 1, link: process.env.DEFAULT_POSTER, title: true }],
+        },
       });
       setSnapshotID(snapShot.id);
     } catch (error) {
@@ -98,7 +101,10 @@ const NewCupPage = () => {
   };
   const handleCupDataWithInputChange = () => {
     if (cupInfo.cupPoster == undefined) {
-      setCupInfo({ ...cupInfo, cupPoster: "" });
+      setCupInfo({
+        ...cupInfo,
+        cupPoster: [{ id: 1, link: process.env.DEFAULT_POSTER, title: true }],
+      });
     }
     setCupData({
       cupInfo,

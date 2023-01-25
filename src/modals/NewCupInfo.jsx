@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import { storage } from "../firebase";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useState } from "react";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,74 +6,29 @@ import { faImages, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { ImageList } from "./ImageList";
 import { Modal } from "@mui/material";
 import { UploadMultiple } from "../customhooks/useUpload";
+import { setDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
-const uploadImage = (e, state) => {
-  let uploadURL = "";
-  const imageFile = e.target.files[0];
-  const imageFileName = e.target.files[0].name;
-  const newFileName = makeFileName(imageFileName, "p");
-
-  const storageRef = ref(storage, `images/poster/${newFileName}`);
-  const uploadTask = uploadBytesResumable(storageRef, imageFile);
-  try {
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        // Observe state change events such as progress, pause, and resume
-        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log("Upload is " + progress + "% done");
-        switch (snapshot.state) {
-          case "paused":
-            console.log("Upload is paused");
-            break;
-          case "running":
-            console.log("Upload is running");
-            break;
-        }
-      },
-      (error) => {
-        // Handle unsuccessful uploads
-      },
-      () => {
-        // Handle successful uploads on complete
-        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          state(downloadURL);
-        });
-      }
-    );
-  } catch (error) {
-    console.log(error.message);
-  } finally {
-    console.log("UPLOAD", uploadURL);
-  }
-};
-
-const makeFileName = (filename, salt) => {
-  const currentDate = new Date();
-  const currentTime = currentDate.getTime();
-  const prevFilename = filename.split(".");
-  return String(salt).toUpperCase() + currentTime + "." + prevFilename[1];
-};
-
-export const NewCupInfo = ({ prevState, prevInfo }) => {
+export const NewCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
-  const [uploadedImageURL, setUploadedImageURL] = useState();
+  const [cupId, setCupId] = useState();
+  const [resUploadURL, setResUploadURL] = useState([]);
+  const [uploadedImageURL, setUploadedImageURL] = useState([]);
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  //console.log(props.cupInfo);
+  console.log(prevInfo);
+
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
   };
+
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
     setModal(() => true);
