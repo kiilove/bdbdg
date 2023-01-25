@@ -87,6 +87,7 @@ const NewCupPage = () => {
       const snapShot = await addDoc(collection(db, "cups"), {
         cupInfo: {
           cupName: "",
+          cupPoster: [{ id: 1, link: process.env.DEFAULT_POSTER, title: true }],
         },
       });
       setSnapshotID(snapShot.id);

@@ -45,6 +45,7 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   };
 
   const updateCupInfo = async () => {
+    console.log("updateCupInfo", cupInfo);
     try {
       const updateDoc = await setDoc(
         doc(db, "cups", cupId),

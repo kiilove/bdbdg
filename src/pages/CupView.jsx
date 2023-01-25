@@ -77,7 +77,11 @@ const CupView = () => {
   const [resData, setResData] = useState();
   const [cupInfo, setCupInfo] = useState({});
   const [posterList, setPosterList] = useState([]);
-  const [posterTitle, setPosterTitle] = useState({});
+  const [posterTitle, setPosterTitle] = useState({
+    id: 0,
+    link: process.env.DEFAULT_POSTER,
+    title: false,
+  });
   const [cupData, setCupData] = useState();
   const [resReferee, setResReferee] = useState([]);
   const [resRefereeTableData, setResRefereeTableData] = useState([]);
@@ -125,24 +129,28 @@ const CupView = () => {
   useEffect(() => {
     let title = [];
     if (cupInfo.cupPoster) {
+      console.log("포스터 정리 진입");
       // const posterInfo = cupInfo.cupPoster.filter(
       //   (item) => item.title === true
       // );
       // setPosterTitle(posterInfo);
       // console.log(posterInfo);
+      console.log(typeof cupInfo.cupPoster);
       const prevList = Array.prototype.slice.call(cupInfo.cupPoster);
-      setPosterList(prevList);
-      if (posterList) {
-        title = posterList.filter((item) => item.title === true);
+      console.log("prevList: " + prevList);
+      //setPosterList(prevList);
+      if (prevList) {
+        title = prevList.filter((item) => item.title === true);
         //setPosterTitle(title);
         //console.log(posterTitle);
+        console.log(posterTitle);
+        console.log(title[0]);
+        setPosterTitle(title[0]);
       }
     }
-    console.log(title[0]);
-    setPosterTitle(title[0]);
-    console.log(posterTitle);
   }, [cupInfo]);
 
+  console.log("title", posterTitle);
   return (
     <>
       {isLoading ? (
