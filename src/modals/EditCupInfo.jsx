@@ -23,6 +23,7 @@ const inputTextStyle =
 export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
   const [cupId, setCupId] = useState();
+  const [posterList, setPosterList] = useState([...prevInfo.cupPoster]);
   const [resUploadURL, setResUploadURL] = useState([...prevInfo.cupPoster]);
   const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
@@ -31,12 +32,27 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   //console.log(prevInfo.cupPoster[0].link);
 
   const handlePosterTitle = () => {
-    if (resUploadURL) {
+    console.log(posterList);
+    if (posterList) {
       // 오브젝트로 받아오면서 filter시 오류를 뿜어냄
       // 오브젝트를 배열로 변환하면 해결되겠지만, 이부분에 대한 고려가 더 필요함
       // 23.01.25
-      console.log(typeof resUploadURL);
-      console.log(resUploadURL);
+
+      // 사진 멀티저장시 파일 중간에 씹히는듯
+      // 갯수는 맞지만 어떤파일 하나가 중복으로 올라감
+      // 23.01.26
+      console.log(typeof resUploposterListadURL);
+      const prevList = Array.prototype.slice.call(posterList);
+
+      if (prevList) {
+        const title = prevList.filter((item) => item.title === true);
+        //setPosterTitle(title);
+        //console.log(posterTitle);
+        console.log(posterTitle);
+        console.log(title[0]);
+        setPosterTitle(title[0]);
+      }
+      console.log(posterList);
       // const title = resUploadURL.filter((item) => item.title === true);
       // console.log("cupInfo", cupInfo);
       // console.log("title", title);
@@ -179,8 +195,8 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
               />
             </label>
             <div className="flex w-full">
-              {typeof cupInfo.cupPoster === Array ? (
-                cupInfo.cupPoster.map((item, idx) => (
+              {posterList ? (
+                posterList.map((item, idx) => (
                   <div
                     className="flex w-full h-full py-3 rounded-lg"
                     style={{ backgroundColor: "rgba(7,11,41,1)" }}
