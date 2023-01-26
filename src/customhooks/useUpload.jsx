@@ -11,6 +11,9 @@ export const UploadMultiple = (e, type, folder, resState) => {
   // 만만치 않음
   // 23.0.25
 
+  // upload list를 리턴하고 리턴된 값을 추가할지 수정할지를 함수를 호출하는 쪽에서 분기하는 형태로 수정
+  //23.01.26
+
   let upList = [];
   let downList = [];
   let promises = [];
@@ -93,6 +96,63 @@ export const UploadMultiple = (e, type, folder, resState) => {
     });
 
   return [upList, downList];
+};
+
+export const UploadMultiFiles = (e, type, folder) => {
+  let downList = [];
+  let promises = [];
+
+  const newFileList = Array.prototype.slice.call(e.target.files);
+
+  newFileList.map((item, idx) => {
+    const storageRef = ref(
+      storage,
+      folder + "/" + makeFileName(item.name, type)
+    );
+
+    const uploadTask = uploadBytesResumable(storageRef, item);
+    promises.push(uploadTask);
+
+    try {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        (error) => {
+          console.error(error.message);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            //const info = { link: downloadURL };
+            downList.push(downloadURL);
+          });
+        }
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      console.info("업로드완료");
+    })
+    .catch((error) => {
+      console.error(error.message);
+    });
+
+  return downList;
 };
 
 const makeFileName = (filename, salt) => {
