@@ -8,6 +8,8 @@ import { ThreeDots } from "react-loader-spinner";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { NewCupInfo } from "../modals/NewCupInfo";
+import { EditCupInfo } from "../modals/EditCupInfo";
+import { DEFAULT_POSTER } from "../const/front";
 
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
@@ -102,7 +104,7 @@ const NewCupPage = () => {
     if (cupInfo.cupPoster == undefined) {
       setCupInfo({
         ...cupInfo,
-        cupPoster: [{ id: 1, link: process.env.DEFAULT_POSTER, title: true }],
+        cupPoster: [{ id: 1, link: DEFAULT_POSTER, title: true }],
       });
     }
     setCupData({
@@ -149,6 +151,7 @@ const NewCupPage = () => {
   }, [snapshotID]);
 
   useEffect(() => {
+    console.log(cupData);
     updateSetDoc();
   }, [cupData]);
 

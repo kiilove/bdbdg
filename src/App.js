@@ -1,6 +1,5 @@
 import "./App.css";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import BackgroundImage from "./assets/images//bg/mainBg.jpg";
 import SideMenus from "./components/SideMenus";
 import TopMenus from "./components/TopMenus";
 import CupMain from "./pages/CupMain";
@@ -10,6 +9,7 @@ import NewCupPage from "./pages/NewCupPage";
 import CupView from "./pages/CupView";
 import CupList from "./pages/CupList";
 import RefereeList from "./pages/RefereeList";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -19,6 +19,7 @@ function App() {
     // >
     <BrowserRouter>
       <div className="flex w-full min-h-screen p-3 gap-x-3 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900 box-border">
+        <ToastContainer />
         <div className="flex w-60 opacity-90">
           <SideMenus />
         </div>

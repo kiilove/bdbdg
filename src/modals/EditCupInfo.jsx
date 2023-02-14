@@ -4,17 +4,10 @@ import { db } from "../firebase";
 import { useState } from "react";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faImage,
-  faImages,
-  faPlus,
-  faSave,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { doc, setDoc } from "firebase/firestore";
 import { Modal } from "@mui/material";
-import { ImageList } from "./ImageList";
-import { UploadMultiple } from "../customhooks/useUpload";
+
 import ImageForm from "../components/ImageForm";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
@@ -30,10 +23,6 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  //console.log(props.cupInfo);
-  //console.log(prevInfo.cupPoster[0].link);
-
-  console.log(prevInfo);
 
   const updateCupInfo = async () => {
     console.log("updateCupInfo", cupInfo);
@@ -47,7 +36,6 @@ export const EditCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
       console.log(error.message);
     } finally {
       prevState({ ...prevState, ...cupInfo });
-      //parentsModalState(() => false);
 
       console.log("updateSetDoc", "Successfully updated");
     }

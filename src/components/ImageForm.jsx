@@ -8,28 +8,27 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { DeleteFile } from "../customhooks/DeleteFiles";
 import { UploadMultiFiles } from "../customhooks/useUpload";
 
 const ImageForm = ({ prevImageList, prevSetImageList }) => {
   const [imageTitle, setImageTitle] = useState({});
   const [files, setFiles] = useState();
-  const [newUpload, setNewUpload] = useState([]);
+
+  const [downlist, setDownlist] = useState([]);
   const [imageList, setImageList] = useState([]);
   const [imageView, setImageView] = useState({});
-  console.log(prevImageList);
 
   const getImageTitle = (list) => {
-    console.log(list);
     let getTitle;
     const findTitle = list.filter((item) => item.title === true);
-    console.log(findTitle);
+
     if (findTitle.lenth) {
-      console.log("??");
       getTitle = findTitle[0];
     } else {
       getTitle = list[0];
     }
-    console.log(getTitle);
+
     return getTitle;
   };
 
@@ -49,21 +48,22 @@ const ImageForm = ({ prevImageList, prevSetImageList }) => {
     return setImageList(setTitle());
   };
 
-  const deleteImageList = (imageIndex) => {
-    const delImage = () => {
-      const newItem = imageList.filter(
-        (item) => Number(item.id) !== imageIndex
-      );
-      getImageTitle(newItem);
-      return newItem;
-    };
-
-    setImageList(delImage());
+  const delImage = (id) => {
+    return new Promise((resolve, reject) => {
+      resolve(imageList.filter((item) => Number(item.id) !== id));
+    });
   };
+  const deleteImageList = (imageIndex, imageFilename) => {
+    delImage(imageIndex)
+      .then((result) => {
+        setImageList(result);
+        return result;
+      })
+      .then((result) => getImageTitle(result))
+      .then((title) => setImageTitle(title))
+      .then(() => DeleteFile("images/poster/", imageFilename));
 
-  const uploadImage = async () => {
-    const downlist = await UploadMultiFiles(files, "P", "images/poster/");
-    return downlist;
+    //setImageList(delImage());
   };
 
   const reduceImageList = (list) => {
@@ -72,8 +72,18 @@ const ImageForm = ({ prevImageList, prevSetImageList }) => {
     if (!imageList.length) {
       list.map((item, idx) => {
         idx === 0
-          ? dummy.push({ id: idx + 1, link: item, title: true })
-          : dummy.push({ id: idx + 1, link: item, title: false });
+          ? dummy.push({
+              id: idx + 1,
+              link: item.link,
+              title: true,
+              filename: item.filename,
+            })
+          : dummy.push({
+              id: idx + 1,
+              link: item.link,
+              title: false,
+              filename: item.filename,
+            });
       });
     } else {
       const prevCount = imageList.length;
@@ -81,11 +91,11 @@ const ImageForm = ({ prevImageList, prevSetImageList }) => {
       dummy = [...imageList];
 
       list.map((item, idx) => {
-        console.log("OK");
         dummy.push({
           id: prevCount + idx + 1,
-          link: item,
+          link: item.link,
           title: false,
+          filename: item.filename,
         });
       });
     }
@@ -94,47 +104,55 @@ const ImageForm = ({ prevImageList, prevSetImageList }) => {
   };
 
   const handleUpload = async () => {
-    await uploadImage(files, "P", "images/poster/")
-      .then((list) => {
-        console.log(list);
-        reduceImageList(list);
+    await UploadMultiFiles(files, "P", "images/poster/", setDownlist)
+      .then(() => {
+        reduceImageList(downlist);
       })
-      .then((temp) => {
-        console.log(temp);
+      .then((dummy) => {
+        setImageList(dummy);
+      })
+      .then(() => {
+        setFiles();
       });
   };
-  //const uploadFiles = useUploadMulti(files, "p", "images/poster/");
+
   useEffect(() => {
-    console.log(typeof prevImageList);
-    const listToArray = Array.prototype.slice.call(prevImageList);
-    console.log(listToArray);
-    setImageList(listToArray);
+    //const listToArray = Array.prototype.slice.call(prevImageList);
+
+    setImageList(prevImageList);
   }, []);
 
   useEffect(() => {
     imageList.length && setImageTitle(getImageTitle(imageList));
-    //prevSetImageList(imageList);
-    console.log("imageList", imageList);
+    prevSetImageList(imageList);
   }, [imageList]);
 
   useEffect(() => {
+    console.log(imageTitle);
     setImageView(imageTitle);
   }, [imageTitle]);
 
   useEffect(() => {
     files && handleUpload();
+    setFiles();
+    console.log(files);
   }, [files]);
 
   useEffect(() => {
-    newUpload.length && setImageList(reduceImageList(newUpload));
-  }, [newUpload]);
+    downlist.length && setImageList(reduceImageList(downlist));
+    console.log("down", downlist);
+  }, [downlist]);
+
+  useEffect(() => {
+    console.log(downlist);
+  }, [downlist]);
 
   return (
     <div className="flex justify-center items-center w-full flex-col gap-y-4">
       {imageView ? (
         <div className="flex flex-col justify-center items-center w-full ">
           <div className="flex w-full h-full">
-            {/* <img src={imageView.link} alt="" className="object-cover" /> */}
+            <img src={imageView.link} alt="" className="object-cover" />
           </div>
           <div className="flex w-full h-full p-2">
             <div className="flex w-20 justify-center items-center">
@@ -154,7 +172,7 @@ const ImageForm = ({ prevImageList, prevSetImageList }) => {
               <button
                 className="flex justify-center items-center w-8 h-8 bg-sky-500 rounded-xl hover:cursor-pointer"
                 onClick={() => {
-                  deleteImageList(imageView.id);
+                  deleteImageList(imageView.id, imageView.filename);
                 }}
               >
                 <FontAwesomeIcon

@@ -1,13 +1,14 @@
 import { useEffect } from "react";
+import { db } from "../firebase";
+
 import { useState } from "react";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImages, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { ImageList } from "./ImageList";
+import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { doc, setDoc } from "firebase/firestore";
 import { Modal } from "@mui/material";
-import { UploadMultiple } from "../customhooks/useUpload";
-import { setDoc, doc } from "firebase/firestore";
-import { db } from "../firebase";
+
+import ImageForm from "../components/ImageForm";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
@@ -17,12 +18,16 @@ const inputTextStyle =
 export const NewCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   const [cupInfo, setCupInfo] = useState({ ...prevInfo });
   const [cupId, setCupId] = useState();
+  const [posterList, setPosterList] = useState([]);
   const [resUploadURL, setResUploadURL] = useState([]);
-  const [uploadedImageURL, setUploadedImageURL] = useState([]);
+  const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  console.log(prevInfo);
 
+  const updateCupInfo = async () => {
+    console.log("updateCupInfo", cupInfo);
+    prevState((prev) => ({ ...prev, ...cupInfo }));
+  };
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -40,13 +45,21 @@ export const NewCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
   };
 
   useEffect(() => {
-    prevState({ ...cupInfo });
-  }, [cupInfo]);
+    setCupInfo({ ...cupInfo, cupPoster: posterList });
+    console.log(cupInfo);
+  }, [posterList]);
 
   useEffect(() => {
-    setCupInfo((prev) => ({ ...prev, cupPoster: uploadedImageURL }));
-  }, [uploadedImageURL]);
+    setCupId(id);
+  }, [id]);
 
+  useEffect(() => {
+    setCupInfo((prev) => ({ ...prev, cupPoster: resUploadURL }));
+  }, [resUploadURL]);
+
+  useEffect(() => {
+    updateCupInfo();
+  }, [cupInfo]);
   return (
     <div
       className="flex w-full h-full gap-x-16 box-border"
@@ -81,81 +94,10 @@ export const NewCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
       <div className="flex w-1/3 flex-col">
         <div className="flex justify-center items-start mt-3">
           {/* 이미지 업로드 폼 시작 */}
-          <div className="flex justify-center items-center w-full flex-col gap-y-4">
-            <label
-              for="cupPoster"
-              className="flex flex-col justify-center items-center w-full  rounded-lg border-2 border-gray-300 border-dashed cursor-pointer p-1  hover:bg-blue-800"
-            >
-              {uploadedImageURL ? (
-                <div className="flex flex-col justify-center items-center w-full">
-                  <img src={uploadedImageURL} alt="" className="object-cover" />
-                </div>
-              ) : (
-                <div className="flex flex-col justify-center items-center h-32">
-                  <svg
-                    aria-hidden="true"
-                    class="mb-3 w-10 h-10 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    ></path>
-                  </svg>
-
-                  <p className="text-xs text-gray-200 font-light">
-                    SVG, PNG, JPG
-                  </p>
-                </div>
-              )}
-
-              <input
-                type="file"
-                id="cupPoster"
-                name="cupPoster"
-                className="hidden"
-                multiple
-                onChange={(e) =>
-                  UploadMultiple(e, "P", "images/poster/", setUploadedImageURL)
-                }
-              />
-            </label>
-            {uploadedImageURL && (
-              <div className="flex w-full">
-                <div
-                  className="flex w-full h-full py-3 rounded-lg"
-                  style={{ backgroundColor: "rgba(7,11,41,1)" }}
-                >
-                  <img
-                    src={uploadedImageURL && uploadedImageURL}
-                    className="flex w-16 h-16 p-1 border border-gray-300 "
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="flex w-full">
-              <button
-                className="flex justify-center items-center w-full h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-                onClick={() =>
-                  handleOpenModal({ component: <ImageList refType="poster" /> })
-                }
-              >
-                <FontAwesomeIcon
-                  icon={faImages}
-                  className="text-white text-lg"
-                />
-                <span className="text-white text-sm font-light ml-3">
-                  기존 포스터 찾기
-                </span>
-              </button>
-            </div>
-          </div>
+          <ImageForm
+            prevImageList={posterList}
+            prevSetImageList={setPosterList}
+          />
           {/* 이미지 업로드 폼 끝 */}
         </div>
       </div>

@@ -15,6 +15,8 @@ import { db } from "../firebase";
 import { Modal } from "@mui/material";
 import { NewReferee } from "../modals/NewReferee";
 import { widgetTitle } from "../components/Titles";
+import { Decrypter } from "../components/Encrypto";
+import { handleToast } from "../components/HandleToast";
 
 const tableHeaders = [
   "순번",
@@ -38,15 +40,16 @@ const RefereeList = () => {
   const handleOpenModal = ({ component }) => {
     console.log(component);
     setModalComponent(() => component);
-    setModal(() => true);
+    setModal(true);
   };
 
   const handleCloseModal = () => {
     setModalComponent("");
-    setModal(() => false);
+    setModal(false);
   };
   const getCollections = async () => {
     setIsLoading(true);
+    setResCollections([]);
     try {
       resDocs = await getDocs(collection(db, "referee"));
       resDocs.forEach((doc) => {
@@ -55,6 +58,7 @@ const RefereeList = () => {
     } catch (error) {
       console.log(error.message);
     } finally {
+      handleToast({ type: "info", msg: "심판 정보 불러오기 완료" });
       setResCollections(dataArray);
       setIsLoading(false);
     }
@@ -62,11 +66,7 @@ const RefereeList = () => {
 
   useEffect(() => {
     getCollections();
-  }, []);
-
-  useEffect(() => {
-    console.log(resCollections);
-  }, [resCollections]);
+  }, [modal]);
 
   return (
     <>
@@ -123,17 +123,18 @@ const RefereeList = () => {
                     </div>
                     <div className="flex justify-end items-center gap-x-5 w-1/2 ">
                       <div className="flex">
-                        <button className="flex w-12 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer">
-                          <div
-                            onClick={() =>
-                              handleOpenModal({ component: <NewReferee /> })
-                            }
-                          >
-                            <FontAwesomeIcon
-                              icon={faPlus}
-                              className="text-white"
-                            />
-                          </div>
+                        <button
+                          className="flex w-12 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
+                          onClick={() =>
+                            handleOpenModal({
+                              component: <NewReferee pSetModal={setModal} />,
+                            })
+                          }
+                        >
+                          <FontAwesomeIcon
+                            icon={faPlus}
+                            className="text-white"
+                          />
                         </button>
                       </div>
                     </div>
@@ -168,25 +169,26 @@ const RefereeList = () => {
                                 <td className="text-white text-sm font-light py-3 px-6">
                                   <div className="flex ">
                                     <img
-                                      src={item.basicInfo.refProfile}
+                                      src={item.refProfile}
                                       className="flex rounded-2xl"
                                     />
                                   </div>
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6">
-                                  {item.basicInfo.refId}
+                                  {item.refUid.substring(1, 7)}
+                                  <span>...</span>
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6">
-                                  {item.basicInfo.refName}
+                                  {Decrypter(item.refName)}
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6">
-                                  {item.basicInfo.refLocation}
+                                  {Decrypter(item.refLocation)}
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6">
-                                  {item.basicInfo.refTel}
+                                  {Decrypter(item.refTel)}
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6">
-                                  {item.basicInfo.refEmail}
+                                  {Decrypter(item.refEmail)}
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6 gap-x-5 flex justify-center">
                                   <div className="flex justify-end items-center">
