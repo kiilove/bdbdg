@@ -84,11 +84,7 @@ const makeTableDatas = (rows, props) => {
 
   if (props.collectionName === "referee") {
     madeRows = rows.map((item, idx) => {
-      rowsArray.push([
-        item.basicInfo.refId,
-        item.basicInfo.refName,
-        item.basicInfo.refEmail,
-      ]);
+      rowsArray.push([item.refUid, item.refName, item.refEmail]);
     });
   } else if (props.collectionName === "player") {
     madeRows = rows.map((item, idx) => {

@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { collection, getDocs } from "firebase/firestore";
-import React from "react";
+import React, { useMemo } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Bars } from "react-loader-spinner";
@@ -32,13 +32,13 @@ const tableHeaders = [
 const RefereeList = () => {
   const [resCollections, setResCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefresh, setIsRefresh] = useState(false);
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   let dataArray = [];
   let resDocs;
 
   const handleOpenModal = ({ component }) => {
-    console.log(component);
     setModalComponent(() => component);
     setModal(true);
   };
@@ -58,15 +58,16 @@ const RefereeList = () => {
     } catch (error) {
       console.log(error.message);
     } finally {
-      handleToast({ type: "info", msg: "심판 정보 불러오기 완료" });
       setResCollections(dataArray);
+      dataArray = [];
       setIsLoading(false);
+      handleToast({ type: "info", msg: "심판 정보 불러오기 완료" });
     }
   };
 
-  useEffect(() => {
+  useMemo(() => {
     getCollections();
-  }, [modal]);
+  }, [isRefresh]);
 
   return (
     <>
@@ -127,7 +128,12 @@ const RefereeList = () => {
                           className="flex w-12 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
                           onClick={() =>
                             handleOpenModal({
-                              component: <NewReferee pSetModal={setModal} />,
+                              component: (
+                                <NewReferee
+                                  pSetModal={setModal}
+                                  pSetRefresh={setIsRefresh}
+                                />
+                              ),
                             })
                           }
                         >

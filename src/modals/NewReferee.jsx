@@ -14,7 +14,7 @@ const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-gray-500 focus:ring-0";
 
-export const NewReferee = ({ pSetModal }) => {
+export const NewReferee = ({ pSetModal, pSetRefresh }) => {
   const [basicInfo, setBasicInfo] = useState({});
   const [basicInfoEnc, setBasicInfoEnc] = useState({});
   const refName = useRef();
@@ -22,9 +22,8 @@ export const NewReferee = ({ pSetModal }) => {
   const addAuth = async () => {
     const auth = getAuth();
     let refEmail;
-    let refPWD;
+    const refPWD = basicInfo.refPassword || basicInfo.refTel;
     if (basicInfo.refTel !== undefined && basicInfo.refTel) {
-      refPWD = basicInfo.refTel;
       if (basicInfo.refEmail) {
         refEmail = basicInfo.refEmail;
       } else {
@@ -39,6 +38,9 @@ export const NewReferee = ({ pSetModal }) => {
         })
         .then((uid) => {
           addReferee(uid);
+        })
+        .then(() => {
+          console.log(refPWD);
         });
     }
   };
@@ -64,6 +66,7 @@ export const NewReferee = ({ pSetModal }) => {
       console.log(error.message);
     } finally {
       handleToast({ type: "success", msg: "계정정보 저장 완료" });
+      pSetRefresh(true);
       pSetModal(false);
     }
   };
@@ -158,15 +161,18 @@ export const NewReferee = ({ pSetModal }) => {
               </div>
             </div>
             <div className="flex w-full">
-              <div className="flex w-1/3">{formTitle({ title: "메모" })}</div>
+              <div className="flex w-1/3">
+                {formTitle({ title: "비밀번호" })}
+              </div>
               <div className={inputBoxStyle}>
                 <input
-                  type="text"
-                  name="refMemo"
-                  id="refMemo"
+                  type="password"
+                  name="refPassword"
+                  id="refPassword"
                   onChange={(e) => handleBasciInfo(e)}
-                  value={basicInfo.refMemo}
+                  value={basicInfo.refPassword}
                   className={inputTextStyle}
+                  placeholder="비밀번호 미입력시 휴대전화번호로 자동 세팅"
                 />
               </div>
             </div>
