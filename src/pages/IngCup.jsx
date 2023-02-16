@@ -88,11 +88,7 @@ const makeTableDatas = (rows, props) => {
     });
   } else if (props.collectionName === "player") {
     madeRows = rows.map((item, idx) => {
-      rowsArray.push([
-        item.basicInfo.playerId,
-        item.basicInfo.playerName,
-        item.basicInfo.playerEmail,
-      ]);
+      rowsArray.push([item.playerUid, item.pName, item.pEmail]);
     });
   }
   console.log("makeTableDatas finished");
