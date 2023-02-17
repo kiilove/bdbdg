@@ -6,7 +6,7 @@ import {
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useEffect } from "react";
 import { DeleteFile } from "../customhooks/DeleteFiles";
 import { UploadMultiFiles } from "../customhooks/useUpload";
@@ -122,25 +122,22 @@ const ImageForm = ({ prevImageList, prevSetImageList }) => {
     setImageList(prevImageList);
   }, []);
 
-  useEffect(() => {
+  useMemo(() => {
     imageList.length && setImageTitle(getImageTitle(imageList));
     prevSetImageList(imageList);
   }, [imageList]);
 
   useEffect(() => {
-    console.log(imageTitle);
     setImageView(imageTitle);
   }, [imageTitle]);
 
   useEffect(() => {
     files && handleUpload();
     setFiles();
-    console.log(files);
   }, [files]);
 
   useEffect(() => {
     downlist.length && setImageList(reduceImageList(downlist));
-    console.log("down", downlist);
   }, [downlist]);
 
   useEffect(() => {

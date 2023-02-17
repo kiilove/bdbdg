@@ -1,93 +1,65 @@
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useEffect } from "react";
 import { db } from "../firebase";
 
 import { useState } from "react";
-import Datepicker from "react-tailwindcss-datepicker";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
-import {
-  collection,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-  setDoc,
-} from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { Modal } from "@mui/material";
 
 import ImageForm from "../components/ImageForm";
-import { NewcupContext } from "../context/NewcupContext";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
-export const NewCupInfo = ({
-  prevSetState,
-  prevState,
-  id,
-  parentsModalState,
-}) => {
-  const [cupInfo, setCupInfo] = useState({ ...prevState });
-  const [orgList, setOrgList] = useState([]);
+export const NewCupInfo = ({ prevState, prevInfo, id, parentsModalState }) => {
+  const [cupInfo, setCupInfo] = useState({ ...prevInfo });
   const [cupId, setCupId] = useState();
   const [posterList, setPosterList] = useState([]);
   const [resUploadURL, setResUploadURL] = useState([]);
   const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  const [value, setValue] = useState({
-    startDate: new Date(),
-  });
 
-  const handleValueChange = (newValue) => {
-    console.log("newValue:", newValue);
-    setValue(newValue);
+  const updateCupInfo = async () => {
+    console.log("updateCupInfo", cupInfo);
+    prevState((prev) => ({ ...prev, ...cupInfo }));
   };
-
-  const { dispatch, newCup } = useContext(NewcupContext);
-  const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
-
-  const handleCloseModal = () => {
-    setModalComponent("");
-    setModal(() => false);
-  };
-
   const handleCupInfo = (e) => {
     if (e.target.name !== "cupPoster") {
       setCupInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
   };
 
-  const getOrgCollection = async () => {
-    let dataArray = [];
-    try {
-      const orgRef = collection(db, "orgs");
-      const orgQ = query(orgRef, orderBy("createAt"));
-      const querySnapshot = await getDocs(orgQ);
-      querySnapshot.forEach((doc) => {
-        dataArray.push({ id: doc.id, ...doc.data() });
-      });
-    } catch (error) {
-      console.log(error);
-    }
-
-    return new Promise((resolve, reject) => {
-      resolve(setOrgList(dataArray));
-    });
+  const handleOpenModal = ({ component }) => {
+    setModalComponent(() => component);
+    setModal(() => true);
   };
 
-  useMemo(
-    () => setCupInfo((prev) => ({ ...prev, cupPoster: posterList })),
-    [posterList]
-  );
+  const handleCloseModal = () => {
+    setModalComponent("");
+    setModal(() => false);
+  };
 
-  useMemo(() => prevSetState(cupInfo), [cupInfo]);
-  useMemo(() => console.log(orgList), [orgList]);
-  useMemo(() => getOrgCollection(), []);
+  useEffect(() => {
+    setCupInfo({ ...cupInfo, cupPoster: posterList });
+    console.log(cupInfo);
+  }, [posterList]);
 
+  useEffect(() => {
+    setCupId(id);
+  }, [id]);
+
+  useEffect(() => {
+    setCupInfo((prev) => ({ ...prev, cupPoster: resUploadURL }));
+  }, [resUploadURL]);
+
+  useEffect(() => {
+    updateCupInfo();
+  }, [cupInfo]);
   return (
     <div
       className="flex w-full h-full gap-x-16 box-border"
@@ -158,15 +130,14 @@ export const NewCupInfo = ({
         </div>
         <div className="flex w-full">{formTitle({ title: "주최기관" })}</div>
         <div className={inputBoxStyle}>
-          {orgList.length && (
-            <select className="bg-transparent border-transparent focus:border-transparent focus:ring-0 text-white text-sm appearance-none p-0 px-2 w-1/2">
-              {orgList.map((item, idx) => (
-                <option className="bg-transparent text-sm text-gray-800 border-transparent focus:border-transparent focus:ring-0">
-                  {item.orgName}
-                </option>
-              ))}
-            </select>
-          )}
+          <input
+            type="text"
+            name="cupOrg"
+            id="cupOrg"
+            value={cupInfo.cupOrg}
+            onChange={(e) => handleCupInfo(e)}
+            className={inputTextStyle}
+          />
         </div>
         <div className="flex w-full">{formTitle({ title: "장소" })}</div>
         <div className={inputBoxStyle}>
@@ -180,21 +151,14 @@ export const NewCupInfo = ({
           />
         </div>
         <div className="flex w-full">{formTitle({ title: "일자" })}</div>
-        <div>
-          {/* <input
+        <div className={inputBoxStyle}>
+          <input
             type="text"
             name="cupDate"
             id="cupDate"
             value={cupInfo.cupDate}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
-          /> */}
-          <Datepicker
-            value={value}
-            asSingle
-            useRange={false}
-            onChange={handleValueChange}
-            classNames="dark:slate-800"
           />
         </div>
       </div>

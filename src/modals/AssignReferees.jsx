@@ -8,7 +8,7 @@ const AssignReferees = ({ cupId, setRefereeAssign }) => {
   const [checked, setChecked] = useState([]);
   const [pool, setPool] = useState([]);
   const [assign, setAssign] = useState([]);
-
+  //인력풀은 새로운 컵 시작할때 기본값으로 가지고 가게 해야할듯
   const getRefereePool = async () => {
     let dataArray = [];
 
@@ -27,6 +27,7 @@ const AssignReferees = ({ cupId, setRefereeAssign }) => {
     });
   };
 
+  //storage에있는 선택자들을 불러오도록 수정
   const getRefereeAssign = async () => {
     let dataArray = [];
 
