@@ -1,3 +1,4 @@
+import { async } from "@firebase/util";
 import {
   faEye,
   faPenToSquare,
@@ -5,7 +6,9 @@ import {
   faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { deleteDoc, doc } from "firebase/firestore";
 import React from "react";
+import { db } from "../firebase";
 
 const CupItem = ({
   cupId,
@@ -15,6 +18,13 @@ const CupItem = ({
   cupState,
   cupPoster,
 }) => {
+  const handleDel = async (id) => {
+    try {
+      await deleteDoc(doc(db, "cups", id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div
       className="flex flex-wrap box-border p-5 rounded-lg"
@@ -76,12 +86,17 @@ const CupItem = ({
                 className="text-white text-lg"
               />
             </div>
-            <div className="flex justify-center items-center w-10 h-10 bg-orange-500 rounded-xl hover:cursor-pointer">
+            <button
+              className="flex justify-center items-center w-10 h-10 bg-orange-500 rounded-xl hover:cursor-pointer"
+              onClick={() => {
+                handleDel(cupId);
+              }}
+            >
               <FontAwesomeIcon
                 icon={faTrashCan}
                 className="text-white text-lg"
               />
-            </div>
+            </button>
           </div>
         </div>
       </div>

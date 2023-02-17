@@ -10,6 +10,8 @@ import CupView from "./pages/CupView";
 import CupList from "./pages/CupList";
 import RefereeList from "./pages/RefereeList";
 import { ToastContainer } from "react-toastify";
+import Dashboard from "./pages/Dashboard";
+import OrgList from "./pages/OrgList";
 
 function App() {
   return (
@@ -29,7 +31,11 @@ function App() {
           </div>
           <div className="flex w-full min-h-screen ">
             <Routes>
-              <Route path="/" element={<CupMain component={<IngCup />} />} />
+              <Route path="/" element={<CupMain component={<Dashboard />} />} />
+              <Route
+                path="/dashboard"
+                element={<CupMain component={<Dashboard />} />}
+              />
               <Route
                 path="/newcup"
                 element={<CupMain component={<NewCupPage />} />}
@@ -40,8 +46,9 @@ function App() {
                 element={<CupMain component={<CupView />} />}
               ></Route>
               <Route path="/test" element={<DragTable />} />
-              />
+
               <Route path="/refereelist" element={<RefereeList />} />
+              <Route path="/orglist" element={<OrgList />} />
             </Routes>
           </div>
         </div>

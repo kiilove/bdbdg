@@ -11,9 +11,13 @@ export const Encrypter = (keyValue) => {
 };
 
 export const Decrypter = (keyValue) => {
-  const bytes = CryptoJS.AES.decrypt(
-    keyValue,
-    process.env.REACT_APP_SECRET_KEY
-  );
-  return bytes.toString(CryptoJS.enc.Utf8);
+  if (process.env.REACT_APP_SECRET_KEY && keyValue) {
+    const bytes = CryptoJS.AES.decrypt(
+      keyValue,
+      process.env.REACT_APP_SECRET_KEY
+    );
+    return bytes.toString(CryptoJS.enc.Utf8);
+  } else {
+    console.log("error");
+  }
 };

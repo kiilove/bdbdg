@@ -14,7 +14,7 @@ const WidgetWithTable = (props) => {
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   // console.log(props.data.tableData);
-
+  console.log(props.tableData);
   const handleOpenModal = ({ component }) => {
     console.log(component);
     setModalComponent(() => component);

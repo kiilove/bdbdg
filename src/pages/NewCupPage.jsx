@@ -1,15 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./stepper.css";
 import { SelectPlayers, SelectReferees, Startpage } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 import { ThreeDots } from "react-loader-spinner";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { NewCupInfo } from "../modals/NewCupInfo";
 import { EditCupInfo } from "../modals/EditCupInfo";
 import { DEFAULT_POSTER } from "../const/front";
+import AssignReferees from "../modals/AssignReferees";
 
 const NewCupPage = () => {
   const [cupInfo, setCupInfo] = useState({});
@@ -42,24 +51,13 @@ const NewCupPage = () => {
       id: 2,
       title: "심판배정",
       component: (
-        <SelectReferees
-          poolData={resRefereeData}
-          assignData={refereeAssign}
+        <AssignReferees
+          cupId={snapshotID}
           setRefereeAssign={setRefereeAssign}
         />
       ),
     },
-    {
-      id: 3,
-      title: "선수선발",
-      component: (
-        <SelectPlayers
-          poolData={resPlayerData}
-          assignData={playerAssign}
-          setPlayerAssign={setPlayerAssign}
-        />
-      ),
-    },
+
     { id: 4, title: "종목구성" },
   ];
 
@@ -97,8 +95,6 @@ const NewCupPage = () => {
     } finally {
       setIsLoading(false);
     }
-
-    console.log(snapshotID);
   };
   const handleCupDataWithInputChange = () => {
     if (cupInfo.cupPoster == undefined) {
@@ -114,21 +110,6 @@ const NewCupPage = () => {
     });
   };
 
-  useEffect(() => {
-    if (step < 1) {
-      setStep((prev) => (prev = 1));
-    } else if (step >= stepsArray.length) {
-      setStep((prev) => (prev = stepsArray.length));
-    }
-    //console.log(step);
-  }, [step]);
-
-  useEffect(() => {
-    console.log(cupInfo);
-    handleCupDataWithInputChange();
-    console.log(cupData);
-  }, [cupInfo]);
-
   const updateSetDoc = async () => {
     try {
       const updateDoc = await setDoc(
@@ -136,13 +117,22 @@ const NewCupPage = () => {
         { ...cupData },
         { merge: true }
       );
-      console.log("temp", updateDoc);
     } catch (error) {
       console.log(error.message);
-    } finally {
-      console.log("updateSetDoc", "Successfully updated");
     }
   };
+
+  useEffect(() => {
+    if (step < 1) {
+      setStep((prev) => (prev = 1));
+    } else if (step >= stepsArray.length) {
+      setStep((prev) => (prev = stepsArray.length));
+    }
+  }, [step]);
+
+  useEffect(() => {
+    handleCupDataWithInputChange();
+  }, [cupInfo]);
 
   useEffect(() => {
     if (snapshotID.length > 0) {
@@ -151,9 +141,16 @@ const NewCupPage = () => {
   }, [snapshotID]);
 
   useEffect(() => {
-    console.log(cupData);
     updateSetDoc();
   }, [cupData]);
+
+  useEffect(() => {
+    setCupData((prev) => ({
+      ...prev,
+      cupInfo: cupInfo,
+      refereeAssign: refereeAssign,
+    }));
+  }, [cupInfo, refereeAssign]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
