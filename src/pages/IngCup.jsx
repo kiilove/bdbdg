@@ -77,10 +77,27 @@ const tempGameData = [
   ],
 ];
 
-const makeTableDatas = (rows, props) => {
+const makeTableDatas = (rows, props, action) => {
   let madeData = {};
   let rowsArray = [];
   let madeRows = [];
+
+  switch (action) {
+    case "referee":
+      madeRows = rows.map((item, idx) => {
+        rowsArray.push([item.refUid, item.refName, item.refEmail]);
+      });
+    case "player":
+      madeRows = rows.map((item, idx) => {
+        rowsArray.push([item.playerUid, item.pName, item.pEmail]);
+      });
+    case "cups":
+      madeRows = rows.map((item, idx) => {
+        rowsArray.push([item.playerUid, item.pName, item.pEmail]);
+      });
+    default:
+      return;
+  }
 
   if (props.collectionName === "referee") {
     madeRows = rows.map((item, idx) => {
