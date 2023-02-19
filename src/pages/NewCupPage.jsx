@@ -144,6 +144,8 @@ const NewCupPage = () => {
     updateSetDoc();
   }, [cupData]);
 
+  //마침 버튼을 누르면 저장하는걸로 바꿔야 할듯
+  //assign이 초기화 되는듯
   useEffect(() => {
     setCupData((prev) => ({
       ...prev,
