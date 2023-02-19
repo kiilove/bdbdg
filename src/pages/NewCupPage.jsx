@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import "./stepper.css";
 import { SelectPlayers, SelectReferees, Startpage } from "../components/Modals";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,15 +17,17 @@ import {
 import { db } from "../firebase";
 import { NewCupInfo } from "../modals/NewCupInfo";
 import { EditCupInfo } from "../modals/EditCupInfo";
-import { DEFAULT_POSTER } from "../const/front";
+import { DEFAULT_CUP_POSTER, DEFAULT_POSTER } from "../const/front";
 import AssignReferees from "../modals/AssignReferees";
+import { NewcupContext } from "../context/NewcupContext";
 
 const NewCupPage = () => {
-  const [cupInfo, setCupInfo] = useState({});
+  const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
+  const [cupInfo, setCupInfo] = useState(currentNewCup.cupInfo);
   const [refereeInfo, setRefereeInfo] = useState({});
   const [playerInfo, setPlayerInfo] = useState({});
   const [gameInfo, setGameInfo] = useState({});
-  const [cupData, setCupData] = useState({});
+  const [cupData, setCupData] = useState(currentNewCup);
   const [resRefereeData, setResRefereeData] = useState([]);
   const [resPlayerData, setResPlayerData] = useState([]);
 
@@ -36,6 +38,7 @@ const NewCupPage = () => {
   const [step, setStep] = useState(1);
   const [snapshotID, setSnapshotID] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const stepsArray = [
     {
       id: 0,
@@ -45,7 +48,7 @@ const NewCupPage = () => {
     {
       id: 1,
       title: "대회정보",
-      component: <NewCupInfo prevState={setCupInfo} prevInfo={cupInfo} />,
+      component: <NewCupInfo prevSetState={setCupInfo} prevState={cupInfo} />,
     },
     {
       id: 2,
@@ -61,11 +64,14 @@ const NewCupPage = () => {
     { id: 4, title: "종목구성" },
   ];
 
+  const { dispatch } = useContext(NewcupContext);
+
   const handleStep = (action) => {
     switch (action) {
       case "next":
         if (step >= 1 && step < stepsArray.length) {
           setStep((prev) => prev + 1);
+          dispatch({ type: "STEP", payload: { cupData: cupData, step: step } });
         }
         break;
       case "prev":
@@ -82,33 +88,37 @@ const NewCupPage = () => {
   };
 
   const handleStart = async () => {
-    setIsLoading(true);
-    try {
-      const snapShot = await addDoc(collection(db, "cups"), {
-        cupInfo: {
-          cupName: "",
-        },
-      });
-      setSnapshotID(snapShot.id);
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    setStep(2);
   };
-  const handleCupDataWithInputChange = () => {
-    if (cupInfo.cupPoster == undefined) {
-      setCupInfo({
-        ...cupInfo,
-        cupPoster: [{ id: 1, link: DEFAULT_POSTER, title: true }],
-      });
-    }
-    setCupData({
-      cupInfo,
-      refereeAssign,
-      playerAssign,
-    });
-  };
+
+  // const handleStart = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const snapShot = await addDoc(collection(db, "cups"), {
+  //       cupInfo: {
+  //         cupName: "",
+  //       },
+  //     });
+  //     setSnapshotID(snapShot.id);
+  //   } catch (error) {
+  //     console.log(error.message);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  // const handleCupDataWithInputChange = () => {
+  //   if (cupInfo.cupPoster == undefined) {
+  //     setCupInfo({
+  //       ...cupInfo,
+  //       cupPoster: [{ id: 1, link: DEFAULT_CUP_POSTER, title: true }],
+  //     });
+  //   }
+  //   setCupData({
+  //     cupInfo,
+  //     refereeAssign,
+  //     playerAssign,
+  //   });
+  // };
 
   const updateSetDoc = async () => {
     try {
@@ -130,29 +140,15 @@ const NewCupPage = () => {
     }
   }, [step]);
 
-  useEffect(() => {
-    handleCupDataWithInputChange();
-  }, [cupInfo]);
-
-  useEffect(() => {
-    if (snapshotID.length > 0) {
-      setStep(2);
-    }
-  }, [snapshotID]);
-
-  useEffect(() => {
-    updateSetDoc();
-  }, [cupData]);
-
-  //마침 버튼을 누르면 저장하는걸로 바꿔야 할듯
-  //assign이 초기화 되는듯
-  useEffect(() => {
-    setCupData((prev) => ({
-      ...prev,
-      cupInfo: cupInfo,
-      refereeAssign: refereeAssign,
-    }));
-  }, [cupInfo, refereeAssign]);
+  useMemo(
+    () => setCupData((prev) => ({ ...prev, cupInfo, refereeAssign })),
+    [cupInfo, refereeAssign]
+  );
+  useMemo(() => console.log("cupData 추적", cupData), [cupData]);
+  useMemo(
+    () => dispatch({ type: "KEEP", payload: { cupData, step } }),
+    [cupData]
+  );
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">

@@ -12,6 +12,7 @@ import RefereeList from "./pages/RefereeList";
 import { ToastContainer } from "react-toastify";
 import Dashboard from "./pages/Dashboard";
 import OrgList from "./pages/OrgList";
+import { NewcupContextProvider } from "./context/NewcupContext";
 
 function App() {
   return (
