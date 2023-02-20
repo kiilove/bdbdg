@@ -64,14 +64,14 @@ const NewCupPage = () => {
     { id: 4, title: "종목구성" },
   ];
 
-  const { dispatch } = useContext(NewcupContext);
+  const { dispatch, newCup } = useContext(NewcupContext);
 
   const handleStep = (action) => {
     switch (action) {
       case "next":
         if (step >= 1 && step < stepsArray.length) {
           setStep((prev) => prev + 1);
-          dispatch({ type: "STEP", payload: { cupData: cupData, step: step } });
+          //dispatch({ type: "KEEP", payload: { cupData: cupData, step: step } });
         }
         break;
       case "prev":
@@ -87,8 +87,42 @@ const NewCupPage = () => {
     }
   };
 
+  const getRefereePool = async () => {
+    let dataArray = [];
+
+    const refereeRef = collection(db, "referee");
+    try {
+      const querySnapshot = await getDocs(refereeRef);
+      querySnapshot.forEach((doc) => {
+        dataArray.push({ id: doc.id, ...doc.data() });
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    console.log(dataArray);
+    return new Promise((resolve, reject) => {
+      resolve(dataArray);
+    });
+  };
+
   const handleStart = async () => {
-    setStep(2);
+    console.log(refereePool);
+    await getRefereePool()
+      // .then((data) => console.log(data))
+      .then((data) => {
+        dispatch({
+          type: "KEEP",
+          payload: {
+            cupData: {
+              cupInfo: { ...newCup.cupInfo },
+              refereePool: [...data],
+              refereeAssign: [],
+            },
+          },
+        });
+      })
+      .then(() => setStep(2));
   };
 
   // const handleStart = async () => {
@@ -140,15 +174,15 @@ const NewCupPage = () => {
     }
   }, [step]);
 
-  useMemo(
-    () => setCupData((prev) => ({ ...prev, cupInfo, refereeAssign })),
-    [cupInfo, refereeAssign]
-  );
+  // useMemo(
+  //   () => setCupData((prev) => ({ ...prev, cupInfo, refereeAssign })),
+  //   [cupInfo, refereeAssign]
+  // );
   useMemo(() => console.log("cupData 추적", cupData), [cupData]);
-  useMemo(
-    () => dispatch({ type: "KEEP", payload: { cupData, step } }),
-    [cupData]
-  );
+  // useMemo(
+  //   () => dispatch({ type: "KEEP", payload: { cupData, step } }),
+  //   [cupData]
+  // );
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">

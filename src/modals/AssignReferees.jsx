@@ -1,55 +1,37 @@
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import React, { useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { OutlineButton } from "../assets/forms/button";
 import { Decrypter } from "../components/Encrypto";
+import { NewcupContext } from "../context/NewcupContext";
 import { db } from "../firebase";
 
 const AssignReferees = ({ cupId, setRefereeAssign }) => {
   const [checked, setChecked] = useState([]);
   const [pool, setPool] = useState([]);
   const [assign, setAssign] = useState([]);
-  //인력풀은 새로운 컵 시작할때 기본값으로 가지고 가게 해야할듯
-  const getRefereePool = async () => {
-    let dataArray = [];
 
-    const refereeRef = collection(db, "referee");
-    try {
-      const querySnapshot = await getDocs(refereeRef);
-      querySnapshot.forEach((doc) => {
-        dataArray.push({ id: doc.id, ...doc.data() });
-      });
-    } catch (error) {
-      console.log(error);
-    }
-
-    return new Promise((resolve, reject) => {
-      resolve(setPool(dataArray));
-    });
-  };
-
-  //storage에있는 선택자들을 불러오도록 수정
-  const getRefereeAssign = async () => {
-    let dataArray = [];
-
-    const refereeRef = doc(db, "cups", cupId);
-    try {
-      await getDoc(refereeRef)
-        .then((doc) => dataArray.push(doc.data()))
-        .then(() => console.log(dataArray))
-        .then(() =>
-          dataArray.refereeAssgin ? setAssign(dataArray) : setAssign([])
-        );
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const { dispatch, newCup } = useContext(NewcupContext);
 
   useMemo(() => {
-    getRefereePool();
-    getRefereeAssign();
+    setPool(() => newCup.refereePool || []);
+    setAssign(() => newCup.refereeAssgin || []);
+    //console.log(assign);
   }, []);
 
-  useMemo(() => setRefereeAssign(assign), [assign]);
+  useMemo(() => {
+    dispatch({
+      type: "KEEP",
+      payload: {
+        cupData: {
+          cupInfo: { ...newCup.cupInfo },
+          refereePool: pool || [],
+          refereeAssgin: assign || [],
+        },
+      },
+    });
+
+    console.log("pool", pool);
+  }, [assign]);
 
   const poolChecked = intersection(checked, pool);
   const assignChecked = intersection(checked, assign);
@@ -63,6 +45,7 @@ const AssignReferees = ({ cupId, setRefereeAssign }) => {
   }
 
   const handleToggle = (value) => () => {
+    console.log(value);
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
 
@@ -101,45 +84,46 @@ const AssignReferees = ({ cupId, setRefereeAssign }) => {
     return (
       <div className="flex w-full h-72 overflow-auto">
         <div className="flex flex-col gap-y-2 w-full p-1">
-          {items.map((value, idx) => (
-            <div
-              className={`flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800  ${
-                checked.indexOf(value) !== -1 && " border-sky-700 "
-              }`}
-            >
-              <div className="flex items-center h-5 justify-center ">
-                <input
-                  type="checkbox"
-                  tabIndex={-1}
-                  checked={checked.indexOf(value) !== -1}
-                  id={`itemsRefereeCheckbox-${value.id}`}
-                  onClick={handleToggle(value)}
-                  className="w-4 h-4 bg-pink-100 border-pink-300 text-pink-500 focus:ring-red-200 border-0 rounded-lg focus:ring-0"
-                />
-              </div>
-              <div className="ml-2 text-md w-full h-full">
-                <label
-                  id
-                  htmlFor={`itemsRefereeCheckbox-${value.id}`}
-                  className="font-medium text-gray-900 dark:text-gray-300 w-full h-full flex "
-                >
-                  <div className="flex w-full items-center gap-x-3">
-                    <div className="flex flex-col">
-                      <p className=" text-sm text-gray-300">
-                        {Decrypter(value.refName)}
-                      </p>
-                      <span className=" text-xs text-gray-500">
-                        {Decrypter(value.refEmail)}
-                      </span>
-                      <span className=" text-xs text-gray-500">
-                        {Decrypter(value.refTel)}
-                      </span>
+          {items.length > 0 &&
+            items.map((value, idx) => (
+              <div
+                className={`flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800  ${
+                  checked.indexOf(value) !== -1 && " border-sky-700 "
+                }`}
+              >
+                <div className="flex items-center h-5 justify-center ">
+                  <input
+                    type="checkbox"
+                    tabIndex={-1}
+                    checked={checked.indexOf(value) !== -1}
+                    id={`itemsRefereeCheckbox-${value.id}`}
+                    onClick={handleToggle(value)}
+                    className="w-4 h-4 bg-pink-100 border-pink-300 text-pink-500 focus:ring-red-200 border-0 rounded-lg focus:ring-0"
+                  />
+                </div>
+                <div className="ml-2 text-md w-full h-full">
+                  <label
+                    id
+                    htmlFor={`itemsRefereeCheckbox-${value.id}`}
+                    className="font-medium text-gray-900 dark:text-gray-300 w-full h-full flex "
+                  >
+                    <div className="flex w-full items-center gap-x-3">
+                      <div className="flex flex-col">
+                        <p className=" text-sm text-gray-300">
+                          {Decrypter(value.refName)}
+                        </p>
+                        <span className=" text-xs text-gray-500">
+                          {Decrypter(value.refEmail)}
+                        </span>
+                        <span className=" text-xs text-gray-500">
+                          {Decrypter(value.refTel)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </label>
+                  </label>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     );

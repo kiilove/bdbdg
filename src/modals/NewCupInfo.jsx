@@ -48,7 +48,7 @@ export const NewCupInfo = ({
   };
 
   const { dispatch, newCup } = useContext(NewcupContext);
-  const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
+  //const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
 
   const handleCloseModal = () => {
     setModalComponent("");
@@ -80,11 +80,28 @@ export const NewCupInfo = ({
   };
 
   useMemo(
-    () => setCupInfo((prev) => ({ ...prev, cupPoster: posterList })),
+    () =>
+      setCupInfo((prev) => ({
+        ...prev,
+        cupPoster: posterList,
+      })),
     [posterList]
   );
 
-  useMemo(() => prevSetState(cupInfo), [cupInfo]);
+  useMemo(
+    () =>
+      dispatch({
+        type: "KEEP",
+        payload: {
+          cupData: {
+            ...newCup,
+            cupInfo: { ...cupInfo },
+          },
+        },
+      }),
+    // console.log(newCup),
+    [cupInfo]
+  );
   useMemo(() => console.log(orgList), [orgList]);
   useMemo(() => getOrgCollection(), []);
 
