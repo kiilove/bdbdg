@@ -5,8 +5,13 @@ import { DEFAULT_CUP_POSTER } from "../const/front";
 import { NewcupReducer } from "./NewcupReduce";
 
 const INITIAL_STATE = {
-  newCup: { cupInfo: { cupPoster: [] }, refereeAssign: [] },
-  step: 1,
+  newCup: {
+    cupInfo: { cupPoster: [] },
+    refereeAssign: [],
+    refereePool: [],
+    gamesCategoryAssign: [],
+    gamesCategoryPool: [],
+  },
 };
 
 export const NewcupContext = createContext(INITIAL_STATE);
@@ -16,8 +21,7 @@ export const NewcupContextProvider = ({ children }) => {
   useMemo(() => {
     //console.log("memo", state);
     localStorage.setItem("newCup", JSON.stringify(state.newCup));
-    localStorage.setItem("step", JSON.stringify(state.step));
-  }, [state.newCup, state.step]);
+  }, [state.newCup]);
 
   return (
     <NewcupContext.Provider

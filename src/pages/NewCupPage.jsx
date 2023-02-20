@@ -20,6 +20,7 @@ import { EditCupInfo } from "../modals/EditCupInfo";
 import { DEFAULT_CUP_POSTER, DEFAULT_POSTER } from "../const/front";
 import AssignReferees from "../modals/AssignReferees";
 import { NewcupContext } from "../context/NewcupContext";
+import AssignGamesCategory from "../modals/AssignGamesCategory";
 
 const NewCupPage = () => {
   const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
@@ -33,8 +34,12 @@ const NewCupPage = () => {
 
   const [refereePool, setRefereePool] = useState([]);
   const [playerPool, setPlayerPool] = useState([]);
+  const [gamesCategoryPool, setGamesCategoryPool] = useState([]);
+
   const [refereeAssign, setRefereeAssign] = useState([]);
   const [playerAssign, setPlayerAssign] = useState([]);
+  const [gamesCategoryPoolAssign, setGamesCategoryPoolAssign] = useState([]);
+
   const [step, setStep] = useState(1);
   const [snapshotID, setSnapshotID] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -48,20 +53,19 @@ const NewCupPage = () => {
     {
       id: 1,
       title: "대회정보",
-      component: <NewCupInfo prevSetState={setCupInfo} prevState={cupInfo} />,
+      component: <NewCupInfo />,
     },
     {
       id: 2,
       title: "심판배정",
-      component: (
-        <AssignReferees
-          cupId={snapshotID}
-          setRefereeAssign={setRefereeAssign}
-        />
-      ),
+      component: <AssignReferees />,
     },
 
-    { id: 4, title: "종목구성" },
+    {
+      id: 3,
+      title: "종목구성",
+      component: <AssignGamesCategory />,
+    },
   ];
 
   const { dispatch, newCup } = useContext(NewcupContext);
@@ -87,12 +91,14 @@ const NewCupPage = () => {
     }
   };
 
-  const getRefereePool = async () => {
+  const getGamesCategory = async () => {
     let dataArray = [];
 
-    const refereeRef = collection(db, "referee");
+    const gamesCategoryRef = collection(db, "gamesCategory");
+    const q = query(gamesCategoryRef, orderBy("index"));
+
     try {
-      const querySnapshot = await getDocs(refereeRef);
+      const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         dataArray.push({ id: doc.id, ...doc.data() });
       });
@@ -100,27 +106,52 @@ const NewCupPage = () => {
       console.log(error);
     }
 
-    console.log(dataArray);
     return new Promise((resolve, reject) => {
-      resolve(dataArray);
+      resolve({ gamePool: dataArray });
+    });
+  };
+
+  const getRefereePool = async () => {
+    let dataArray = [];
+
+    const refereeRef = collection(db, "referee");
+    const q = query(refereeRef, orderBy("refName"));
+    try {
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        dataArray.push({ id: doc.id, ...doc.data() });
+      });
+      console.log(dataArray.length);
+    } catch (error) {
+      console.log(error);
+    }
+
+    return new Promise((resolve, reject) => {
+      resolve({ refPool: dataArray });
     });
   };
 
   const handleStart = async () => {
-    console.log(refereePool);
-    await getRefereePool()
-      // .then((data) => console.log(data))
+    const promises = [getGamesCategory(), getRefereePool()];
+    await Promise.all(promises)
+      // .then((data) => console.log(data));
       .then((data) => {
         dispatch({
           type: "KEEP",
           payload: {
             cupData: {
               cupInfo: { ...newCup.cupInfo },
-              refereePool: [...data],
+              gamesCategory: [...data[0].gamePool],
+              refereePool: [...data[1].refPool],
               refereeAssign: [],
             },
           },
         });
+        return data;
+      })
+      .then((data) => {
+        setGamesCategoryPool(data[0].gamePool);
+        setRefereePool(data[1].refPool);
       })
       .then(() => setStep(2));
   };
@@ -178,7 +209,7 @@ const NewCupPage = () => {
   //   () => setCupData((prev) => ({ ...prev, cupInfo, refereeAssign })),
   //   [cupInfo, refereeAssign]
   // );
-  useMemo(() => console.log("cupData 추적", cupData), [cupData]);
+  //useMemo(() => console.log("cupData 추적", cupData), [cupData]);
   // useMemo(
   //   () => dispatch({ type: "KEEP", payload: { cupData, step } }),
   //   [cupData]

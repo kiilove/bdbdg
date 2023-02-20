@@ -18,6 +18,8 @@ import { Modal } from "@mui/material";
 
 import ImageForm from "../components/ImageForm";
 import { NewcupContext } from "../context/NewcupContext";
+import Moment from "react-moment";
+import moment from "moment";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
@@ -30,25 +32,17 @@ export const NewCupInfo = ({
   id,
   parentsModalState,
 }) => {
-  const [cupInfo, setCupInfo] = useState({ ...prevState });
+  const { dispatch, newCup } = useContext(NewcupContext);
+  const [cupInfo, setCupInfo] = useState({});
   const [orgList, setOrgList] = useState([]);
-  const [cupId, setCupId] = useState();
-  const [posterList, setPosterList] = useState([]);
+  const [cupOrg, setCupOrg] = useState("");
+  const [cupState, setCupState] = useState("");
+  const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [resUploadURL, setResUploadURL] = useState([]);
   const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  const [value, setValue] = useState({
-    startDate: new Date(),
-  });
-
-  const handleValueChange = (newValue) => {
-    console.log("newValue:", newValue);
-    setValue(newValue);
-  };
-
-  const { dispatch, newCup } = useContext(NewcupContext);
-  //const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
+  const [cupDate, setCupDate] = useState({});
 
   const handleCloseModal = () => {
     setModalComponent("");
@@ -81,15 +75,6 @@ export const NewCupInfo = ({
 
   useMemo(
     () =>
-      setCupInfo((prev) => ({
-        ...prev,
-        cupPoster: posterList,
-      })),
-    [posterList]
-  );
-
-  useMemo(
-    () =>
       dispatch({
         type: "KEEP",
         payload: {
@@ -104,6 +89,38 @@ export const NewCupInfo = ({
   );
   useMemo(() => console.log(orgList), [orgList]);
   useMemo(() => getOrgCollection(), []);
+  useMemo(() => setCupInfo((prev) => (prev = newCup.cupInfo)) || {}, []);
+  useMemo(() => {
+    newCup.cupInfo.cupPoster &&
+      setPosterList([...newCup.cupInfo.cupPoster] || []);
+
+    newCup.cupInfo.cupOrg && setCupOrg(newCup.cupInfo.cupOrg || "");
+    newCup.cupInfo.cupDate &&
+      setCupDate(newCup.cupInfo.cupDate || { startDate: new Date() });
+    newCup.cupInfo.cupState &&
+      setCupState(newCup.cupInfo.cupState || "대회준비중");
+  }, []);
+
+  useMemo(
+    () =>
+      setCupInfo((prev) => ({
+        ...prev,
+        cupOrg: cupOrg,
+        cupPoster: posterList,
+        cupDate: cupDate,
+        cupState: cupState,
+      })),
+    [cupOrg, posterList, cupDate, cupState]
+  );
+
+  useMemo(
+    () =>
+      setCupInfo((prev) => ({
+        ...prev,
+        cupDate: cupDate,
+      })),
+    [cupDate]
+  );
 
   return (
     <div
@@ -147,6 +164,48 @@ export const NewCupInfo = ({
         </div>
       </div>
       <div className="flex w-2/3 h-full flex-col flex-wrap box-border">
+        <div className="flex w-full">{formTitle({ title: "대회상태" })}</div>
+        <div className="flex w-full gap-x-5">
+          <label className="flex w-1/5 justify-center items-center">
+            <input
+              type="radio"
+              name="cupState"
+              id="cupState1"
+              value="대회준비중"
+              checked={cupState === "대회준비중"}
+              onChange={(e) => setCupState((prev) => (prev = e.target.value))}
+            />
+            <span className="flex justify-start items-center text-white text-sm ml-3">
+              대회준비중
+            </span>
+          </label>
+          <label className="flex w-1/5 justify-center items-center">
+            <input
+              type="radio"
+              name="cupState"
+              id="cupState2"
+              value="대회중"
+              checked={cupState === "대회중"}
+              onChange={(e) => setCupState((prev) => (prev = e.target.value))}
+            />
+            <span className="flex justify-start items-center text-white text-sm ml-3">
+              대회중
+            </span>
+          </label>
+          <label className="flex w-1/5 justify-center items-center">
+            <input
+              type="radio"
+              name="cupState"
+              id="cupState3"
+              value="대회종료"
+              checked={cupState === "대회종료"}
+              onChange={(e) => setCupState((prev) => (prev = e.target.value))}
+            />
+            <span className="flex justify-start items-center text-white text-sm ml-3">
+              대회종료
+            </span>
+          </label>
+        </div>
         <div className="flex w-full">{formTitle({ title: "대회명" })}</div>
         <div className={inputBoxStyle}>
           <input
@@ -176,9 +235,17 @@ export const NewCupInfo = ({
         <div className="flex w-full">{formTitle({ title: "주최기관" })}</div>
         <div className={inputBoxStyle}>
           {orgList.length && (
-            <select className="bg-transparent border-transparent focus:border-transparent focus:ring-0 text-white text-sm appearance-none p-0 px-2 w-1/2">
+            <select
+              name="cupOrg"
+              className="bg-transparent border-transparent focus:border-transparent focus:ring-0 text-white text-sm appearance-none p-0 px-2 w-1/2"
+              onChange={(e) => setCupOrg((prev) => (prev = e.target.value))}
+            >
               {orgList.map((item, idx) => (
-                <option className="bg-transparent text-sm text-gray-800 border-transparent focus:border-transparent focus:ring-0">
+                <option
+                  className="bg-transparent text-sm text-gray-800 border-transparent focus:border-transparent focus:ring-0"
+                  value={item.orgName}
+                  selected={item.orgName === cupOrg}
+                >
                   {item.orgName}
                 </option>
               ))}
@@ -207,10 +274,10 @@ export const NewCupInfo = ({
             className={inputTextStyle}
           /> */}
           <Datepicker
-            value={value}
+            value={cupDate}
             asSingle
             useRange={false}
-            onChange={handleValueChange}
+            onChange={(value) => setCupDate((prev) => (prev = value))}
             classNames="dark:slate-800"
           />
         </div>

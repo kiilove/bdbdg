@@ -1,11 +1,9 @@
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import React, { useContext, useMemo, useState } from "react";
 import { OutlineButton } from "../assets/forms/button";
 import { Decrypter } from "../components/Encrypto";
 import { NewcupContext } from "../context/NewcupContext";
-import { db } from "../firebase";
 
-const AssignReferees = ({ cupId, setRefereeAssign }) => {
+const AssignReferees = () => {
   const [checked, setChecked] = useState([]);
   const [pool, setPool] = useState([]);
   const [assign, setAssign] = useState([]);
@@ -23,14 +21,15 @@ const AssignReferees = ({ cupId, setRefereeAssign }) => {
       type: "KEEP",
       payload: {
         cupData: {
+          ...newCup,
           cupInfo: { ...newCup.cupInfo },
-          refereePool: pool || [],
-          refereeAssgin: assign || [],
+          refereePool: [...pool] || [],
+          refereeAssign: [...assign] || [],
         },
       },
     });
 
-    console.log("pool", pool);
+    //console.log("pool", pool);
   }, [assign]);
 
   const poolChecked = intersection(checked, pool);
