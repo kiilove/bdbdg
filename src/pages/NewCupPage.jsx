@@ -21,6 +21,7 @@ import { DEFAULT_CUP_POSTER, DEFAULT_POSTER } from "../const/front";
 import AssignReferees from "../modals/AssignReferees";
 import { NewcupContext } from "../context/NewcupContext";
 import AssignGamesCategory from "../modals/AssignGamesCategory";
+import CompleteCup from "../modals/CompleteCup";
 
 const NewCupPage = () => {
   const currentNewCup = JSON.parse(localStorage.getItem("newCup"));
@@ -66,6 +67,11 @@ const NewCupPage = () => {
       title: "종목구성",
       component: <AssignGamesCategory />,
     },
+    {
+      id: 4,
+      title: "마침",
+      component: <CompleteCup />,
+    },
   ];
 
   const { dispatch, newCup } = useContext(NewcupContext);
@@ -107,7 +113,7 @@ const NewCupPage = () => {
     }
 
     return new Promise((resolve, reject) => {
-      resolve({ gamePool: dataArray });
+      resolve({ gameList: dataArray });
     });
   };
 
@@ -132,6 +138,7 @@ const NewCupPage = () => {
   };
 
   const handleStart = async () => {
+    setIsLoading(true);
     const promises = [getGamesCategory(), getRefereePool()];
     await Promise.all(promises)
       // .then((data) => console.log(data));
@@ -141,7 +148,7 @@ const NewCupPage = () => {
           payload: {
             cupData: {
               cupInfo: { ...newCup.cupInfo },
-              gamesCategory: [...data[0].gamePool],
+              gamesCategory: [...data[0].gameList],
               refereePool: [...data[1].refPool],
               refereeAssign: [],
             },
@@ -153,43 +160,28 @@ const NewCupPage = () => {
         setGamesCategoryPool(data[0].gamePool);
         setRefereePool(data[1].refPool);
       })
+      .then(() => setIsLoading(false))
       .then(() => setStep(2));
   };
 
-  // const handleStart = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const snapShot = await addDoc(collection(db, "cups"), {
-  //       cupInfo: {
-  //         cupName: "",
-  //       },
-  //     });
-  //     setSnapshotID(snapShot.id);
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  // const handleCupDataWithInputChange = () => {
-  //   if (cupInfo.cupPoster == undefined) {
-  //     setCupInfo({
-  //       ...cupInfo,
-  //       cupPoster: [{ id: 1, link: DEFAULT_CUP_POSTER, title: true }],
-  //     });
-  //   }
-  //   setCupData({
-  //     cupInfo,
-  //     refereeAssign,
-  //     playerAssign,
-  //   });
-  // };
+  const handleEnd = () => {
+    const cupDatas = JSON.parse(localStorage.getItem("newCup"));
+    cupDatas !== undefined && setCupData((prev) => (prev = cupDatas));
 
-  const updateSetDoc = async () => {
+    addCupData(cupDatas);
+  };
+
+  const addCupData = async (datas) => {
+    await addDoc(collection(db, "cups"), { ...datas }).then((addDoc) =>
+      console.log(addDoc.id)
+    );
+  };
+
+  const updateSetDoc = async (datas) => {
     try {
       const updateDoc = await setDoc(
         doc(db, "cups", snapshotID),
-        { ...cupData },
+        { ...datas },
         { merge: true }
       );
     } catch (error) {
@@ -204,16 +196,6 @@ const NewCupPage = () => {
       setStep((prev) => (prev = stepsArray.length));
     }
   }, [step]);
-
-  // useMemo(
-  //   () => setCupData((prev) => ({ ...prev, cupInfo, refereeAssign })),
-  //   [cupInfo, refereeAssign]
-  // );
-  //useMemo(() => console.log("cupData 추적", cupData), [cupData]);
-  // useMemo(
-  //   () => dispatch({ type: "KEEP", payload: { cupData, step } }),
-  //   [cupData]
-  // );
 
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
@@ -246,31 +228,54 @@ const NewCupPage = () => {
           style={{ backgroundColor: "rgba(7,11,41,0.5)", minWidth: "900px" }}
         >
           <div className="flex w-full">{stepsArray[step - 1].component}</div>
-          {step === 1 ? (
+          {step === 1 || step === 5 ? (
             <div className="flex justify-center mt-5">
               <div className="flex">
-                <button
-                  id="menuItemIconBox"
-                  className="flex w-40 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
-                  onClick={() => handleStart()}
-                >
-                  {isLoading ? (
-                    <ThreeDots
-                      height="80"
-                      width="80"
-                      radius="9"
-                      color="#fff"
-                      ariaLabel="three-dots-loading"
-                      wrapperStyle={{}}
-                      wrapperClassName=""
-                      visible={true}
-                    />
-                  ) : (
-                    <span className="text-white text-lg font-bold">
-                      시작하기
-                    </span>
-                  )}
-                </button>
+                {step === 1 ? (
+                  <button
+                    id="menuItemIconBox"
+                    className="flex w-40 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
+                    onClick={() => handleStart()}
+                  >
+                    {isLoading ? (
+                      <ThreeDots
+                        height="80"
+                        width="80"
+                        radius="9"
+                        color="#fff"
+                        ariaLabel="three-dots-loading"
+                        wrapperStyle={{}}
+                        wrapperClassName=""
+                        visible={true}
+                      />
+                    ) : (
+                      <span className="text-white text-lg font-bold">
+                        시작하기
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    id="menuItemIconBox"
+                    className="flex w-40 h-12 justify-center items-center rounded-xl bg-blue-700 hover:bg-sky-500 hover:cursor-pointer"
+                    onClick={() => handleEnd()}
+                  >
+                    {isLoading ? (
+                      <ThreeDots
+                        height="80"
+                        width="80"
+                        radius="9"
+                        color="#fff"
+                        ariaLabel="three-dots-loading"
+                        wrapperStyle={{}}
+                        wrapperClassName=""
+                        visible={true}
+                      />
+                    ) : (
+                      <span className="text-white text-lg font-bold">마침</span>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ) : (

@@ -60,6 +60,7 @@ export const TableDragable = (props) => {
 
     const items = Array.from(tableData);
     const [reorderedItem] = items.splice(result.source.index, 1);
+
     items.splice(result.destination.index, 0, reorderedItem);
 
     setTableData(items);
@@ -80,11 +81,15 @@ export const TableDragable = (props) => {
               className="w-full text-sm text-left text-gray-500"
             >
               <thead className="text-xs text-gray-400 uppercase border-b border-gray-700">
-                <tr>
+                <tr className="">
                   {tableHeaders &&
                     tableHeaders.map((item, idx) => (
-                      <th className="py-3 px-6" key={item}>
-                        {item}
+                      <th
+                        className="py-3 px-6 "
+                        key={item.title}
+                        style={{ width: item.size }}
+                      >
+                        {item.title}
                       </th>
                     ))}
                 </tr>
@@ -113,7 +118,15 @@ export const TableDragable = (props) => {
                                 className="text-white text-sm font-semibold py-3 px-6"
                                 key={item + index}
                               >
-                                {index == 0 ? idx + 1 : item}
+                                <div className="flex w-full flex-wrap gap-2">
+                                  {Array.isArray(item)
+                                    ? item.map((cItem) => (
+                                        <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                                          {cItem.title}
+                                        </span>
+                                      ))
+                                    : item}
+                                </div>
                               </td>
                             ))}
                           </tr>

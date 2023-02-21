@@ -76,7 +76,8 @@ const CupList = () => {
                     cupId={item.id}
                     cupName={item.cupInfo.cupName}
                     cupCount={item.cupInfo.cupCount}
-                    cupDate={item.cupInfo.cupDate}
+                    cupDate={item.cupInfo.cupDate.startDate}
+                    cupState={item.cupInfo.cupState}
                     cupPoster={posterTitle && posterTitle.link}
                   />
                 </div>

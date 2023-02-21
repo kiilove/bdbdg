@@ -49,12 +49,15 @@ export const NewReferee = ({ pSetModal, pSetRefresh }) => {
     const dummyKeys = Object.keys(basicInfo);
     dummyKeys.length > 0 &&
       dummyKeys.map((key) => {
+        console.log(key);
         const encValue = Encrypter(basicInfo[key]);
-        //console.log(encValue);
+        console.log(encValue);
         setBasicInfoEnc({ ...basicInfoEnc, [key]: encValue });
       });
+    console.log(basicInfoEnc);
   };
   const addReferee = async (uid) => {
+    //console.log(...basicInfoEnc);
     try {
       await addDoc(collection(db, "referee"), {
         ...basicInfoEnc,
@@ -72,7 +75,6 @@ export const NewReferee = ({ pSetModal, pSetRefresh }) => {
   };
 
   const handleBasciInfo = (e) => {
-    e.preventDefault();
     if (e.target.name !== "cupPoster") {
       setBasicInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
       //console.log(Encrypter(e.target.value ));

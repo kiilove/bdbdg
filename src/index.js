@@ -4,10 +4,13 @@ import "./index.css";
 import "tw-elements";
 import App from "./App";
 import { NewcupContextProvider } from "./context/NewcupContext";
+import { EditcupContextProvider } from "./context/EditcupContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <NewcupContextProvider>
-    <App />
+    <EditcupContextProvider>
+      <App />
+    </EditcupContextProvider>
   </NewcupContextProvider>
 );

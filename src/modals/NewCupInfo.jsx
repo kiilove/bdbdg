@@ -36,13 +36,13 @@ export const NewCupInfo = ({
   const [cupInfo, setCupInfo] = useState({});
   const [orgList, setOrgList] = useState([]);
   const [cupOrg, setCupOrg] = useState("");
-  const [cupState, setCupState] = useState("");
+  const [cupState, setCupState] = useState("대회준비중");
+  const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [resUploadURL, setResUploadURL] = useState([]);
   const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  const [cupDate, setCupDate] = useState({});
 
   const handleCloseModal = () => {
     setModalComponent("");
@@ -84,10 +84,10 @@ export const NewCupInfo = ({
           },
         },
       }),
-    // console.log(newCup),
+
     [cupInfo]
   );
-  useMemo(() => console.log(orgList), [orgList]);
+
   useMemo(() => getOrgCollection(), []);
   useMemo(() => setCupInfo((prev) => (prev = newCup.cupInfo)) || {}, []);
   useMemo(() => {
@@ -111,15 +111,6 @@ export const NewCupInfo = ({
         cupState: cupState,
       })),
     [cupOrg, posterList, cupDate, cupState]
-  );
-
-  useMemo(
-    () =>
-      setCupInfo((prev) => ({
-        ...prev,
-        cupDate: cupDate,
-      })),
-    [cupDate]
   );
 
   return (
@@ -237,9 +228,11 @@ export const NewCupInfo = ({
           {orgList.length && (
             <select
               name="cupOrg"
+              defaultValue={orgList[0].orgName}
               className="bg-transparent border-transparent focus:border-transparent focus:ring-0 text-white text-sm appearance-none p-0 px-2 w-1/2"
               onChange={(e) => setCupOrg((prev) => (prev = e.target.value))}
             >
+              <option disabled>협회선택</option>
               {orgList.map((item, idx) => (
                 <option
                   className="bg-transparent text-sm text-gray-800 border-transparent focus:border-transparent focus:ring-0"

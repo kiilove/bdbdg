@@ -1,13 +1,18 @@
 import CryptoJS from "crypto-js";
 export const Encrypter = (keyValue) => {
-  console.log(keyValue);
-  const encryptText = CryptoJS.AES.encrypt(
-    keyValue,
-    process.env.REACT_APP_SECRET_KEY
-  ).toString();
-  console.log(encryptText);
-  console.log(Decrypter(encryptText));
-  return encryptText;
+  if (process.env.REACT_APP_SECRET_KEY && keyValue) {
+    const encryptText = CryptoJS.AES.encrypt(
+      keyValue,
+      process.env.REACT_APP_SECRET_KEY
+    ).toString();
+
+    const checkEncrypted = Decrypter(encryptText);
+    if (keyValue === checkEncrypted) {
+      return encryptText;
+    } else {
+      return "encError";
+    }
+  }
 };
 
 export const Decrypter = (keyValue) => {
@@ -15,9 +20,9 @@ export const Decrypter = (keyValue) => {
     const bytes = CryptoJS.AES.decrypt(
       keyValue,
       process.env.REACT_APP_SECRET_KEY
-    );
-    return bytes.toString(CryptoJS.enc.Utf8);
+    ).toString(CryptoJS.enc.Utf8);
+    return bytes;
   } else {
-    console.log("error");
+    return "내용표시실패";
   }
 };

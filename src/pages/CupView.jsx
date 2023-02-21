@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useContext, useMemo, useReducer } from "react";
 import { Modal } from "@mui/material";
 import { widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,75 +21,33 @@ import { db } from "../firebase";
 import { Bars } from "react-loader-spinner";
 import { NewCupInfo } from "../modals/NewCupInfo";
 import { EditCupInfo } from "../modals/EditCupInfo";
-const REFEREE_HEADERS = ["ID", "이름", "이메일"];
+import { EditcupContext } from "../context/EditcupContext";
+import { Decrypter } from "../components/Encrypto";
+import GameCategoryTable from "../components/GameCategoryTable";
+const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
-const GAME_HEADERS = [
-  "경기순서",
-  "종목명",
-  "필요 심판 / 배정된 심판",
-  "필요 선수 / 배정된 선수",
-  "체점표 준비",
-  "준비율",
-];
 
-const tempGameData = [
-  [
-    "1",
-    "171cm 남자클래식",
-    "9 / 5",
-    "10 / 4",
-    "준비중",
-    "50%",
-    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
-  ],
-  [
-    "2",
-    "181cm 남자클래식",
-    "9 / 8",
-    "10 / 8",
-    "완료",
-    "90%",
-    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
-  ],
-  [
-    "3",
-    "160cm 여자클래식",
-    "9 / 5",
-    "10 / 4",
-    "준비중",
-    "50%",
-    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
-  ],
-  [
-    "4",
-    "170cm 여자스포츠",
-    "9 / 8",
-    "10 / 8",
-    "완료",
-    "90%",
-    <FontAwesomeIcon icon={faPenToSquare} className="text-white text-lg" />,
-  ],
+const GAME_HEADERS = [
+  { title: "경기순서", size: "10%" },
+  { title: "종목명", size: "15%" },
+  { title: "체급", size: "30%" },
+  { title: "참가신청 선수", size: "10%" },
+  { title: "배정된 심판", size: "10%" },
+  { title: "액션", size: "10%" },
 ];
 
 const CupView = () => {
   const params = useParams();
-  const [cupId, setCupId] = useState();
-  const [resData, setResData] = useState();
+  const [cupId, setCupId] = useState(params.cupId);
   const [cupInfo, setCupInfo] = useState({});
-  const [posterList, setPosterList] = useState([]);
-  const [posterTitle, setPosterTitle] = useState({
-    id: 0,
-    link: process.env.DEFAULT_POSTER,
-    title: false,
-  });
-  const [cupData, setCupData] = useState();
-  const [resReferee, setResReferee] = useState([]);
-  const [resRefereeTableData, setResRefereeTableData] = useState([]);
-  const [resPlayer, setResPlayer] = useState([]);
-  const [resPlayerTableData, setResPlayerTableData] = useState([]);
+  const [cupOrg, setCupOrg] = useState("");
+  const [cupState, setCupState] = useState("대회준비중");
+  const [cupDate, setCupDate] = useState({});
+  const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const { dispatch, editCup } = useContext(EditcupContext);
 
   const handleOpenModal = ({ component }) => {
     console.log(component);
@@ -105,52 +63,59 @@ const CupView = () => {
   useEffect(() => {
     setCupId(() => params.cupId);
   }, [params]);
-  let dataObj;
-  const getDocument = async () => {
-    setIsLoading(true);
-    try {
-      const resDoc = await getDoc(doc(db, "cups", cupId));
-      dataObj = { ...resDoc.data() };
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      setResData(dataObj);
-      setCupInfo({ ...dataObj.cupInfo });
 
-      setIsLoading(false);
-      console.log(resData);
+  const getCup = async () => {
+    setIsLoading(true);
+    await getDoc(doc(db, "cups", cupId))
+      .then((data) => {
+        dispatch({
+          type: "EDIT",
+          payload: { cupData: { ...data.data() } },
+        });
+      })
+      .then(() => setIsLoading(false))
+      .catch((error) => console.log(error));
+  };
+
+  useMemo(() => getCup(), [params]);
+
+  useMemo(() => {
+    setCupInfo((prev) => (prev = editCup.cupInfo) || {});
+    setPosterList([...editCup.cupInfo.cupPoster] || []);
+    setCupOrg(editCup.cupInfo.cupOrg || "");
+    setCupDate(editCup.cupInfo.cupDate || { startDate: new Date() });
+    setCupState(editCup.cupInfo.cupState || "대회준비중");
+  }, [editCup]);
+
+  const handlePosterTitle = (posters) => {
+    if (posters !== undefined && posters.length) {
+      const posterTitle = posters.filter((item) => item.title === true);
+      if (posterTitle) {
+        return { titleLink: posterTitle[0].link };
+      } else {
+        return { titleLink: null };
+      }
+    } else {
+      return { titleLink: null };
     }
   };
 
-  useEffect(() => {
-    getDocument();
-  }, [cupId]);
-
-  useEffect(() => {
-    let title = [];
-    if (cupInfo.cupPoster) {
-      console.log("포스터 정리 진입");
-      // const posterInfo = cupInfo.cupPoster.filter(
-      //   (item) => item.title === true
-      // );
-      // setPosterTitle(posterInfo);
-      // console.log(posterInfo);
-      console.log(typeof cupInfo.cupPoster);
-      const prevList = Array.prototype.slice.call(cupInfo.cupPoster);
-      console.log("prevList: " + prevList);
-      //setPosterList(prevList);
-      if (prevList) {
-        title = prevList.filter((item) => item.title === true);
-        //setPosterTitle(title);
-        //console.log(posterTitle);
-        console.log(posterTitle);
-        console.log(title[0]);
-        setPosterTitle(title[0]);
-      }
+  const handleRefereeTable = (data) => {
+    let dataArray = [];
+    if (data !== undefined && data.length) {
+      data.map((item) => {
+        const itemRow = [
+          Decrypter(item.refName),
+          Decrypter(item.refEmail),
+          Decrypter(item.refTel),
+        ];
+        dataArray.push(itemRow);
+      });
     }
-  }, [cupInfo]);
 
-  console.log("title", posterTitle);
+    return dataArray;
+  };
+
   return (
     <>
       {isLoading ? (
@@ -158,7 +123,7 @@ const CupView = () => {
           <Bars color="white" />
         </div>
       ) : (
-        resData && (
+        cupInfo && (
           <div className="flex w-full h-full flex-col gap-y-8">
             <Modal open={modal} onClose={handleCloseModal}>
               <div
@@ -192,7 +157,7 @@ const CupView = () => {
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
-                  src={posterTitle && posterTitle.link}
+                  src={handlePosterTitle(cupInfo.cupPoster) || null}
                   className="w-full rounded-2xl object-cover object-top"
                 />
               </div>
@@ -238,7 +203,7 @@ const CupView = () => {
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    주최 : {cupInfo && cupInfo.cupOrg}
+                    주최 : {cupInfo && cupOrg}
                   </span>
                 </div>
                 <div className="flex justify-start items-top">
@@ -248,7 +213,12 @@ const CupView = () => {
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    일자 : {cupInfo && cupInfo.cupDate}
+                    {/* 일자 : {cupInfo && cupInfo.cupDate.startDate} */}
+                  </span>
+                </div>
+                <div className="flex justify-start items-top">
+                  <span className="text-white text-xl">
+                    상태 : {cupInfo && cupState}
                   </span>
                 </div>
               </div>
@@ -260,7 +230,7 @@ const CupView = () => {
                     title: "참가심판",
                     titleIcon: faScaleBalanced,
                     tableHeaders: REFEREE_HEADERS,
-                    tableData: resRefereeTableData,
+                    tableData: handleRefereeTable(editCup.refereeAssign),
                     modalComponent: "",
                   }}
                 />
@@ -271,21 +241,18 @@ const CupView = () => {
                     title: "출전선수",
                     titleIcon: faPeopleLine,
                     tableHeaders: PLAYER_HEADERS,
-                    tableData: resPlayerTableData,
+                    tableData: "",
                     modalComponent: "",
                   }}
                 />
               </div>
             </div>
             <div className="flex w-full h-96">
-              <WidgetWithTableDragable
+              <GameCategoryTable
                 data={{
                   title: "개최종목",
                   titleIcon: faSitemap,
                   actionIcon: faPlus,
-                  actionComponent: "",
-                  tableHeaders: GAME_HEADERS,
-                  tableData: tempGameData,
                 }}
               />
             </div>
