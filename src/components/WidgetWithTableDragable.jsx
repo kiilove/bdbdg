@@ -17,7 +17,6 @@ const WidgetWithTableDragable = (props) => {
   const [modalComponent, setModalComponent] = useState();
 
   const handleOpenModal = ({ component }) => {
-    console.log(component);
     setModalComponent(() => component);
     setModal(() => true);
   };
