@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
 
 import { useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { Bars } from "react-loader-spinner";
 import { NewCupInfo } from "../modals/NewCupInfo";
@@ -24,6 +24,7 @@ import { EditCupInfo } from "../modals/EditCupInfo";
 import { EditcupContext } from "../context/EditcupContext";
 import { Decrypter } from "../components/Encrypto";
 import GameCategoryTable from "../components/GameCategoryTable";
+import EditAssignReferees from "../modals/EditAssignReferees";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
 
@@ -42,6 +43,7 @@ const CupView = () => {
   const [cupInfo, setCupInfo] = useState({});
   const [cupOrg, setCupOrg] = useState("");
   const [cupState, setCupState] = useState("대회준비중");
+
   const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [modal, setModal] = useState(false);
@@ -50,7 +52,6 @@ const CupView = () => {
   const { dispatch, editCup } = useContext(EditcupContext);
 
   const handleOpenModal = ({ component }) => {
-    console.log(component);
     setModalComponent(() => component);
     setModal(() => true);
   };
@@ -76,20 +77,34 @@ const CupView = () => {
       .then(() => setIsLoading(false))
       .catch((error) => console.log(error));
   };
+  const updateCup = async (data) => {
+    (data.cupInfo.cupName !== undefined ||
+      data.cupInfo.cupCount !== undefined) &&
+      (await setDoc(doc(db, "cups", cupId), { ...data }, { merge: true }).then(
+        () => refreshState()
+      ));
+  };
+  const refreshState = () => {
+    const promises = [
+      setCupInfo((prev) => (prev = editCup.cupInfo) || {}),
+      setPosterList([...editCup.cupInfo.cupPoster] || []),
+      setCupOrg(editCup.cupInfo.cupOrg || ""),
+      setCupDate(editCup.cupInfo.cupDate || { startDate: null }),
+      setCupState(editCup.cupInfo.cupState || "대회준비중"),
+    ];
 
+    Promise.all(promises);
+  };
   useMemo(() => getCup(), [params]);
 
   useMemo(() => {
-    setCupInfo((prev) => (prev = editCup.cupInfo) || {});
-    setPosterList([...editCup.cupInfo.cupPoster] || []);
-    setCupOrg(editCup.cupInfo.cupOrg || "");
-    setCupDate(editCup.cupInfo.cupDate || { startDate: new Date() });
-    setCupState(editCup.cupInfo.cupState || "대회준비중");
+    updateCup(editCup);
   }, [editCup]);
 
   const handlePosterTitle = (posters) => {
     if (posters !== undefined && posters.length) {
       const posterTitle = posters.filter((item) => item.title === true);
+      console.log(posterTitle);
       if (posterTitle) {
         return { titleLink: posterTitle[0].link };
       } else {
@@ -157,7 +172,7 @@ const CupView = () => {
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
-                  src={handlePosterTitle(cupInfo.cupPoster) || null}
+                  src={handlePosterTitle(posterList).titleLink || null}
                   className="w-full rounded-2xl object-cover object-top"
                 />
               </div>
@@ -173,14 +188,7 @@ const CupView = () => {
                     className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
                     onClick={() =>
                       handleOpenModal({
-                        component: (
-                          <EditCupInfo
-                            prevState={setCupInfo}
-                            prevInfo={cupInfo}
-                            id={cupId}
-                            parentsModalState={setModal}
-                          />
-                        ),
+                        component: <EditCupInfo />,
                       })
                     }
                   >
@@ -213,7 +221,8 @@ const CupView = () => {
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-xl">
-                    {/* 일자 : {cupInfo && cupInfo.cupDate.startDate} */}
+                    일자 :{" "}
+                    {cupDate.startDate === null ? "미정" : cupDate.startDate}
                   </span>
                 </div>
                 <div className="flex justify-start items-top">
@@ -231,7 +240,7 @@ const CupView = () => {
                     titleIcon: faScaleBalanced,
                     tableHeaders: REFEREE_HEADERS,
                     tableData: handleRefereeTable(editCup.refereeAssign),
-                    modalComponent: "",
+                    modalComponent: <EditAssignReferees />,
                   }}
                 />
               </div>

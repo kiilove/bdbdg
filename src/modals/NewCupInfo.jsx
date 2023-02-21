@@ -5,44 +5,29 @@ import { useState } from "react";
 import Datepicker from "react-tailwindcss-datepicker";
 import { formTitle, widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faTimes } from "@fortawesome/free-solid-svg-icons";
-import {
-  collection,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-  setDoc,
-} from "firebase/firestore";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { Modal } from "@mui/material";
 
 import ImageForm from "../components/ImageForm";
 import { NewcupContext } from "../context/NewcupContext";
-import Moment from "react-moment";
-import moment from "moment";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
-export const NewCupInfo = ({
-  prevSetState,
-  prevState,
-  id,
-  parentsModalState,
-}) => {
-  const { dispatch, newCup } = useContext(NewcupContext);
+export const NewCupInfo = () => {
   const [cupInfo, setCupInfo] = useState({});
   const [orgList, setOrgList] = useState([]);
   const [cupOrg, setCupOrg] = useState("");
   const [cupState, setCupState] = useState("대회준비중");
   const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
-  const [resUploadURL, setResUploadURL] = useState([]);
-  const [posterTitle, setPosterTitle] = useState({});
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
+
+  const { dispatch, newCup } = useContext(NewcupContext);
 
   const handleCloseModal = () => {
     setModalComponent("");
@@ -89,16 +74,12 @@ export const NewCupInfo = ({
   );
 
   useMemo(() => getOrgCollection(), []);
-  useMemo(() => setCupInfo((prev) => (prev = newCup.cupInfo)) || {}, []);
   useMemo(() => {
-    newCup.cupInfo.cupPoster &&
-      setPosterList([...newCup.cupInfo.cupPoster] || []);
-
-    newCup.cupInfo.cupOrg && setCupOrg(newCup.cupInfo.cupOrg || "");
-    newCup.cupInfo.cupDate &&
-      setCupDate(newCup.cupInfo.cupDate || { startDate: new Date() });
-    newCup.cupInfo.cupState &&
-      setCupState(newCup.cupInfo.cupState || "대회준비중");
+    setCupInfo((prev) => (prev = newCup.cupInfo) || {});
+    setPosterList([...newCup.cupInfo.cupPoster] || []);
+    setCupOrg(newCup.cupInfo.cupOrg || "");
+    setCupDate(newCup.cupInfo.cupDate || { startDate: new Date() });
+    setCupState(newCup.cupInfo.cupState || "대회준비중");
   }, []);
 
   useMemo(
@@ -157,7 +138,7 @@ export const NewCupInfo = ({
       <div className="flex w-2/3 h-full flex-col flex-wrap box-border">
         <div className="flex w-full">{formTitle({ title: "대회상태" })}</div>
         <div className="flex w-full gap-x-5">
-          <label className="flex w-1/5 justify-center items-center">
+          <label className="flex w-1/4 justify-center items-center">
             <input
               type="radio"
               name="cupState"
@@ -170,7 +151,7 @@ export const NewCupInfo = ({
               대회준비중
             </span>
           </label>
-          <label className="flex w-1/5 justify-center items-center">
+          <label className="flex w-1/4 justify-center items-center">
             <input
               type="radio"
               name="cupState"
@@ -183,7 +164,7 @@ export const NewCupInfo = ({
               대회중
             </span>
           </label>
-          <label className="flex w-1/5 justify-center items-center">
+          <label className="flex w-1/4 justify-center items-center">
             <input
               type="radio"
               name="cupState"

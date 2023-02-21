@@ -44,7 +44,7 @@ const Dashboard = () => {
         madeRows = rows.map((item, idx) => {
           rowsArray.push([
             item.cupInfo.cupName,
-            item.cupInfo.cupDate,
+            item.cupInfo.cupDate.startDate,
             item.cupState,
           ]);
         });

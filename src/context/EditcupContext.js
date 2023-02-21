@@ -9,8 +9,7 @@ const INITIAL_STATE = {
     cupInfo: { cupPoster: [] },
     refereeAssign: [],
     refereePool: [],
-    gamesCategoryAssign: [],
-    gamesCategoryPool: [],
+    gamesCategory: [],
   },
 };
 
