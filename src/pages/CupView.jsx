@@ -78,6 +78,7 @@ const CupView = () => {
       .then(() => setIsLoading(false))
       .catch((error) => console.log(error));
   };
+
   const updateCup = async (data) => {
     (data.cupInfo.cupName !== undefined ||
       data.cupInfo.cupCount !== undefined) &&
@@ -105,11 +106,11 @@ const CupView = () => {
   const handlePosterTitle = (posters) => {
     if (posters !== undefined && posters.length) {
       const posterTitle = posters.filter((item) => item.title === true);
-      console.log(posterTitle);
-      if (posterTitle) {
-        return { titleLink: posterTitle[0].link };
-      } else {
+      console.log(posterTitle.length);
+      if (posterTitle === undefined || posterTitle.length === 0) {
         return { titleLink: null };
+      } else {
+        return { titleLink: posterTitle[0].link };
       }
     } else {
       return { titleLink: null };
@@ -173,7 +174,7 @@ const CupView = () => {
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
-                  src={handlePosterTitle(posterList).titleLink || null}
+                  src={handlePosterTitle(posterList).titleLink || ""}
                   className="w-full rounded-2xl object-cover object-top"
                 />
               </div>

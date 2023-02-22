@@ -131,6 +131,8 @@ export const NewCupInfo = () => {
           <ImageForm
             prevImageList={posterList}
             prevSetImageList={setPosterList}
+            header="P"
+            uploadFolder="images/poster/"
           />
           {/* 이미지 업로드 폼 끝 */}
         </div>

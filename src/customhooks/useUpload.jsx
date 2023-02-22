@@ -32,11 +32,7 @@ export const UploadMultiFiles = (e, type, folder, setResult) => {
       }
     );
   });
-  Promise.all(promises)
-    .then(() => alert("All images uploaded"))
-    .then((err) => console.log(err));
-
-  console.log(downList);
+  Promise.all(promises);
 };
 
 const makeFileName = (filename, salt) => {

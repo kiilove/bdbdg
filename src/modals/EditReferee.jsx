@@ -1,75 +1,107 @@
-import { faSave } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
-import { useEffect, useRef, useState } from "react";
-import { Encrypter } from "../components/Encrypto";
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Decrypter, Encrypter } from "../components/Encrypto";
 import { formTitle } from "../components/Titles";
 import { db } from "../firebase";
 
 import { handleToast } from "../components/HandleToast";
+import { async } from "@firebase/util";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
 const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-gray-500 focus:ring-0";
 
-export const NewReferee = ({ pSetModal, pSetRefresh }) => {
+export const EditReferee = ({ pSetModal, pSetRefresh, pRefId }) => {
   const [basicInfo, setBasicInfo] = useState({});
   const [basicInfoEnc, setBasicInfoEnc] = useState({});
-  const refName = useRef();
+  const [pwdView, setPwdView] = useState(true);
 
-  const addAuth = async () => {
-    const auth = getAuth();
-    let refEmail;
-    const refPWD = basicInfo.refPassword || basicInfo.refTel;
-    if (basicInfo.refTel !== undefined && basicInfo.refTel) {
-      if (basicInfo.refEmail) {
-        refEmail = basicInfo.refEmail;
-      } else {
-        refEmail = basicInfo.refTel + "@bdbdg.kr";
-      }
+  // const addAuth = async () => {
+  //   const auth = getAuth();
+  //   let refEmail;
+  //   const refPWD = basicInfo.refPassword || basicInfo.refTel;
+  //   if (basicInfo.refTel !== undefined && basicInfo.refTel) {
+  //     if (basicInfo.refEmail) {
+  //       refEmail = basicInfo.refEmail;
+  //     } else {
+  //       refEmail = basicInfo.refTel + "@bdbdg.kr";
+  //     }
 
-      await createUserWithEmailAndPassword(auth, refEmail, refPWD)
-        .then((user) => {
-          const userInfo = user;
-          handleToast({ type: "success", msg: "계정 등록 완료" });
-          return userInfo.user.uid;
-        })
-        .then((uid) => {
-          addReferee(uid);
-        })
-        .then(() => {
-          console.log(refPWD);
-        });
-    }
-  };
+  //     await createUserWithEmailAndPassword(auth, refEmail, refPWD)
+  //       .then((user) => {
+  //         const userInfo = user;
+  //         handleToast({ type: "success", msg: "계정 등록 완료" });
+  //         return userInfo.user.uid;
+  //       })
+  //       .then((uid) => {
+  //         addReferee(uid);
+  //       })
+  //       .then(() => {
+  //         console.log(refPWD);
+  //       });
+  //   }
+  // };
 
-  const handleENC = () => {
-    const dummyKeys = Object.keys(basicInfo);
-    dummyKeys.length > 0 &&
-      dummyKeys.map((key) => {
-        const encValue = Encrypter(basicInfo[key]);
-
-        setBasicInfoEnc({ ...basicInfoEnc, [key]: encValue });
+  const getReferee = async (rId) => {
+    let dataObj;
+    await getDoc(doc(db, "referee", rId))
+      .then((data) => {
+        dataObj = { ...data.data() };
+        return dataObj;
+      })
+      .then((data) => {
+        setBasicInfo(handleDENC(data));
       });
   };
 
-  const addReferee = async (uid) => {
-    try {
-      await addDoc(collection(db, "referee"), {
-        ...basicInfoEnc,
-        refUid: uid,
-      })
-        .then(() => setBasicInfoEnc({}))
-        .then(() => setBasicInfo({}));
-    } catch (error) {
-      console.log(error.message);
-    } finally {
-      handleToast({ type: "success", msg: "계정정보 저장 완료" });
-      pSetRefresh(true);
-      pSetModal(false);
-    }
+  const handleENC = (data) => {
+    const dummyKeys = Object.keys(data);
+    let dataObj;
+    dummyKeys.length > 0 &&
+      dummyKeys.map((key) => {
+        if (key === "refUid") {
+          dataObj = { ...dataObj, [key]: data[key] };
+        } else {
+          const dencValue = Encrypter(data[key]);
+          dataObj = { ...dataObj, [key]: dencValue };
+        }
+      });
+    return dataObj;
+  };
+
+  const handleDENC = (data) => {
+    const dummyKeys = Object.keys(data);
+    let dataObj;
+    dummyKeys.length > 0 &&
+      dummyKeys.map((key) => {
+        if (key === "refUid") {
+          dataObj = { ...dataObj, [key]: data[key] };
+        } else {
+          const dencValue = Decrypter(data[key]);
+          dataObj = { ...dataObj, [key]: dencValue };
+        }
+      });
+    return dataObj;
+  };
+
+  const updateReferee = async (rId) => {
+    console.log(handleENC(basicInfo));
+    // const refereeRef = doc(db, "referee", rId);
+    // try {
+    //   setDoc(refereeRef, { ...basicInfoEnc }, { merge: true })
+    //     .then(() => setBasicInfoEnc({}))
+    //     .then(() => setBasicInfo({}));
+    // } catch (error) {
+    //   console.log(error.message);
+    // } finally {
+    //   handleToast({ type: "success", msg: "심판정보 수정 완료" });
+    //   pSetRefresh(true);
+    //   pSetModal(false);
+    // }
   };
 
   const handleBasciInfo = (e) => {
@@ -86,9 +118,11 @@ export const NewReferee = ({ pSetModal, pSetRefresh }) => {
     console.log(basicInfo);
   };
 
-  useEffect(() => {
-    handleENC();
-  }, [basicInfo]);
+  // useEffect(() => {
+  //   handleENC();
+  // }, [basicInfo]);
+
+  useMemo(() => getReferee(pRefId), []);
 
   return (
     <div
@@ -149,37 +183,34 @@ export const NewReferee = ({ pSetModal, pSetRefresh }) => {
             <div className="flex w-full">
               <div className="flex w-1/3">{formTitle({ title: "이메일" })}</div>
               <div className={inputBoxStyle}>
-                <input
-                  type="text"
-                  name="refEmail"
-                  id="refEmail"
-                  onChange={(e) => handleBasciInfo(e)}
-                  value={basicInfo.refEmail}
-                  className={inputTextStyle}
-                  placeholder="심판아이디로 사용 정확히 입력"
-                />
+                <span className="text-white">{basicInfo.refEmail}</span>
               </div>
             </div>
             <div className="flex w-full">
               <div className="flex w-1/3">
-                {formTitle({ title: "비밀번호" })}
+                {formTitle({ title: "초기비밀번호" })}
               </div>
               <div className={inputBoxStyle}>
-                <input
-                  type="password"
-                  name="refPassword"
-                  id="refPassword"
-                  onChange={(e) => handleBasciInfo(e)}
-                  value={basicInfo.refPassword}
-                  className={inputTextStyle}
-                  placeholder="비밀번호 미입력시 휴대전화번호로 자동 세팅"
-                />
+                <span className="text-white text-sm flex h-full w-full justify-start items-center ml-2">
+                  {pwdView ? basicInfo.refPassword : "****"}
+                </span>
+                <span className="flex text-white w-10 h-full justify-center items-center">
+                  {pwdView ? (
+                    <button onClick={() => setPwdView(false)}>
+                      <FontAwesomeIcon icon={faEyeSlash} />
+                    </button>
+                  ) : (
+                    <button onClick={() => setPwdView(true)}>
+                      <FontAwesomeIcon icon={faEye} />
+                    </button>
+                  )}
+                </span>
               </div>
             </div>
             <div className="flex w-full justify-end">
               <button
                 className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-                onClick={() => addAuth()}
+                onClick={() => updateReferee()}
               >
                 <FontAwesomeIcon icon={faSave} className="text-white text-lg" />
               </button>

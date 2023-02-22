@@ -17,6 +17,7 @@ import { NewReferee } from "../modals/NewReferee";
 import { widgetTitle } from "../components/Titles";
 import { Decrypter } from "../components/Encrypto";
 import { handleToast } from "../components/HandleToast";
+import { EditReferee } from "../modals/EditReferee";
 
 const tableHeaders = [
   "순번",
@@ -34,6 +35,7 @@ const RefereeList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefresh, setIsRefresh] = useState(false);
   const [modal, setModal] = useState(false);
+  const [modal2, setModal2] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   let dataArray = [];
   let resDocs;
@@ -47,6 +49,17 @@ const RefereeList = () => {
     setModalComponent("");
     setModal(false);
   };
+
+  const handleOpenModal2 = ({ component }) => {
+    setModalComponent(() => component);
+    setModal2(true);
+  };
+
+  const handleCloseModal2 = () => {
+    setModalComponent("");
+    setModal2(false);
+  };
+
   const getCollections = async () => {
     setIsLoading(true);
     setResCollections([]);
@@ -94,6 +107,32 @@ const RefereeList = () => {
                   <div
                     className="flex w-1/2 justify-end items-center hover:cursor-pointer"
                     onClick={() => handleCloseModal()}
+                  >
+                    <FontAwesomeIcon
+                      icon={faTimes}
+                      className="text-white text-2xl font-bold"
+                    />
+                  </div>
+                </div>
+                <div className="flex">{modalComponent}</div>
+              </div>
+            </Modal>
+            <Modal open={modal2} onClose={handleCloseModal2}>
+              <div
+                className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
+                style={{
+                  backgroundColor: "rgba(7,11,41,0.9)",
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
+                <div className="flex w-full">
+                  <div className="flex w-1/2">
+                    {widgetTitle({ title: "심판수정" })}
+                  </div>
+                  <div
+                    className="flex w-1/2 justify-end items-center hover:cursor-pointer"
+                    onClick={() => handleCloseModal2()}
                   >
                     <FontAwesomeIcon
                       icon={faTimes}
@@ -197,12 +236,25 @@ const RefereeList = () => {
                                   {Decrypter(item.refEmail)}
                                 </td>
                                 <td className="text-white text-sm font-light py-3 px-6 gap-x-5 flex justify-center">
-                                  <div className="flex justify-end items-center">
+                                  <button
+                                    className="flex justify-end items-center"
+                                    onClick={() =>
+                                      handleOpenModal2({
+                                        component: (
+                                          <EditReferee
+                                            pSetModal={setModal2}
+                                            pSetRefresh={setIsRefresh}
+                                            pRefId={item.id}
+                                          />
+                                        ),
+                                      })
+                                    }
+                                  >
                                     <FontAwesomeIcon
                                       icon={faPencilSquare}
                                       className="text-lg"
                                     />
-                                  </div>
+                                  </button>
                                   <div className="flex justify-end items-center">
                                     <FontAwesomeIcon
                                       icon={faTrashCan}

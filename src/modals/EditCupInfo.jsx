@@ -11,6 +11,7 @@ import { Modal } from "@mui/material";
 
 import ImageForm from "../components/ImageForm";
 import { EditcupContext } from "../context/EditcupContext";
+import PhotoUpload from "../components/PhotoUpload";
 
 const inputBoxStyle = "flex w-full rounded-xl border border-gray-500 h-9 mb-1";
 
@@ -134,9 +135,11 @@ export const EditCupInfo = () => {
       <div className="flex w-1/3 flex-col">
         <div className="flex justify-center items-start mt-3">
           {/* 이미지 업로드 폼 시작 */}
-          <ImageForm
+          <PhotoUpload
             prevImageList={posterList}
             prevSetImageList={setPosterList}
+            header="P"
+            uploadFolder="images/poster/"
           />
           {/* 이미지 업로드 폼 끝 */}
         </div>

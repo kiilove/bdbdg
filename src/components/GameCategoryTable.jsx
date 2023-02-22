@@ -6,6 +6,7 @@ import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { EditcupContext } from "../context/EditcupContext";
 import { Modal } from "@mui/material";
 import { widgetTitle } from "./Titles";
+import { EditAssignGameCategory } from "../modals/EditAssignGamesCategory";
 
 const GAME_HEADERS = [
   { title: "경기순서", size: "10%" },
@@ -18,10 +19,10 @@ const GAME_HEADERS = [
 
 const GameCategoryTable = (props) => {
   const [modal, setModal] = useState(false);
+  const [modal2, setModal2] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   const [gamesCategory, setGamesCategory] = useState([]);
-  const [tableHeaders, setTableHeaders] = useState([]);
-  const [tableData, setTableData] = useState([]);
 
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
@@ -32,27 +33,16 @@ const GameCategoryTable = (props) => {
     setModalComponent("");
     setModal(() => false);
   };
-  // const handleGameTable = (data) => {
-  //   let dataArray = [];
-  //   if (data !== undefined && data.length) {
-  //     data.map((item) => {
-  //       const itemRow = [
-  //         item.index,
-  //         item.title,
-  //         item.class,
-  //         "준비중",
-  //         "준비중",
-  //         <FontAwesomeIcon
-  //           icon={faPenToSquare}
-  //           className="text-white text-lg"
-  //         />,
-  //       ];
-  //       dataArray.push(itemRow);
-  //     });
-  //   }
-  //   return dataArray;
-  // };
 
+  const handleOpenModal2 = ({ component }) => {
+    setModalComponent(() => component);
+    setModal2(() => true);
+  };
+
+  const handleCloseModal2 = () => {
+    setModalComponent("");
+    setModal2(() => false);
+  };
   const { dispatch, editCup } = useContext(EditcupContext);
 
   useMemo(
@@ -67,7 +57,6 @@ const GameCategoryTable = (props) => {
     const [reorderedItem] = items.splice(result.source.index, 1);
 
     items.splice(result.destination.index, 0, reorderedItem);
-    //console.log(handleReOrder(items));
     setGamesCategory(handleReOrder(items));
   };
 
@@ -104,11 +93,37 @@ const GameCategoryTable = (props) => {
           {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
           <div className="flex w-full">
             <div className="flex w-1/2">
-              {widgetTitle({ title: "새게임 등록" })}
+              {widgetTitle({ title: "새종목 등록" })}
             </div>
             <div
               className="flex w-1/2 justify-end items-center hover:cursor-pointer"
               onClick={() => handleCloseModal()}
+            >
+              <FontAwesomeIcon
+                icon={faTimes}
+                className="text-white text-2xl font-bold"
+              />
+            </div>
+          </div>
+          {modalComponent}
+        </div>
+      </Modal>
+      <Modal open={modal2} onClose={handleCloseModal2}>
+        <div
+          className="absolute top-1/2 left-1/2 border-0 p-5 outline-none rounded-lg flex flex-col"
+          style={{
+            backgroundColor: "rgba(7,11,41,0.9",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
+          <div className="flex w-full">
+            <div className="flex w-1/2">
+              {widgetTitle({ title: "종목 수정" })}
+            </div>
+            <div
+              className="flex w-1/2 justify-end items-center hover:cursor-pointer"
+              onClick={() => handleCloseModal2()}
             >
               <FontAwesomeIcon
                 icon={faTimes}
@@ -235,10 +250,24 @@ const GameCategoryTable = (props) => {
                                     className="text-white text-sm font-semibold py-3 px-6"
                                     key={items.action + idx}
                                   >
-                                    <FontAwesomeIcon
-                                      icon={faPenToSquare}
-                                      className="text-white text-lg"
-                                    />
+                                    <button
+                                      onClick={() =>
+                                        handleOpenModal2({
+                                          component: (
+                                            <EditAssignGameCategory
+                                              pSetModal={modal2}
+                                              pSetRefresh={setRefresh}
+                                              pGameId={items.id}
+                                            />
+                                          ),
+                                        })
+                                      }
+                                    >
+                                      <FontAwesomeIcon
+                                        icon={faPenToSquare}
+                                        className="text-white text-lg"
+                                      />
+                                    </button>
                                   </td>
                                 </tr>
                               )}
