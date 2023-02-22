@@ -3,6 +3,7 @@ import { Modal } from "@mui/material";
 import { widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faFlagCheckered,
   faPenToSquare,
   faPeopleLine,
   faPlus,
@@ -180,22 +181,32 @@ const CupView = () => {
                 className="flex w-2/3 flex-col px-10 py-8 gap-y-5 rounded-lg"
                 style={{ backgroundColor: "rgba(7,11,41,0.7)" }}
               >
-                <div className="flex justify-start items-top mb-5 gap-x-5">
-                  <span className="text-white font-extrabold text-4xl">
-                    {cupInfo && cupInfo.cupName} {cupInfo && cupInfo.cupCount}회
-                  </span>
-                  <div
-                    className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-                    onClick={() =>
-                      handleOpenModal({
-                        component: <EditCupInfo />,
-                      })
-                    }
-                  >
-                    <FontAwesomeIcon
-                      icon={faPenToSquare}
-                      className="text-white text-lg"
-                    />
+                <div className="flex">
+                  <div className="flex items-center justify-start bg-slate-800 w-full h-14 rounded-xl px-5 gap-x-2">
+                    <div className="flex justify-between w-full">
+                      <div className="flex justify-center items-center">
+                        <FontAwesomeIcon
+                          icon={faFlagCheckered}
+                          className="text-white text-xl mr-2"
+                        />
+                        <span className="text-white text-xl ">
+                          기초정보(모집공고)
+                        </span>
+                      </div>
+                      <div
+                        className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+                        onClick={() =>
+                          handleOpenModal({
+                            component: <EditCupInfo />,
+                          })
+                        }
+                      >
+                        <FontAwesomeIcon
+                          icon={faPenToSquare}
+                          className="text-white text-lg hover:cursor-pointer"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 

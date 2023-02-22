@@ -39,21 +39,19 @@ const EditAssignReferees = () => {
     //console.log(editCup.refereeAssign);
   }, []);
 
-  // useMemo(() => {
-  //   dispatch({
-  //     type: "EDIT",
-  //     payload: {
-  //       cupData: {
-  //         ...editCup,
-  //         cupInfo: { ...editCup.cupInfo },
-  //         refereePool: [...pool] || [],
-  //         refereeAssign: [...assign] || [],
-  //       },
-  //     },
-  //   });
-
-  //   //console.log("pool", pool);
-  // }, [assign]);
+  useMemo(() => {
+    dispatch({
+      type: "EDIT",
+      payload: {
+        cupData: {
+          ...editCup,
+          cupInfo: { ...editCup.cupInfo },
+          refereePool: [...pool] || [],
+          refereeAssign: [...assign] || [],
+        },
+      },
+    });
+  }, [assign, pool]);
 
   const poolChecked = intersection(checked, pool);
   const assignChecked = intersection(checked, assign);
@@ -61,14 +59,21 @@ const EditAssignReferees = () => {
   function not(a, b) {
     return a.filter((value) => b.indexOf(value) === -1);
   }
+  function not2(a, b) {
+    return a.filter((value) => b.indexOf(value.id) === -1);
+  }
 
   function intersection(a, b) {
     return a.filter((value) => b.indexOf(value) !== -1);
   }
+
   const handlePoolRefresh = async () => {
     const poolAll = await getRefereePool();
+    const poolResult = poolAll.filter((item) => {
+      return !assign.some((other) => other.id === item.id);
+    });
 
-    setPool(poolAll.filter((x) => assign.some((y) => x.id === y.id)));
+    setPool(poolResult);
   };
   const handleToggle = (value) => () => {
     //console.log(value);
