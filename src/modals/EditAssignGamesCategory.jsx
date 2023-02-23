@@ -160,7 +160,7 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
   };
 
   useMemo(() => {
-    setGameInfo(handleGame());
+    setGameInfo(() => handleGame());
     setAssignPool(() => editCup.refereeAssign || []);
     setAssignPoolFiltered(handleDENC(editCup.refereeAssign, "refUid"));
     //console.log("filterInit", assignPoolFiltered);
@@ -177,16 +177,11 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
     //   type: "EDIT",
     //   cupData: { ...editCup, refereeAssign: [...assign] },
     // });
-    setGamesCategory(
-      (prev) => (prev = { ...gameInfo, refereeAssign: [...assign] })
-    );
-    setGameInfo(
-      (prev) =>
-        (prev = {
-          ...gameInfo,
-          refereeAssign: [...assign],
-        })
-    );
+    assign.length > 0 &&
+      setGameInfo({
+        ...gameInfo,
+        refereeAssign: [assign],
+      });
   }, [assign]);
 
   useMemo(() => {
@@ -195,6 +190,10 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
     //   ...editCup,
     //   gamesCategory: handleGamesCategory(Number(gameInfo.id) - 1, gameInfo),
     // });
+    assign.length > 0 &&
+      setGameInfo({
+        ...gameInfo,
+      });
     console.log(gameInfo);
   }, [gameInfo]);
 
