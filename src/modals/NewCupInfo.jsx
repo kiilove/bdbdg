@@ -211,16 +211,16 @@ export const NewCupInfo = () => {
           {orgList.length && (
             <select
               name="cupOrg"
-              defaultValue={orgList[0].orgName}
               className="bg-transparent border-transparent focus:border-transparent focus:ring-0 text-white text-sm appearance-none p-0 px-2 w-1/2"
               onChange={(e) => setCupOrg((prev) => (prev = e.target.value))}
             >
-              <option disabled>협회선택</option>
+              <option disabled selected>
+                협회선택
+              </option>
               {orgList.map((item, idx) => (
                 <option
                   className="bg-transparent text-sm text-gray-800 border-transparent focus:border-transparent focus:ring-0"
                   value={item.orgName}
-                  selected={item.orgName === cupOrg}
                 >
                   {item.orgName}
                 </option>

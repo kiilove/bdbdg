@@ -21,6 +21,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { Bars } from "react-loader-spinner";
 import { NewCupInfo } from "../modals/NewCupInfo";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 import { EditCupInfo } from "../modals/EditCupInfo";
 import { EditcupContext } from "../context/EditcupContext";
 import { Decrypter } from "../components/Encrypto";
@@ -47,6 +48,7 @@ const CupView = () => {
 
   const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
+  const [posterTitle, setPosterTitle] = useState();
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +76,15 @@ const CupView = () => {
           type: "EDIT",
           payload: { cupData: { ...data.data() } },
         });
+        return data.data();
+      })
+      .then((data) => {
+        const titleLink = handlePosterTitle(data.cupInfo.cupPoster);
+        if (titleLink === undefined || titleLink === null) {
+          setPosterTitle("");
+        } else {
+          setPosterTitle(titleLink.titleLink);
+        }
       })
       .then(() => setIsLoading(false))
       .catch((error) => console.log(error));
@@ -106,7 +117,7 @@ const CupView = () => {
   const handlePosterTitle = (posters) => {
     if (posters !== undefined && posters.length) {
       const posterTitle = posters.filter((item) => item.title === true);
-      console.log(posterTitle.length);
+
       if (posterTitle === undefined || posterTitle.length === 0) {
         return { titleLink: null };
       } else {
@@ -174,7 +185,7 @@ const CupView = () => {
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
-                  src={handlePosterTitle(posterList).titleLink || ""}
+                  src={posterTitle}
                   className="w-full rounded-2xl object-cover object-top"
                 />
               </div>
