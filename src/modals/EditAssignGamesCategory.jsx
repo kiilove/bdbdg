@@ -1,15 +1,15 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { EditcupContext } from "../context/EditcupContext";
 
-import DraggableDialog from "../forms/Dialog/DraggableDialog";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { Decrypter } from "../components/Encrypto";
+import { Decrypter, Encrypter } from "../components/Encrypto";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,9 +17,12 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
 export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
   const [gameInfo, setGameInfo] = useState({});
+  const [gamesCategory, setGamesCategory] = useState([]);
   const [allItemFalse, setAllItemFalse] = useState(false);
   const [assignPool, setAssignPool] = useState([]);
+  const [assignPoolFiltered, setAssignPoolFiltered] = useState([]);
   const [assign, setAssign] = useState([]);
+  const [searchCount, setSearchCount] = useState(undefined);
   const { dispatch, editCup } = useContext(EditcupContext);
   const chkRef = useRef([]);
   const getRefereePool = async () => {
@@ -56,6 +59,43 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
     return game;
   };
 
+  const handleENC = (data, keyValue) => {
+    const dummyKeys = Object.keys(data);
+    let dataObj;
+    dummyKeys.length > 0 &&
+      dummyKeys.map((key) => {
+        if (key === keyValue) {
+          dataObj = { ...dataObj, [key]: data[key] };
+        } else {
+          const dencValue = Encrypter(data[key]);
+          dataObj = { ...dataObj, [key]: dencValue };
+        }
+      });
+    return dataObj;
+  };
+
+  const handleDENC = (data, keyValue) => {
+    const dummyArray = [...data];
+    let dummyDenc = [];
+    dummyArray.map((item, idx) => {
+      const dummyKeys = Object.keys(item);
+      let dataObj;
+      dummyKeys.length > 0 &&
+        dummyKeys.map((key) => {
+          //console.log(key);
+          if (key === keyValue || key === "id") {
+            dataObj = { ...dataObj, [key]: item[key] };
+          } else {
+            const dencValue = Decrypter(item[key]);
+            dataObj = { ...dataObj, [key]: dencValue };
+          }
+        });
+      dummyDenc.push({ ...dataObj });
+    });
+
+    return dummyDenc;
+  };
+
   const handleChk = (idx) => {
     const dummy = [...gameInfo.class];
     const newChk = {
@@ -75,14 +115,38 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
     return newData;
   };
 
-  useMemo(() => {
-    setGameInfo(handleGame());
-    setAssignPool(() => editCup.refereeAssign || []);
-  }, []);
+  const handleGamesCategory = (idx, value) => {
+    const dummy = [...editCup.gamesCategory];
+    const newValue = {
+      ...value,
+    };
 
-  useMemo(() => console.log(assign), [assign]);
+    dummy.splice(idx, 1, newValue);
 
-  useMemo(() => console.log(gameInfo), [gameInfo]);
+    const newData = [...dummy];
+
+    return newData;
+  };
+
+  const handleSearch = (keyword) => {
+    const dummy = [...assignPoolFiltered];
+    console.log("dummy:", dummy);
+    console.log("fitered:", assignPoolFiltered);
+    const result = dummy.filter(
+      (item) => item.refName.includes(keyword) || item.refTel.includes(keyword)
+    );
+    console.log(result);
+    setSearchCount(result.length);
+    result.length > 0 && setAssignPoolFiltered(result);
+
+    //setAssignPoolFiltered(result);
+
+    if (keyword.length === 0) {
+      setAssignPoolFiltered(handleDENC(editCup.refereeAssign, "refUid"));
+    }
+
+    console.log(keyword.length);
+  };
 
   const handleAssign = (e, idx, value) => {
     if (e.target.checked === false) {
@@ -94,6 +158,45 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
       setAssign([...poolResult]);
     }
   };
+
+  useMemo(() => {
+    setGameInfo(handleGame());
+    setAssignPool(() => editCup.refereeAssign || []);
+    setAssignPoolFiltered(handleDENC(editCup.refereeAssign, "refUid"));
+    //console.log("filterInit", assignPoolFiltered);
+  }, []);
+
+  useMemo(() => {
+    console.log(handleDENC(assignPool, "refUid"));
+  }, [assignPool]);
+
+  useMemo(() => {
+    //setAssignPoolFiltered(handleDENC(assignPool, "refUid"));
+    // /console.log("filterInit", assignPoolFiltered);
+    // dispatch({
+    //   type: "EDIT",
+    //   cupData: { ...editCup, refereeAssign: [...assign] },
+    // });
+    setGamesCategory(
+      (prev) => (prev = { ...gameInfo, refereeAssign: [...assign] })
+    );
+    setGameInfo(
+      (prev) =>
+        (prev = {
+          ...gameInfo,
+          refereeAssign: [...assign],
+        })
+    );
+  }, [assign]);
+
+  useMemo(() => {
+    // console.log(handleGamesCategory(Number(gameInfo.id) - 1, gameInfo));
+    // console.log({
+    //   ...editCup,
+    //   gamesCategory: handleGamesCategory(Number(gameInfo.id) - 1, gameInfo),
+    // });
+    console.log(gameInfo);
+  }, [gameInfo]);
 
   const customList = (items) => {
     return (
@@ -121,13 +224,13 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
                     <div className="flex w-full items-center gap-x-3">
                       <div className="flex flex-col">
                         <p className=" text-sm text-gray-300">
-                          {Decrypter(value.refName)}
+                          {value.refName}
                         </p>
                         <span className=" text-xs text-gray-500">
-                          {Decrypter(value.refEmail)}
+                          {value.refEmail}
                         </span>
                         <span className=" text-xs text-gray-500">
-                          {Decrypter(value.refTel)}
+                          {value.refTel}
                         </span>
                       </div>
                     </div>
@@ -206,7 +309,7 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
                 assign.map((item, idx) => (
                   <div className="flex justify-center items-center w-18">
                     <span className="bg-blue-500 py-1 px-1 text-xs rounded-lg text-white font-semibold">
-                      {Decrypter(item.refName)}
+                      {item.refName}
                     </span>
                   </div>
                 ))}
@@ -223,11 +326,26 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
                 type="text"
                 name="refereeSearch"
                 id="refereeSearch"
+                onChange={(e) => {
+                  e.preventDefault();
+                  handleSearch(e.target.value);
+                }}
                 className=" bg-transparent border-0 text-white outline-none focus:ring-0 w-full"
               />
+              {/* <button className="w-24 text-sm text-white">전체선택</button> */}
             </div>
           </div>
-          {assignPool ? customList(assignPool) : <div></div>}
+          {searchCount === 0 ? (
+            <div className="flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800">
+              <div className="flex items-center h-5 justify-center ">
+                <span className="text-white font-semibold text-sm">
+                  적당한 검색결과 없음
+                </span>
+              </div>
+            </div>
+          ) : (
+            assignPoolFiltered.length > 0 && customList(assignPoolFiltered)
+          )}
         </div>
       </div>
     </div>
