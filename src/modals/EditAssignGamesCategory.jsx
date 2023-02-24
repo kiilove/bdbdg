@@ -15,15 +15,24 @@ import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
-export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
-  const [gameInfo, setGameInfo] = useState({});
-  const [gamesCategory, setGamesCategory] = useState([]);
-  const [allItemFalse, setAllItemFalse] = useState(false);
+export const EditAssignGameCategory = ({
+  pSetModal,
+  pSetRefresh,
+  pGameId,
+  pIndex,
+}) => {
+  const { dispatch, editCup } = useContext(EditcupContext);
+  const [gameInfo, setGameInfo] = useState(editCup.gamesCategory[pIndex]);
+  const [gamesCategory, setGamesCategory] = useState([
+    ...editCup.gamesCategory,
+  ]);
+  const [classIsTrue, setClassIsTrue] = useState(false);
   const [assignPool, setAssignPool] = useState([]);
   const [assignPoolFiltered, setAssignPoolFiltered] = useState([]);
-  const [assign, setAssign] = useState([]);
+  const [assign, setAssign] = useState(
+    editCup.gamesCategory[pIndex].refereeAssign || []
+  );
   const [searchCount, setSearchCount] = useState(undefined);
-  const { dispatch, editCup } = useContext(EditcupContext);
   const chkRef = useRef([]);
   const getRefereePool = async () => {
     let dataArray = [];
@@ -97,6 +106,7 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
   };
 
   const handleChk = (idx) => {
+    let classCheck = true;
     const dummy = [...gameInfo.class];
     const newChk = {
       title: dummy[idx].title,
@@ -107,94 +117,70 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
 
     const newData = { ...gameInfo, class: [...dummy] };
     if (!newData.class.some((chk) => chk.launched === true)) {
-      setAllItemFalse(true);
+      classCheck = true;
     } else {
-      setAllItemFalse(false);
+      classCheck = false;
     }
+
+    setClassIsTrue(classCheck);
     setGameInfo(() => newData);
-    return newData;
-  };
-
-  const handleGamesCategory = (idx, value) => {
-    const dummy = [...editCup.gamesCategory];
-    const newValue = {
-      ...value,
-    };
-
-    dummy.splice(idx, 1, newValue);
-
-    const newData = [...dummy];
-
     return newData;
   };
 
   const handleSearch = (keyword) => {
     const dummy = [...assignPoolFiltered];
-    console.log("dummy:", dummy);
-    console.log("fitered:", assignPoolFiltered);
+
     const result = dummy.filter(
       (item) => item.refName.includes(keyword) || item.refTel.includes(keyword)
     );
-    console.log(result);
+
     setSearchCount(result.length);
     result.length > 0 && setAssignPoolFiltered(result);
-
-    //setAssignPoolFiltered(result);
 
     if (keyword.length === 0) {
       setAssignPoolFiltered(handleDENC(editCup.refereeAssign, "refUid"));
     }
-
-    console.log(keyword.length);
   };
 
   const handleAssign = (e, idx, value) => {
+    let assignResult = [];
     if (e.target.checked === false) {
-      const poolResult = assign.filter((item) => item.id !== value.id);
-      setAssign([...poolResult]);
+      assignResult = assign.filter((item) => item.id !== value.id);
     }
     if (e.target.checked === true) {
-      const poolResult = [...assign, value];
-      setAssign([...poolResult]);
+      assignResult = [...assign, value];
     }
+    setAssign((prev) => (prev = assignResult));
+    console.log(assignResult);
+  };
+
+  const handleGamesCategory = (data) => {
+    console.log(data);
+    const dummy = [...gamesCategory];
+    dummy.splice(pIndex, 1, data);
+    const newData = [...dummy];
+    return newData;
   };
 
   useMemo(() => {
-    setGameInfo(() => handleGame());
-    setAssignPool(() => editCup.refereeAssign || []);
     setAssignPoolFiltered(handleDENC(editCup.refereeAssign, "refUid"));
-    //console.log("filterInit", assignPoolFiltered);
   }, []);
 
   useMemo(() => {
-    console.log(handleDENC(assignPool, "refUid"));
-  }, [assignPool]);
-
-  useMemo(() => {
-    //setAssignPoolFiltered(handleDENC(assignPool, "refUid"));
-    // /console.log("filterInit", assignPoolFiltered);
-    // dispatch({
-    //   type: "EDIT",
-    //   cupData: { ...editCup, refereeAssign: [...assign] },
-    // });
-    assign.length > 0 &&
-      setGameInfo({
-        ...gameInfo,
-        refereeAssign: [assign],
-      });
+    setGameInfo(() => ({
+      ...gameInfo,
+      refereeAssign: [...assign],
+    }));
   }, [assign]);
 
   useMemo(() => {
-    // console.log(handleGamesCategory(Number(gameInfo.id) - 1, gameInfo));
-    // console.log({
-    //   ...editCup,
-    //   gamesCategory: handleGamesCategory(Number(gameInfo.id) - 1, gameInfo),
-    // });
-    assign.length > 0 &&
-      setGameInfo({
-        ...gameInfo,
-      });
-    console.log(gameInfo);
+    setGameInfo(() => ({ ...gameInfo, launched: !classIsTrue }));
+  }, [classIsTrue]);
+
+  useMemo(() => {
+    const gameNewData = handleGamesCategory(gameInfo);
+    const cupData = { ...editCup, gamesCategory: [...gameNewData] };
+    dispatch({ type: "EDIT", payload: { cupData } });
   }, [gameInfo]);
 
   const customList = (items) => {
@@ -208,6 +194,7 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
                   <input
                     type="checkbox"
                     tabIndex={-1}
+                    checked={assign.some((uid) => uid.refUid === value.refUid)}
                     onChange={(e) => handleAssign(e, idx, value)}
                     ref={(el) => (chkRef.current[idx] = el)}
                     id={`itemsRefereeCheckbox-${value.id}`}
@@ -247,106 +234,111 @@ export const EditAssignGameCategory = ({ pSetModal, pSetRefresh, pGameId }) => {
       className="flex w-full h-full gap-x-16 box-border"
       style={{ minWidth: "800px", maxWidth: "1000px" }}
     >
-      <div className="flex w-full h-full p-10 justify-between">
-        <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-3 gap-y-2">
-          <div className="flex border-gray-400 rounded-md bg-slate-800 h-13">
-            <div className="flex w-full h-full p-3 items-center">
-              {allItemFalse ? (
-                <>
-                  <p className="text-gray-600 font-semibold line-through">
-                    {gameInfo.title || ""}
-                  </p>
-                  <span className="text-gray-400 text-sm ml-2 no-underline">
-                    종목삭제됨
-                  </span>
-                </>
-              ) : (
-                <span className="text-white font-semibold">
-                  {gameInfo.title || ""}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex border-gray-400 rounded-md bg-slate-800 h-13">
-            <div className="flex w-full h-full p-3 flex-wrap gap-1">
-              {/* 체크박스 폼컨트롤 해야하나? */}
-              {gameInfo.class &&
-                gameInfo.class.map((game, idx) => (
-                  <div className="flex w-20 justify-start items-center gap-x-2">
-                    <input
-                      type="checkbox"
-                      tabIndex={-1}
-                      checked={game.launched}
-                      onChange={() => handleChk(idx)}
-                      id={`itemsClassCheckbox-${game.title}`}
-                      className="w-3 h-3 bg-blue-100 border-blue-300 text-blue-500 focus:ring-blue-200 border-0 focus:ring-0 text-xs"
-                    />
-                    <label
-                      id
-                      htmlFor={`itemsClassCheckbox-${game.title}`}
-                      className="font-medium text-gray-900 dark:text-gray-300 w-full h-full flex "
-                    >
-                      <span className="text-white mr-2 text-sm">
-                        {game.title}
-                      </span>
-                    </label>
-                  </div>
-                ))}
-            </div>
-          </div>
-          <div className="flex border-gray-400 rounded-md bg-slate-800 flex-col">
-            <div className="flex p-3">
-              <span className="text-white">배정된심판</span>
-              {assign ? (
-                <span className="text-white ml-2">{`(${assign.length})`}</span>
-              ) : (
-                <span className="text-white">0</span>
-              )}
-            </div>
-            <div className="flex w-full h-full p-3 flex-wrap gap-2">
-              {assign &&
-                assign.map((item, idx) => (
-                  <div className="flex justify-center items-center w-18">
-                    <span className="bg-blue-500 py-1 px-1 text-xs rounded-lg text-white font-semibold">
-                      {item.refName}
+      {gameInfo && (
+        <div className="flex w-full h-full p-10 justify-between">
+          <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-3 gap-y-2">
+            <div className="flex border-gray-400 rounded-md bg-slate-800 h-13">
+              <div className="flex w-full h-full p-3 items-center">
+                {classIsTrue ? (
+                  <>
+                    <p className="text-gray-600 font-semibold line-through">
+                      {gameInfo.title || ""}
+                    </p>
+                    <span className="text-gray-400 text-sm ml-2 no-underline">
+                      종목삭제됨
                     </span>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-3 gap-y-2">
-          <div className="flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800">
-            <div className="flex items-center h-5 justify-center w-full">
-              <span>
-                <FontAwesomeIcon icon={faSearch} className="text-gray-200" />
-              </span>
-              <input
-                type="text"
-                name="refereeSearch"
-                id="refereeSearch"
-                onChange={(e) => {
-                  e.preventDefault();
-                  handleSearch(e.target.value);
-                }}
-                className=" bg-transparent border-0 text-white outline-none focus:ring-0 w-full"
-              />
-              {/* <button className="w-24 text-sm text-white">전체선택</button> */}
-            </div>
-          </div>
-          {searchCount === 0 ? (
-            <div className="flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800">
-              <div className="flex items-center h-5 justify-center ">
-                <span className="text-white font-semibold text-sm">
-                  적당한 검색결과 없음
-                </span>
+                  </>
+                ) : (
+                  <span className="text-white font-semibold">
+                    {gameInfo.title || ""}
+                  </span>
+                )}
               </div>
             </div>
-          ) : (
-            assignPoolFiltered.length > 0 && customList(assignPoolFiltered)
-          )}
+            <div className="flex border-gray-400 rounded-md bg-slate-800 h-13">
+              <div className="flex w-full h-full p-3 flex-wrap gap-1">
+                {/* 체크박스 폼컨트롤 해야하나? */}
+                {gameInfo.class &&
+                  gameInfo.class.map((game, idx) => (
+                    <div className="flex w-28 justify-start items-center gap-x-2">
+                      <input
+                        type="checkbox"
+                        tabIndex={-1}
+                        checked={game.launched}
+                        onChange={() => handleChk(idx)}
+                        id={`itemsClassCheckbox-${game.title}`}
+                        className="w-3 h-3 bg-blue-100 border-blue-300 text-blue-500 focus:ring-blue-200 border-0 focus:ring-0 text-xs"
+                      />
+                      <label
+                        id
+                        htmlFor={`itemsClassCheckbox-${game.title}`}
+                        className="font-medium text-gray-900 dark:text-gray-300 w-full h-full flex "
+                      >
+                        <span className="text-white mr-2 text-sm">
+                          {game.title}
+                        </span>
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div className="flex border-gray-400 rounded-md bg-slate-800 flex-col">
+              <div className="flex p-3">
+                <span className="text-white">배정된심판</span>
+                {assign ? (
+                  <span className="text-white ml-2">{`(${assign.length})`}</span>
+                ) : (
+                  <span className="text-white">0</span>
+                )}
+              </div>
+              <div className="flex w-full h-full p-3 flex-wrap gap-2">
+                {assign &&
+                  assign.map((item, idx) => (
+                    <div className="flex justify-center items-center w-18">
+                      <span className="bg-blue-500 py-1 px-1 text-xs rounded-lg text-white font-semibold">
+                        {item.refName}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+          <div
+            className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-3 gap-y-2"
+            style={{ minHeight: "370px" }}
+          >
+            <div className="flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800">
+              <div className="flex items-center h-5 justify-center w-full">
+                <span>
+                  <FontAwesomeIcon icon={faSearch} className="text-gray-200" />
+                </span>
+                <input
+                  type="text"
+                  name="refereeSearch"
+                  id="refereeSearch"
+                  onChange={(e) => {
+                    e.preventDefault();
+                    handleSearch(e.target.value);
+                  }}
+                  className=" bg-transparent border-0 text-white outline-none focus:ring-0 w-full"
+                />
+                {/* <button className="w-24 text-sm text-white">전체선택</button> */}
+              </div>
+            </div>
+            {searchCount === 0 ? (
+              <div className="flex h-13 w-full p-3 justify-center items-center border-0 border-gray-400 rounded-md bg-slate-800">
+                <div className="flex items-center h-5 justify-center ">
+                  <span className="text-white font-semibold text-sm">
+                    적당한 검색결과 없음
+                  </span>
+                </div>
+              </div>
+            ) : (
+              assignPoolFiltered.length > 0 && customList(assignPoolFiltered)
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

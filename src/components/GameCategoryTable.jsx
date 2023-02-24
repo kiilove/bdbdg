@@ -220,18 +220,32 @@ const GameCategoryTable = (props) => {
                                     className="text-white text-sm font-semibold py-3 px-6"
                                     key={items.title + idx}
                                   >
-                                    {items.title}
+                                    {items.launched ? (
+                                      <span>{items.title}</span>
+                                    ) : (
+                                      <span className=" line-through font-light italic text-gray-500">
+                                        {items.title}
+                                      </span>
+                                    )}
                                   </td>
                                   <td
                                     className="text-white text-sm font-semibold py-3 px-6"
                                     key={items.class + idx}
                                   >
                                     <div className="flex w-full flex-wrap gap-2">
-                                      {items.class.map((item, cIdx) => (
-                                        <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
-                                          {item.title}
-                                        </span>
-                                      ))}
+                                      {items.launched ? (
+                                        items.class.map((item, cIdx) => (
+                                          <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                                            {item.title}
+                                          </span>
+                                        ))
+                                      ) : (
+                                        <div>
+                                          <span className="font-light italic text-gray-500">
+                                            종목 개최 안함
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
                                   </td>
                                   <td
@@ -244,7 +258,11 @@ const GameCategoryTable = (props) => {
                                     className="text-white text-sm font-semibold py-3 px-6"
                                     key={items.referee + idx}
                                   >
-                                    10
+                                    {!items.refereeAssign
+                                      ? "배정안됨"
+                                      : items.refereeAssign.length > 0
+                                      ? items.refereeAssign.length
+                                      : "배정안됨"}
                                   </td>
                                   <td
                                     className="text-white text-sm font-semibold py-3 px-6"
@@ -258,6 +276,7 @@ const GameCategoryTable = (props) => {
                                               pSetModal={modal2}
                                               pSetRefresh={setRefresh}
                                               pGameId={items.id}
+                                              pIndex={idx}
                                             />
                                           ),
                                         })
