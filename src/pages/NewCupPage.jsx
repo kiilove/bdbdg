@@ -200,8 +200,8 @@ const NewCupPage = () => {
   return (
     <div className="flex w-full h-full flex-col gap-y-8">
       <div className="flex w-full gap-x-8 flex-col">
-        <div className="flex w-full justify-center items-center p-10 h-20">
-          <ol className="stepper">
+        <div className="flex w-full justify-center items-center p-10 h-20 ">
+          <ol className="stepper" style={{ minWidth: "900px" }}>
             {stepsArray.map((item, idx) =>
               idx <= step - 1 ? (
                 <li className="stepper-item-active">

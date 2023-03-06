@@ -101,7 +101,7 @@ export const NewCupInfo = () => {
     >
       <Modal open={modal} onClose={handleCloseModal}>
         <div
-          className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
+          className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-md flex flex-col"
           style={{
             backgroundColor: "rgba(7,11,41,0.9)",
             transform: "translate(-50%, -50%)",
@@ -238,6 +238,66 @@ export const NewCupInfo = () => {
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
+        </div>
+        <div className="flex w-full">{formTitle({ title: "참가비" })}</div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupPrice"
+            id="cupPrice"
+            value={cupInfo.cupPrice}
+            onChange={(e) => handleCupInfo(e)}
+            className={inputTextStyle}
+          />
+        </div>
+        <div className="flex w-full">
+          <div className="flex w-full px-5 gap-x-2">
+            <button className="text-white font-medium text-md">초기화</button>
+            <button className="text-white font-medium text-md">+10만원</button>
+            <button className="text-white font-medium text-md">+5만원</button>
+            <button className="text-white font-medium text-md">+1만원</button>
+            <button className="text-white font-medium text-md">-1만원</button>
+            <button className="text-white font-medium text-md">-5만원</button>
+            <button className="text-white font-medium text-md">-10만원</button>
+          </div>
+        </div>
+        <div className="flex w-full">
+          {formTitle({ title: "복수 종목 참가비" })}
+          <div className="flex w-full gap-x-2 justify-end items-end">
+            <label htmlFor="priceExtraType1">
+              <input type="radio" name="priceExtraType" id="priceExtraType1" />
+              <span className="text-white ml-2">정액</span>
+            </label>
+            <label htmlFor="priceExtraType2">
+              <input type="radio" name="priceExtraType" id="priceExtraType2" />
+              <span className="text-white ml-2">누적</span>
+            </label>
+            <label htmlFor="priceExtraType3">
+              <input type="radio" name="priceExtraType" id="priceExtraType3" />
+              <span className="text-white ml-2">없음</span>
+            </label>
+          </div>
+        </div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupPriceExtra"
+            id="cupPriceExtra"
+            value={cupInfo.cupPriceExtra}
+            onChange={(e) => handleCupInfo(e)}
+            className={inputTextStyle}
+          />
+        </div>
+        <div className="flex w-full ">
+          <div className="flex w-full px-5 gap-x-2">
+            <button className="text-white font-medium text-md">초기화</button>
+            <button className="text-white font-medium text-md">+10만원</button>
+            <button className="text-white font-medium text-md">+5만원</button>
+            <button className="text-white font-medium text-md">+1만원</button>
+            <button className="text-white font-medium text-md">-1만원</button>
+            <button className="text-white font-medium text-md">-5만원</button>
+            <button className="text-white font-medium text-md">-10만원</button>
+          </div>
         </div>
         <div className="flex w-full">{formTitle({ title: "일자" })}</div>
         <div>
