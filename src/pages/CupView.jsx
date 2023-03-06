@@ -17,7 +17,15 @@ import { useEffect } from "react";
 import WidgetWithTableDragable from "../components/WidgetWithTableDragable";
 
 import { useParams } from "react-router-dom";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { Bars } from "react-loader-spinner";
 import { NewCupInfo } from "../modals/NewCupInfo";
@@ -27,8 +35,10 @@ import { EditcupContext } from "../context/EditcupContext";
 import { Decrypter } from "../components/Encrypto";
 import GameCategoryTable from "../components/GameCategoryTable";
 import EditAssignReferees from "../modals/EditAssignReferees";
+import dayjs from "dayjs";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
+const INVOICE_HEADERS = ["이름", "이메일", "연락처", "신청일자", "신청종목"];
 
 const GAME_HEADERS = [
   { title: "경기순서", size: "10%" },
@@ -52,6 +62,8 @@ const CupView = () => {
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   const [isLoading, setIsLoading] = useState(false);
+
+  const [invoiceList, setInvoiceList] = useState([]);
   const { dispatch, editCup } = useContext(EditcupContext);
 
   const handleOpenModal = ({ component }) => {
@@ -90,6 +102,21 @@ const CupView = () => {
       .catch((error) => console.log(error));
   };
 
+  const getPlayerInvoice = async () => {
+    let dummy = [];
+    const invoiceRef = collection(db, "cupsjoin");
+    const invoiceQ = query(invoiceRef, where("cupId", "==", cupId));
+    const invoiceSnapshot = await getDocs(invoiceQ);
+
+    await invoiceSnapshot.forEach((doc) => {
+      dummy.push({ id: doc.id, ...doc.data() });
+    });
+
+    return new Promise((resolve, reject) => {
+      resolve(setInvoiceList([...dummy]));
+    });
+  };
+
   const updateCup = async (data) => {
     (data.cupInfo.cupName !== undefined ||
       data.cupInfo.cupCount !== undefined) &&
@@ -108,7 +135,10 @@ const CupView = () => {
 
     Promise.all(promises);
   };
-  useMemo(() => getCup(), [params]);
+  useMemo(() => {
+    getCup();
+    getPlayerInvoice();
+  }, [params]);
 
   useMemo(() => {
     updateCup(editCup);
@@ -126,6 +156,32 @@ const CupView = () => {
     } else {
       return { titleLink: null };
     }
+  };
+
+  const handleInvoicePlayers = (data) => {
+    let dataArray = [];
+    console.log(data);
+
+    if (data !== undefined && data.length) {
+      data.map((item) => {
+        const itemRow = [
+          item.pName,
+          item.pEmail,
+          item.pTel,
+          dayjs(item.invoiceDate).format("YYYY-MM-DD"),
+          item.joinGames.map((game) => (
+            <div className="flex flex-wrap w-full gap-2 h-full p-1">
+              <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                {game.gameTitle} ({game.gameClass})
+              </span>
+            </div>
+          )),
+        ];
+        dataArray.push(itemRow);
+      });
+    }
+    console.log(dataArray);
+    return dataArray;
   };
 
   const handleRefereeTable = (data) => {
@@ -253,6 +309,19 @@ const CupView = () => {
                     상태 : {cupInfo && cupState}
                   </span>
                 </div>
+              </div>
+            </div>
+            <div className="flex w-full gap-x-8 ">
+              <div className="flex w-full h-96">
+                <WidgetWithTable
+                  data={{
+                    title: "참가신청선수",
+                    titleIcon: faPeopleLine,
+                    tableHeaders: INVOICE_HEADERS,
+                    tableData: handleInvoicePlayers(invoiceList),
+                    modalComponent: "",
+                  }}
+                />
               </div>
             </div>
             <div className="flex w-full gap-x-8 ">
