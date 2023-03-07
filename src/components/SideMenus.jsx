@@ -19,8 +19,9 @@ const menuItems = [
   { id: 4, title: "경기 기록관", link: "/cuplist", icon: faLandmarkDome },
   { id: 5, title: "심판진", link: "/refereelist", icon: faScaleBalanced },
   { id: 6, title: "선수진", link: "/refereemanager", icon: faPeopleLine },
-  { id: 7, title: "협회", link: "/orglist", icon: faBuilding },
-  { id: 8, title: "관리자", link: "/admin", icon: faUserSecret },
+  { id: 7, title: "종목", link: "/gamelist", icon: faBuilding },
+  { id: 8, title: "협회", link: "/orglist", icon: faBuilding },
+  { id: 9, title: "관리자", link: "/admin", icon: faUserSecret },
   { id: 10, title: "테스트페이지", link: "/test", icon: faUserSecret },
 ];
 const SideMenus = () => {

@@ -13,6 +13,7 @@ import { ToastContainer } from "react-toastify";
 import Dashboard from "./pages/Dashboard";
 import OrgList from "./pages/OrgList";
 import { NewcupContextProvider } from "./context/NewcupContext";
+import GameList from "./pages/GameList";
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
 
               <Route path="/refereelist" element={<RefereeList />} />
               <Route path="/orglist" element={<OrgList />} />
+              <Route path="/gamelist" element={<GameList />} />
             </Routes>
           </div>
         </div>

@@ -3,12 +3,14 @@ import { Modal } from "@mui/material";
 import { widgetTitle } from "../components/Titles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faEye,
   faFlagCheckered,
   faPenToSquare,
   faPeopleLine,
   faPlus,
   faScaleBalanced,
   faSitemap,
+  faSquarePen,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import WidgetWithTable from "../components/WidgetWithTable";
@@ -36,9 +38,17 @@ import { Decrypter } from "../components/Encrypto";
 import GameCategoryTable from "../components/GameCategoryTable";
 import EditAssignReferees from "../modals/EditAssignReferees";
 import dayjs from "dayjs";
+import EditInvoice from "../modals/EditInvoice";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["ID", "이름", "이메일"];
-const INVOICE_HEADERS = ["이름", "이메일", "연락처", "신청일자", "신청종목"];
+const INVOICE_HEADERS = [
+  "이름",
+  "이메일",
+  "연락처",
+  "신청일자",
+  "신청종목",
+  "액션",
+];
 
 const GAME_HEADERS = [
   { title: "경기순서", size: "10%" },
@@ -60,14 +70,16 @@ const CupView = () => {
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [posterTitle, setPosterTitle] = useState();
   const [modal, setModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
   const [modalComponent, setModalComponent] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
   const [invoiceList, setInvoiceList] = useState([]);
   const { dispatch, editCup } = useContext(EditcupContext);
 
-  const handleOpenModal = ({ component }) => {
+  const handleOpenModal = ({ component, title }) => {
     setModalComponent(() => component);
+    setModalTitle((prev) => (prev = title));
     setModal(() => true);
   };
 
@@ -176,6 +188,24 @@ const CupView = () => {
               </span>
             </div>
           )),
+          <div className="flex">
+            <div className="flex">
+              <button
+                onClick={() =>
+                  handleOpenModal({
+                    component: <EditInvoice collentionId={item.id} />,
+                    title: "참가신청서2",
+                  })
+                }
+              >
+                <FontAwesomeIcon
+                  icon={faPenToSquare}
+                  className="text-white text-lg"
+                />
+              </button>
+            </div>
+            <div className="flex"></div>
+          </div>,
         ];
         dataArray.push(itemRow);
       });
@@ -220,7 +250,7 @@ const CupView = () => {
                 {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
                 <div className="flex w-full">
                   <div className="flex w-1/2">
-                    {widgetTitle({ title: "대회 정보 수정" })}
+                    {widgetTitle({ title: modalTitle })}
                   </div>
                   <div
                     className="flex w-1/2 justify-end items-center hover:cursor-pointer"
@@ -266,6 +296,7 @@ const CupView = () => {
                         onClick={() =>
                           handleOpenModal({
                             component: <EditCupInfo />,
+                            title: "대회정보수정",
                           })
                         }
                       >
@@ -315,11 +346,10 @@ const CupView = () => {
               <div className="flex w-full h-96">
                 <WidgetWithTable
                   data={{
-                    title: "참가신청선수",
+                    title: "참가신청선수명단",
                     titleIcon: faPeopleLine,
                     tableHeaders: INVOICE_HEADERS,
                     tableData: handleInvoicePlayers(invoiceList),
-                    modalComponent: "",
                   }}
                 />
               </div>
@@ -333,6 +363,7 @@ const CupView = () => {
                     tableHeaders: REFEREE_HEADERS,
                     tableData: handleRefereeTable(editCup.refereeAssign),
                     modalComponent: <EditAssignReferees />,
+                    modalTitle: "심판배정",
                   }}
                 />
               </div>

@@ -16,6 +16,7 @@ const WidgetWithTable = (props) => {
 
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
+    console.log(component);
     setModal(() => true);
   };
 
@@ -39,7 +40,9 @@ const WidgetWithTable = (props) => {
           {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
           <div className="flex w-full ">
             <div className="flex w-1/2">
-              {widgetTitle({ title: props.data.title })}
+              {widgetTitle({
+                title: props.data.modalTitle || props.data.title,
+              })}
             </div>
             <div
               className="flex w-1/2 justify-end items-center hover:cursor-pointer"
