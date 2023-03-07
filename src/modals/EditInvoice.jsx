@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import useFirestore from "../customhooks/useFirestore";
 
-const EditInvoice = ({ collectionId }) => {
-  console.log(collectionId);
+const EditInvoice = (props) => {
+  console.log(props.collectionId);
   const { data, loading, error, getDocument } = useFirestore();
 
   useEffect(() => {
-    getDocument("cupsJoin", collectionId);
-  }, []);
+    getDocument("cupsjoin", props.collectionId);
+  }, [props.collectionId]);
 
   useEffect(() => {
     console.log(data);

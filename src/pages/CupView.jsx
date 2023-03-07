@@ -193,7 +193,7 @@ const CupView = () => {
               <button
                 onClick={() =>
                   handleOpenModal({
-                    component: <EditInvoice collentionId={item.id} />,
+                    component: <EditInvoice collectionId={item.id} />,
                     title: "참가신청서2",
                   })
                 }

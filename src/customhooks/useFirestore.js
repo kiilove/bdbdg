@@ -16,12 +16,13 @@ const useFirestore = () => {
   const [error, setError] = useState(null);
 
   const getDocument = async (collectionName, collectionId) => {
-    console.log(collectionName, collectionId);
     try {
       const docSnapshot = await getDoc(doc(db, collectionName, collectionId));
-      const documents = { id: docSnapshot.id, ...docSnapshot.data() };
-      console.log(documents);
-      setData(documents);
+      if (docSnapshot.exists()) {
+        setData({ id: docSnapshot.id, ...docSnapshot.data() });
+      } else {
+        setError({ message: "Document does not exist" });
+      }
       setLoading(false);
     } catch (error) {
       setError(error);
