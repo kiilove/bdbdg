@@ -69,11 +69,6 @@ const useFirestore = () => {
   const updateData = async (collectionName, id, updatedData, callback) => {
     try {
       await updateDoc(doc(db, collectionName, id), updatedData);
-      setData((prevState) =>
-        prevState.map((item) =>
-          item.id === id ? { ...item, ...updatedData } : item
-        )
-      );
       callback && callback();
     } catch (error) {
       setError(error);
