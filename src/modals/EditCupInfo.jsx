@@ -22,6 +22,11 @@ export const EditCupInfo = () => {
   const [cupInfo, setCupInfo] = useState({});
   const [orgList, setOrgList] = useState([]);
   const [cupOrg, setCupOrg] = useState("");
+  const [fee, setFee] = useState({
+    basicFee: 0,
+    extraFee: 0,
+    extraType: "없음",
+  });
   const [cupState, setCupState] = useState("대회준비중");
   const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
@@ -81,6 +86,7 @@ export const EditCupInfo = () => {
     setCupOrg(editCup.cupInfo.cupOrg || "");
     setCupDate(editCup.cupInfo.cupDate || { startDate: new Date() });
     setCupState(editCup.cupInfo.cupState || "대회준비중");
+    setFee(editCup.cupInfo.cupFee || {});
   }, []);
 
   useMemo(
@@ -91,8 +97,9 @@ export const EditCupInfo = () => {
         cupPoster: posterList,
         cupDate: cupDate,
         cupState: cupState,
+        cupFee: fee,
       })),
-    [cupOrg, posterList, cupDate, cupState]
+    [cupOrg, posterList, cupDate, cupState, fee]
   );
 
   useMemo(
@@ -245,6 +252,239 @@ export const EditCupInfo = () => {
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
+        </div>
+        <div className="flex w-full">{formTitle({ title: "참가비" })}</div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupPrice"
+            id="cupPrice"
+            value={Number(fee.basicFee).toLocaleString()}
+            onChange={(e) =>
+              setFee(
+                (prev) =>
+                  (prev = { ...fee, basicFee: e.target.value.replace(",", "") })
+              )
+            }
+            className={inputTextStyle}
+          />
+          <div className="flex w-full justify-end items-center gap-x-2 mr-2">
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      basicFee: fee.basicFee + 100000,
+                    })
+                )
+              }
+            >
+              +10만
+            </button>
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      basicFee: fee.basicFee + 50000,
+                    })
+                )
+              }
+            >
+              +5만
+            </button>
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      basicFee: fee.basicFee + 10000,
+                    })
+                )
+              }
+            >
+              +1만
+            </button>
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      basicFee: 0,
+                    })
+                )
+              }
+            >
+              초기화
+            </button>
+          </div>
+        </div>
+        <div className="flex w-full mt-5">
+          {formTitle({ title: "복수 종목 참가비" })}
+          <div className="flex gap-x-2 justify-end items-center bg-slate-400 px-1 h-8 rounded-full">
+            <label htmlFor="priceExtraType1">
+              <input
+                type="radio"
+                name="priceExtraType"
+                id="priceExtraType1"
+                value="정액"
+                className="hidden"
+                onClick={(e) =>
+                  setFee(
+                    (prev) =>
+                      (prev = {
+                        ...fee,
+                        extraType: e.target.value,
+                      })
+                  )
+                }
+              />
+              {fee.extraType === "정액" ? (
+                <div className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm justify-center items-center flex hover:cursor">
+                  정액
+                </div>
+              ) : (
+                <div className="bg-slate-400 text-gray-800 font-semibold w-14 h-7 rounded-xl text-sm justify-center items-center flex hover:cursor-pointer">
+                  정액
+                </div>
+              )}
+            </label>
+            <label htmlFor="priceExtraType2">
+              <input
+                type="radio"
+                name="priceExtraType"
+                id="priceExtraType2"
+                value="누적"
+                className="hidden"
+                onClick={(e) =>
+                  setFee(
+                    (prev) =>
+                      (prev = {
+                        ...fee,
+                        extraType: e.target.value,
+                      })
+                  )
+                }
+              />
+              {fee.extraType === "누적" ? (
+                <div className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm justify-center items-center flex hover:cursor-pointer">
+                  누적
+                </div>
+              ) : (
+                <div className="bg-slate-400 text-gray-800 font-semibold w-14 h-7 rounded-xl text-sm justify-center items-center flex hover:cursor-pointer">
+                  누적
+                </div>
+              )}
+            </label>
+            <label htmlFor="priceExtraType3">
+              <input
+                type="radio"
+                name="priceExtraType"
+                id="priceExtraType3"
+                value="없음"
+                className="hidden"
+                onClick={(e) =>
+                  setFee(
+                    (prev) =>
+                      (prev = {
+                        ...fee,
+                        extraType: e.target.value,
+                      })
+                  )
+                }
+              />
+              {fee.extraType === "없음" ? (
+                <div className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm justify-center items-center flex hover:cursor-pointer">
+                  없음
+                </div>
+              ) : (
+                <div className="bg-slate-400 text-gray-800 font-semibold w-14 h-7 rounded-xl text-sm justify-center items-center flex hover:cursor-pointer">
+                  없음
+                </div>
+              )}
+            </label>
+          </div>
+        </div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupPriceExtra"
+            id="cupPriceExtra"
+            value={Number(fee.extraFee).toLocaleString()}
+            onChange={(e) =>
+              setFee(
+                (prev) =>
+                  (prev = { ...fee, extraFee: e.target.value.replace(",", "") })
+              )
+            }
+            className={inputTextStyle}
+          />
+          <div className="flex w-full justify-end items-center gap-x-2 mr-2">
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      extraFee: fee.extraFee + 100000,
+                    })
+                )
+              }
+            >
+              +10만
+            </button>
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      extraFee: fee.extraFee + 50000,
+                    })
+                )
+              }
+            >
+              +5만
+            </button>
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      extraFee: fee.extraFee + 10000,
+                    })
+                )
+              }
+            >
+              +1만
+            </button>
+            <button
+              className="bg-blue-500 text-white w-14 h-7 rounded-xl text-sm"
+              onClick={() =>
+                setFee(
+                  (prev) =>
+                    (prev = {
+                      ...fee,
+                      extraFee: 0,
+                    })
+                )
+              }
+            >
+              초기화
+            </button>
+          </div>
         </div>
         <div className="flex w-full">{formTitle({ title: "일자" })}</div>
         <div>

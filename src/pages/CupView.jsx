@@ -194,7 +194,7 @@ const CupView = () => {
                 onClick={() =>
                   handleOpenModal({
                     component: <EditInvoice collectionId={item.id} />,
-                    title: "참가신청서2",
+                    title: "참가신청서",
                   })
                 }
               >
@@ -243,7 +243,7 @@ const CupView = () => {
               <div
                 className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
                 style={{
-                  backgroundColor: "rgba(7,11,41,0.9)",
+                  backgroundColor: "rgba(7,11,41,1)",
                   transform: "translate(-50%, -50%)",
                 }}
               >
