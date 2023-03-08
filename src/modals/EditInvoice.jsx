@@ -99,37 +99,80 @@ const EditInvoice = (props) => {
 
     Promise.all(promises);
   };
+
   const handleAddPlayerByGamesCategory = () => {
-    let dummyCategory = [...cupData.gamesCategory];
-    joinGames.map((game) => {
-      const gameCategoryIndex = dummyCategory.findIndex(
-        (category) => category.id === game.id
-      );
-      const classArray = dummyCategory.find(
-        (category) => category.id === game.id
-      )?.class;
+    const updatedGamesCategory = cupData.gamesCategory.map((category) => {
+      const game = joinGames.find((game) => game.id === category.id);
+      if (!game) return category;
+      const classArray = [...category.class];
       const titleObject = classArray.findIndex(
         (item) => item.title === game.gameClass
       );
-
-      const players = {
-        pName: joinInfo.pName,
-        pId: joinInfo.pId,
-        pEmail: joinInfo.pEmail,
-        pTel: joinInfo.pTel,
-      };
-      const newClass = classArray.splice(titleObject, 1, {
+      if (titleObject === -1) return category;
+      const isPlayerExist = classArray[titleObject].players.some(
+        (player) => player.pId === joinInfo.pId
+      );
+      if (isPlayerExist) return category;
+      const newPlayers = [
+        ...classArray[titleObject].players,
+        {
+          pName: joinInfo.pName,
+          pId: joinInfo.pId,
+          pEmail: joinInfo.pEmail,
+          pTel: joinInfo.pTel,
+        },
+      ];
+      classArray[titleObject] = {
         ...classArray[titleObject],
-        players: [players],
-      });
-      dummyCategory.splice(gameCategoryIndex, 1, {
-        ...dummyCategory[gameCategoryIndex],
-      });
-      // console.log(newClass);
-      // console.log(dummyCategory);
-      setNewCupData(() => ({ ...cupData, gamesCategory: dummyCategory }));
+        players: newPlayers,
+      };
+      return { ...category, class: classArray };
     });
+    setNewCupData({ ...cupData, gamesCategory: updatedGamesCategory });
   };
+
+  const removePlayerByPid = (pid) => {
+    const updatedGamesCategory = cupData.gamesCategory.map((category) => {
+      const classArray = [...category.class];
+      classArray.forEach((item) => {
+        item.players = item.players.filter((player) => player.pId !== pid);
+      });
+      return { ...category, class: classArray };
+    });
+    setNewCupData({ ...cupData, gamesCategory: updatedGamesCategory });
+  };
+
+  // const handleAddPlayerByGamesCategory = () => {
+  //   let dummyCategory = [...cupData.gamesCategory];
+  //   joinGames.map((game) => {
+  //     const gameCategoryIndex = dummyCategory.findIndex(
+  //       (category) => category.id === game.id
+  //     );
+  //     const classArray = dummyCategory.find(
+  //       (category) => category.id === game.id
+  //     )?.class;
+  //     const titleObject = classArray.findIndex(
+  //       (item) => item.title === game.gameClass
+  //     );
+
+  //     const players = {
+  //       pName: joinInfo.pName,
+  //       pId: joinInfo.pId,
+  //       pEmail: joinInfo.pEmail,
+  //       pTel: joinInfo.pTel,
+  //     };
+  //     const newClass = classArray.splice(titleObject, 1, {
+  //       ...classArray[titleObject],
+  //       players: [players],
+  //     });
+  //     dummyCategory.splice(gameCategoryIndex, 1, {
+  //       ...dummyCategory[gameCategoryIndex],
+  //     });
+  //     // console.log(newClass);
+  //     // console.log(dummyCategory);
+  //     setNewCupData(() => ({ ...cupData, gamesCategory: dummyCategory }));
+  //   });
+  // };
 
   useEffect(() => {
     getDocument("cupsjoin", props.collectionId);
@@ -160,7 +203,7 @@ const EditInvoice = (props) => {
   useMemo(() => console.log(cupData), [cupData]);
   useMemo(() => {
     console.log(newCupData);
-    
+
     updateData("cups", newCupData.id, newCupData);
   }, [newCupData]);
 

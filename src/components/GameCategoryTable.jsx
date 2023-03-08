@@ -11,7 +11,7 @@ import { EditAssignGameCategory } from "../modals/EditAssignGamesCategory";
 const GAME_HEADERS = [
   { title: "경기순서", size: "10%" },
   { title: "종목명", size: "15%" },
-  { title: "체급", size: "30%" },
+  { title: "체급 / 확정 선수", size: "30%" },
   { title: "참가신청", size: "10%" },
   { title: "심판배정", size: "10%" },
   { title: "액션", size: "10%" },
@@ -234,9 +234,12 @@ const GameCategoryTable = (props) => {
                                   >
                                     <div className="flex w-full flex-wrap gap-2">
                                       {items.launched ? (
+                                        
                                         items.class.map((item, cIdx) => (
                                           <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
                                             {item.title}
+                                            {item.players &&
+                                              ` / ${item.players.length}`}
                                           </span>
                                         ))
                                       ) : (
@@ -252,7 +255,7 @@ const GameCategoryTable = (props) => {
                                     className="text-white text-sm font-semibold py-3 px-6"
                                     key={items.player + idx}
                                   >
-                                    10
+                                    {items.players && items.players.length}
                                   </td>
                                   <td
                                     className="text-white text-sm font-semibold py-3 px-6"
