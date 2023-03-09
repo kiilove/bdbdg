@@ -203,10 +203,9 @@ const CupView = () => {
                   })
                 }
               >
-                <FontAwesomeIcon
-                  icon={faPenToSquare}
-                  className="text-white text-lg"
-                />
+                <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                  참가신청서 보기
+                </span>
               </button>
             </div>
             <div className="flex"></div>
@@ -243,7 +242,7 @@ const CupView = () => {
         </div>
       ) : (
         cupInfo && (
-          <div className="flex w-full h-full flex-col gap-y-8">
+          <div className="flex w-full h-full flex-col gap-y-5">
             <Modal open={modal} onClose={handleCloseModal}>
               <div
                 className="absolute top-1/2 left-1/2 border-0 px-10 py-3 outline-none rounded-lg flex flex-col"
@@ -270,18 +269,18 @@ const CupView = () => {
                 {modalComponent}
               </div>
             </Modal>
-            <div className="flex w-full gap-x-8">
+            <div className="flex w-full gap-x-5">
               <div
-                className="flex w-1/3 justify-center p-5  rounded-lg"
+                className="flex justify-center p-3  rounded-lg"
                 style={{ backgroundColor: "rgba(7,11,41,0.7" }}
               >
                 <img
                   src={posterTitle}
-                  className="w-full rounded-2xl object-cover object-top"
+                  className=" w-80 rounded-2xl object-cover object-top"
                 />
               </div>
               <div
-                className="flex w-2/3 flex-col px-10 py-8 gap-y-5 rounded-lg"
+                className="flex w-full flex-col p-3 gap-y-5 rounded-lg"
                 style={{ backgroundColor: "rgba(7,11,41,0.7)" }}
               >
                 <div className="flex">
@@ -290,9 +289,9 @@ const CupView = () => {
                       <div className="flex justify-center items-center">
                         <FontAwesomeIcon
                           icon={faFlagCheckered}
-                          className="text-white text-xl mr-2"
+                          className="text-white text-base mr-2"
                         />
-                        <span className="text-white text-xl ">
+                        <span className="text-white text-base ">
                           기초정보(모집공고)
                         </span>
                       </div>
@@ -313,37 +312,38 @@ const CupView = () => {
                     </div>
                   </div>
                 </div>
-
-                <div className="flex justify-start items-top">
-                  <span className="text-white text-xl">
-                    대회명 : {cupInfo && cupInfo.cupName}
-                  </span>
-                </div>
-                <div className="flex justify-start items-top">
-                  <span className="text-white text-xl">
-                    회차 : {cupInfo && cupInfo.cupCount}회
-                  </span>
-                </div>
-                <div className="flex justify-start items-top">
-                  <span className="text-white text-xl">
-                    주최 : {cupInfo && cupOrg}
-                  </span>
-                </div>
-                <div className="flex justify-start items-top">
-                  <span className="text-white text-xl">
-                    장소 : {cupInfo && cupInfo.cupLocation}
-                  </span>
-                </div>
-                <div className="flex justify-start items-top">
-                  <span className="text-white text-xl">
-                    일자 :{" "}
-                    {cupDate.startDate === null ? "미정" : cupDate.startDate}
-                  </span>
-                </div>
-                <div className="flex justify-start items-top">
-                  <span className="text-white text-xl">
-                    상태 : {cupInfo && cupState}
-                  </span>
+                <div className="flex flex-col w-full h-full px-5 gap-y-2">
+                  <div className="flex justify-start items-top ">
+                    <span className="text-white text-base">
+                      대회명 : {cupInfo && cupInfo.cupName}
+                    </span>
+                  </div>
+                  <div className="flex justify-start items-top">
+                    <span className="text-white text-base">
+                      회차 : {cupInfo && cupInfo.cupCount}회
+                    </span>
+                  </div>
+                  <div className="flex justify-start items-top">
+                    <span className="text-white text-base">
+                      주최 : {cupInfo && cupOrg}
+                    </span>
+                  </div>
+                  <div className="flex justify-start items-top">
+                    <span className="text-white text-base">
+                      장소 : {cupInfo && cupInfo.cupLocation}
+                    </span>
+                  </div>
+                  <div className="flex justify-start items-top">
+                    <span className="text-white text-base">
+                      일자 :{" "}
+                      {cupDate.startDate === null ? "미정" : cupDate.startDate}
+                    </span>
+                  </div>
+                  <div className="flex justify-start items-top">
+                    <span className="text-white text-base">
+                      상태 : {cupInfo && cupState}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -363,7 +363,7 @@ const CupView = () => {
               <div className="flex w-1/2 h-96">
                 <WidgetWithTable
                   data={{
-                    title: "참가심판",
+                    title: "대회참가 심판",
                     titleIcon: faScaleBalanced,
                     tableHeaders: REFEREE_HEADERS,
                     tableData: handleRefereeTable(editCup.refereeAssign),
@@ -380,6 +380,7 @@ const CupView = () => {
                     tableHeaders: PLAYER_HEADERS,
                     tableData: "",
                     modalComponent: "",
+                    editIcon: false,
                   }}
                 />
               </div>

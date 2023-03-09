@@ -67,6 +67,7 @@ const useFirestore = () => {
   };
 
   const updateData = async (collectionName, id, updatedData, callback) => {
+    console.log(updatedData);
     try {
       await updateDoc(doc(db, collectionName, id), updatedData);
       callback && callback();

@@ -15,12 +15,7 @@ import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
-export const EditAssignGameCategory = ({
-  pSetModal,
-  pSetRefresh,
-  pGameId,
-  pIndex,
-}) => {
+export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
   const { dispatch, editCup } = useContext(EditcupContext);
   const [gameInfo, setGameInfo] = useState(editCup.gamesCategory[pIndex]);
   const [gamesCategory, setGamesCategory] = useState([

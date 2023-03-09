@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Modal } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { widgetTitle } from "../components/Titles";
+import { addComma, removeComma } from "../customhooks/fomatFn";
 
 import useFirestore from "../customhooks/useFirestore";
 import { EditAssignGameCategory } from "./EditAssignGamesCategory";
@@ -14,9 +15,11 @@ const inputTextStyle =
 const EditInvoice = (props) => {
   const [isLock, setIsLock] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const [joinInfo, setJoinInfo] = useState({});
   const [newCupData, setNewCupData] = useState({});
   const [joinGames, setJoinGames] = useState([]);
+  const [feeInfo, setFeeInfo] = useState({});
   const [modal, setModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalComponent, setModalComponent] = useState();
@@ -32,12 +35,11 @@ const EditInvoice = (props) => {
   const handleFee = () => {
     let sumFee = 0;
     let extraCount = 0;
-    console.log(props.cupFee.basicFee);
     const basicFee = props.cupFee.basicFee;
     const extraFee = props.cupFee.extraFee;
     const extraType = props.cupFee.extraType;
     const gameCount = joinGames.length;
-
+    console.log(extraFee);
     if (gameCount <= 1) {
       extraCount = 0;
     } else {
@@ -67,9 +69,9 @@ const EditInvoice = (props) => {
       default:
         break;
     }
-
     console.log(sumFee);
     setJoinFee(sumFee);
+    setFeeInfo({ ...feeInfo, joinFee: sumFee });
   };
 
   const handleOpenModal = ({ component, title }) => {
@@ -88,33 +90,59 @@ const EditInvoice = (props) => {
       setJoinInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
   };
-
-  const handleIncomeMoney = () => {
-    const isIncome = !joinInfo.incomeMoney || false;
-    setJoinInfo((prev) => ({ ...prev, incomeMoney: isIncome }));
+  const handleComma = (e) => {
+    const value = parseInt(e.target.value.replace(/[^0-9]/g, ""));
+    setIncomeFee(value);
   };
 
-  const handleConfirm = () => {
-    const promises = [handleAddPlayerByGamesCategory()];
+  const handleFeeInfo = () => {
+    console.log(feeInfo);
+    setFeeInfo({ ...feeInfo, joinFee, incomeFee });
+  };
 
-    Promise.all(promises);
+  const numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const handleConfirm = async (value) => {
+    setIsLock(value);
+    setIsConfirmed(value);
+    if (!newCupData) {
+      setNewCupData({ ...cupData });
+    }
+    const promises = [
+      handleAddPlayerByGamesCategory(),
+      updateData("cups", newCupData.id, newCupData),
+      updateData("cupsjoin", joinInfo.id, {
+        ...joinInfo,
+        isConfirmed: value,
+        feeInfo,
+      }),
+    ];
+
+    await Promise.all(promises);
   };
 
   const handleAddPlayerByGamesCategory = () => {
     const updatedGamesCategory = cupData.gamesCategory.map((category) => {
       const game = joinGames.find((game) => game.id === category.id);
       if (!game) return category;
-      const classArray = [...category.class];
+      const classArray = category.class.map((classItem) => {
+        const existingPlayers = classItem.players || [];
+        const filteredPlayers = existingPlayers.filter(
+          (player) => player.pId !== joinInfo.pId
+        );
+        return {
+          ...classItem,
+          players: filteredPlayers,
+        };
+      });
       const titleObject = classArray.findIndex(
         (item) => item.title === game.gameClass
       );
       if (titleObject === -1) return category;
-      const isPlayerExist = classArray[titleObject].players.some(
-        (player) => player.pId === joinInfo.pId
-      );
-      if (isPlayerExist) return category;
       const newPlayers = [
-        ...classArray[titleObject].players,
+        ...(classArray[titleObject]?.players || []),
         {
           pName: joinInfo.pName,
           pId: joinInfo.pId,
@@ -123,7 +151,7 @@ const EditInvoice = (props) => {
         },
       ];
       classArray[titleObject] = {
-        ...classArray[titleObject],
+        ...(classArray[titleObject] || {}),
         players: newPlayers,
       };
       return { ...category, class: classArray };
@@ -142,38 +170,6 @@ const EditInvoice = (props) => {
     setNewCupData({ ...cupData, gamesCategory: updatedGamesCategory });
   };
 
-  // const handleAddPlayerByGamesCategory = () => {
-  //   let dummyCategory = [...cupData.gamesCategory];
-  //   joinGames.map((game) => {
-  //     const gameCategoryIndex = dummyCategory.findIndex(
-  //       (category) => category.id === game.id
-  //     );
-  //     const classArray = dummyCategory.find(
-  //       (category) => category.id === game.id
-  //     )?.class;
-  //     const titleObject = classArray.findIndex(
-  //       (item) => item.title === game.gameClass
-  //     );
-
-  //     const players = {
-  //       pName: joinInfo.pName,
-  //       pId: joinInfo.pId,
-  //       pEmail: joinInfo.pEmail,
-  //       pTel: joinInfo.pTel,
-  //     };
-  //     const newClass = classArray.splice(titleObject, 1, {
-  //       ...classArray[titleObject],
-  //       players: [players],
-  //     });
-  //     dummyCategory.splice(gameCategoryIndex, 1, {
-  //       ...dummyCategory[gameCategoryIndex],
-  //     });
-  //     // console.log(newClass);
-  //     // console.log(dummyCategory);
-  //     setNewCupData(() => ({ ...cupData, gamesCategory: dummyCategory }));
-  //   });
-  // };
-
   useEffect(() => {
     getDocument("cupsjoin", props.collectionId);
   }, [props.collectionId]);
@@ -182,30 +178,37 @@ const EditInvoice = (props) => {
     // console.log(data);
     data.joinGames && setJoinGames([...data.joinGames]);
     data.docuId && setJoinInfo({ ...data });
+    data.dacuId && setFeeInfo({ ...data.feeInfo });
   }, [data]);
 
   useMemo(() => {
-    console.log(joinGames);
     if (props.cupFee && joinGames) {
       handleFee();
     }
-    setJoinInfo((prev) => ({ ...prev, joinGames: [...joinGames], joinFee }));
-  }, [joinGames, joinFee]);
+    setJoinInfo((prev) => ({ ...prev, joinGames }));
+  }, [joinGames]);
 
   useMemo(() => {
-    console.log(joinInfo);
+    setFeeInfo(joinInfo.feeInfo);
+    setIsConfirmed(joinInfo.isConfirmed);
     if (joinInfo.docuId) {
       cupGetDocument("cups", data.cupId);
+      setIncomeFee(joinInfo.feeInfo.incomeFee);
+      //setJoinFee(joinInfo.feeInfo.joinFee);
       setIsLoading(false);
     }
   }, [joinInfo]);
 
-  useMemo(() => console.log(cupData), [cupData]);
   useMemo(() => {
-    console.log(newCupData);
-
-    updateData("cups", newCupData.id, newCupData);
-  }, [newCupData]);
+    if (cupData.cupName) {
+      setNewCupData({ ...cupData });
+    }
+  }, [cupData]);
+  useMemo(() => console.log(feeInfo), [feeInfo]);
+  useMemo(
+    () => setFeeInfo({ ...feeInfo, joinFee, incomeFee }),
+    [joinFee, incomeFee]
+  );
 
   return (
     <div
@@ -242,7 +245,7 @@ const EditInvoice = (props) => {
               {modalComponent}
             </div>
           </Modal>
-          <div className="flex w-full  flex-col items-start gap-y-2">
+          <div className="flex w-full  flex-col items-start gap-y-2 mb-5">
             <div className="flex w-full h-16 justify-between items-center gap-x-3">
               <div className="flex">
                 {joinFee === incomeFee && (
@@ -262,24 +265,23 @@ const EditInvoice = (props) => {
                 )}
               </div>
               <div className="flex gap-x-3">
-                <button
-                  className="w-32 h-10 bg-sky-500 rounded-lg text-white"
-                  onClick={() => handleConfirm()}
-                >
-                  <span>출전확정</span>
-                </button>
-                <button
-                  className="w-10 h-10 bg-sky-500 rounded-lg text-white"
-                  onClick={() => {
-                    setIsLock(!isLock);
-                  }}
-                >
-                  {isLock ? (
+                {isConfirmed ? (
+                  <button
+                    className="w-32 h-10 bg-red-500 rounded-lg text-white"
+                    onClick={() => handleConfirm(false)}
+                  >
+                    <span className="mr-2">확정취소</span>
                     <FontAwesomeIcon icon={faLock} />
-                  ) : (
+                  </button>
+                ) : (
+                  <button
+                    className="w-32 h-10 bg-sky-500 rounded-lg text-white"
+                    onClick={() => handleConfirm(true)}
+                  >
+                    <span className="mr-2">출전확정</span>
                     <FontAwesomeIcon icon={faLockOpen} />
-                  )}
-                </button>
+                  </button>
+                )}
               </div>
             </div>
             <div className={inputBoxStyle}>
@@ -402,7 +404,6 @@ const EditInvoice = (props) => {
                   id="joinFee"
                   disabled={isLock}
                   value={Number(joinFee).toLocaleString() || 0}
-                  onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
                 />
               </div>
@@ -415,47 +416,46 @@ const EditInvoice = (props) => {
                   name="incomeFee"
                   id="incomeFee"
                   disabled={isLock}
-                  value={Number(incomeFee).toLocaleString() || 0}
-                  onChange={(e) => handleInputs(e)}
+                  value={numberWithCommas(incomeFee)}
+                  onChange={(e) => {
+                    //e.preventDefault();
+                    handleComma(e);
+                  }}
                   className={inputTextStyle}
                 />
               </div>
               {!isLock && (
-                <div className="flex w-1/2 justify-start items-center">
+                <div className="flex w-1/2 justify-start items-center gap-x-2">
                   <button
                     className="bg-blue-500 text-white w-14 py-1 px-2 rounded-lg text-xs"
-                    onClick={() => setIncomeFee((prev) => (prev = joinFee))}
+                    onClick={() => setIncomeFee(joinFee)}
                   >
                     정액
                   </button>
-                  <input
-                    type="text"
-                    name="incomeFee"
-                    id="incomeFee"
-                    disabled={isLock}
-                    onChange={(e) =>
-                      setIncomeFee((prev) => (prev = e.target.value))
-                    }
-                    placeholder="직접입력"
-                    className={inputTextStyle}
-                  />
+                  <button
+                    className="bg-blue-500 text-white w-24 py-1 px-2 rounded-lg text-xs"
+                    onClick={() => handleFeeInfo()}
+                  >
+                    입금확인
+                  </button>
                 </div>
               )}
             </div>
             <div className={`${inputBoxStyle} h-auto gap-5 py-1`}>
               <div className="flex text-white text-sm w-28">신청종목</div>
-              <div className="flex text-white ml-2 gap-2 w-full flex-wrap justify-start items-center">
-                {isLock ? (
-                  joinGames &&
+              <div className="flex text-white gap-2 flex-wrap justify-start items-center">
+                {joinGames &&
                   joinGames.map((game) => (
                     <div className="flex flex-wrap h-full p-1">
                       <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
                         {game.gameTitle} ({game.gameClass})
                       </span>
                     </div>
-                  ))
-                ) : (
-                  <div className="flex text-white py-1 ml-2 gap-2 w-full flex-wrap justify-start items-center">
+                  ))}
+              </div>
+              {!isLock && (
+                <div className="flex text-white ml-2 gap-2 flex-wrap justify-start items-center">
+                  <div className="flex flex-wrap h-full p-1">
                     <button
                       onClick={() => {
                         handleOpenModal({
@@ -474,8 +474,8 @@ const EditInvoice = (props) => {
                       </span>
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </>

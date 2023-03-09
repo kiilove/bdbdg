@@ -7,14 +7,15 @@ import { EditcupContext } from "../context/EditcupContext";
 import { Modal } from "@mui/material";
 import { widgetTitle } from "./Titles";
 import { EditAssignGameCategory } from "../modals/EditAssignGamesCategory";
+import { EditCupManage } from "../modals/EditCupManage";
 
 const GAME_HEADERS = [
   { title: "경기순서", size: "10%" },
   { title: "종목명", size: "15%" },
-  { title: "체급 / 확정 선수", size: "30%" },
+  { title: "체급 / 확정 선수", size: "20%" },
   { title: "참가신청", size: "10%" },
   { title: "심판배정", size: "10%" },
-  { title: "액션", size: "10%" },
+  { title: "액션", size: "20%" },
 ];
 
 const GameCategoryTable = (props) => {
@@ -79,7 +80,7 @@ const GameCategoryTable = (props) => {
 
   return (
     <div
-      className="flex w-full  h-96 p-8 rounded-lg flex-col align-top justify-start gap-y-3"
+      className="flex w-full  h-96 p-3 rounded-xl flex-col align-top justify-start gap-y-3"
       style={{ backgroundColor: "rgba(7,11,41,0.6" }}
     >
       <Modal open={modal} onClose={handleCloseModal}>
@@ -134,14 +135,14 @@ const GameCategoryTable = (props) => {
           {modalComponent}
         </div>
       </Modal>
-      <div className="flex items-center justify-start bg-slate-800 w-full h-14 rounded-xl px-5 gap-x-2">
+      <div className="flex items-center justify-start bg-slate-800 w-full h-12 rounded-xl px-5 gap-x-2">
         <div className="flex justify-between w-full">
           <div className="flex justify-center items-center">
             <FontAwesomeIcon
               icon={props.data.titleIcon}
-              className="text-white text-xl mr-2"
+              className="text-white text-base mr-2"
             />
-            <span className="text-white text-xl ">{props.data.title}</span>
+            <span className="text-white text-base ">{props.data.title}</span>
           </div>
           <div
             className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
@@ -234,7 +235,6 @@ const GameCategoryTable = (props) => {
                                   >
                                     <div className="flex w-full flex-wrap gap-2">
                                       {items.launched ? (
-                                        
                                         items.class.map((item, cIdx) => (
                                           <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
                                             {item.title}
@@ -275,7 +275,7 @@ const GameCategoryTable = (props) => {
                                       onClick={() =>
                                         handleOpenModal2({
                                           component: (
-                                            <EditAssignGameCategory
+                                            <EditCupManage
                                               pSetModal={modal2}
                                               pSetRefresh={setRefresh}
                                               pGameId={items.id}
@@ -285,10 +285,9 @@ const GameCategoryTable = (props) => {
                                         })
                                       }
                                     >
-                                      <FontAwesomeIcon
-                                        icon={faPenToSquare}
-                                        className="text-white text-lg"
-                                      />
+                                      <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                                        체급 및 심판 배정
+                                      </span>
                                     </button>
                                   </td>
                                 </tr>
