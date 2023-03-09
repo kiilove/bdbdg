@@ -8,14 +8,14 @@ import { Modal } from "@mui/material";
 import { widgetTitle } from "./Titles";
 import { EditAssignGameCategory } from "../modals/EditAssignGamesCategory";
 import { EditCupManage } from "../modals/EditCupManage";
+import EditAssignPlayers from "../modals/EditAssignPlayers";
 
 const GAME_HEADERS = [
-  { title: "경기순서", size: "10%" },
-  { title: "종목명", size: "15%" },
-  { title: "체급 / 확정 선수", size: "20%" },
-  { title: "참가신청", size: "10%" },
+  { title: "경기순서", size: "5%" },
+  { title: "종목명", size: "20%" },
+  { title: "체급별 확정선수", size: "40%" },
+  { title: "체급관리 및 심판배정", size: "15%" },
   { title: "심판배정", size: "10%" },
-  { title: "액션", size: "20%" },
 ];
 
 const GameCategoryTable = (props) => {
@@ -80,7 +80,7 @@ const GameCategoryTable = (props) => {
 
   return (
     <div
-      className="flex w-full  h-96 p-3 rounded-xl flex-col align-top justify-start gap-y-3"
+      className="flex w-full  h-full p-3 rounded-xl flex-col align-top justify-start gap-y-3"
       style={{ backgroundColor: "rgba(7,11,41,0.6" }}
     >
       <Modal open={modal} onClose={handleCloseModal}>
@@ -94,7 +94,7 @@ const GameCategoryTable = (props) => {
           {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
           <div className="flex w-full">
             <div className="flex w-1/2">
-              {widgetTitle({ title: "새종목 등록" })}
+              {widgetTitle({ title: "체급 선수 명단" })}
             </div>
             <div
               className="flex w-1/2 justify-end items-center hover:cursor-pointer"
@@ -144,28 +144,10 @@ const GameCategoryTable = (props) => {
             />
             <span className="text-white text-base ">{props.data.title}</span>
           </div>
-          <div
-            className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-            onClick={() =>
-              handleOpenModal({ component: props.data.actionComponent })
-            }
-          >
-            {props.data.actionIcon ? (
-              <FontAwesomeIcon
-                icon={props.data.actionIcon}
-                className="text-white text-lg hover:cursor-pointer"
-              />
-            ) : (
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="text-white text-lg hover:cursor-pointer"
-              />
-            )}
-          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-start w-full h-64 rounded-xl  gap-x-2 flex-wrap overflow-y-auto">
+      <div className="flex items-center justify-start w-full h-full rounded-xl  gap-x-2 flex-wrap overflow-y-auto">
         <div className="flex w-full justify-center">
           <div className="flex w-full">
             <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -236,11 +218,46 @@ const GameCategoryTable = (props) => {
                                     <div className="flex w-full flex-wrap gap-2">
                                       {items.launched ? (
                                         items.class.map((item, cIdx) => (
-                                          <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
-                                            {item.title}
+                                          <button
+                                            onClick={() =>
+                                              handleOpenModal({
+                                                component: (
+                                                  <EditAssignPlayers
+                                                    cupId={editCup.id}
+                                                    gameId={items.id}
+                                                    gameTitle={items.title}
+                                                    gameClass={item.title}
+                                                  />
+                                                ),
+                                              })
+                                            }
+                                          >
+                                            {(!item.players ||
+                                              item.players.length <= 0) && (
+                                              <span className="bg-red-500 py-1 px-2 text-xs rounded-lg">
+                                                {item.title}
+                                                {item.players &&
+                                                  ` / ${item.players.length}`}
+                                              </span>
+                                            )}
                                             {item.players &&
-                                              ` / ${item.players.length}`}
-                                          </span>
+                                              item.players.length > 0 &&
+                                              item.players.length <= 2 && (
+                                                <span className="bg-yellow-500 py-1 px-2 text-xs rounded-lg">
+                                                  {item.title}
+                                                  {item.players &&
+                                                    ` / ${item.players.length}`}
+                                                </span>
+                                              )}
+                                            {item.players &&
+                                              item.players.length >= 3 && (
+                                                <span className="bg-sky-500 py-1 px-2 text-xs rounded-lg">
+                                                  {item.title}
+                                                  {item.players &&
+                                                    ` / ${item.players.length}`}
+                                                </span>
+                                              )}
+                                          </button>
                                         ))
                                       ) : (
                                         <div>
@@ -251,22 +268,7 @@ const GameCategoryTable = (props) => {
                                       )}
                                     </div>
                                   </td>
-                                  <td
-                                    className="text-white text-sm font-semibold py-3 px-6"
-                                    key={items.player + idx}
-                                  >
-                                    {items.players && items.players.length}
-                                  </td>
-                                  <td
-                                    className="text-white text-sm font-semibold py-3 px-6"
-                                    key={items.referee + idx}
-                                  >
-                                    {!items.refereeAssign
-                                      ? "배정안됨"
-                                      : items.refereeAssign.length > 0
-                                      ? items.refereeAssign.length
-                                      : "배정안됨"}
-                                  </td>
+
                                   <td
                                     className="text-white text-sm font-semibold py-3 px-6"
                                     key={items.action + idx}
@@ -285,10 +287,38 @@ const GameCategoryTable = (props) => {
                                         })
                                       }
                                     >
-                                      <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
-                                        체급 및 심판 배정
-                                      </span>
+                                      {(!items.refereeAssign ||
+                                        items.refereeAssign.length <= 0) && (
+                                        <span className="bg-red-500 py-1 px-2 text-xs rounded-lg">
+                                          체급 및 심판 배정
+                                        </span>
+                                      )}
+                                      {items.refereeAssign &&
+                                        items.refereeAssign.length > 0 &&
+                                        items.refereeAssign.length < 8 && (
+                                          <span className="bg-yellow-500 py-1 px-2 text-xs rounded-lg">
+                                            체급 및 심판 배정
+                                          </span>
+                                        )}
+                                      {items.refereeAssign &&
+                                        items.refereeAssign.length >= 9 && (
+                                          <span className="bg-sky-500 py-1 px-2 text-xs rounded-lg">
+                                            체급 및 심판 배정
+                                          </span>
+                                        )}
                                     </button>
+                                  </td>
+
+                                  <td
+                                    className="text-white text-sm font-semibold py-3 px-6"
+                                    key={items.referee + idx}
+                                  >
+                                    {items.launched &&
+                                      (!items.refereeAssign
+                                        ? "배정안됨"
+                                        : items.refereeAssign.length > 0
+                                        ? items.refereeAssign.length
+                                        : "배정안됨")}
                                   </td>
                                 </tr>
                               )}

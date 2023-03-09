@@ -146,11 +146,13 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
       assignResult = [...assign, value];
     }
     setAssign((prev) => (prev = assignResult));
-    console.log(assignResult);
+  };
+
+  const handleAllAssign = () => {
+    setAssign(assignPoolFiltered);
   };
 
   const handleGamesCategory = (data) => {
-    console.log(data);
     const dummy = [...gamesCategory];
     dummy.splice(pIndex, 1, data);
     const newData = [...dummy];
@@ -297,6 +299,17 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
                   ))}
               </div>
             </div>
+          </div>
+          <div
+            className="flex h-full justify-center items-center flex-col gap-y-3 w-2/12"
+            style={{ minHeight: "370px" }}
+          >
+            <button className="text-white" onClick={() => handleAllAssign()}>
+              {`<< 모두배정`}
+            </button>
+            <button className="text-white" onClick={() => setAssign([])}>
+              {`모두제외>>`}
+            </button>
           </div>
           <div
             className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-3 gap-y-2"

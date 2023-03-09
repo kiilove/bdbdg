@@ -13,7 +13,7 @@ const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
 const EditInvoice = (props) => {
-  const [isLock, setIsLock] = useState(true);
+  const [isLock, setIsLock] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [joinInfo, setJoinInfo] = useState({});
@@ -105,25 +105,23 @@ const EditInvoice = (props) => {
   };
 
   const handleConfirm = async (value) => {
+    if (!newCupData.id) {
+      alert("잠시후 다시 시도해주세요!");
+      return;
+    }
+
+    await handleAddPlayerByGamesCategory();
+    await updateData("cups", newCupData.id, newCupData);
+    await updateData("cupsjoin", joinInfo.id, {
+      ...joinInfo,
+      isConfirmed: value,
+      feeInfo,
+    });
     setIsLock(value);
     setIsConfirmed(value);
-    if (!newCupData) {
-      setNewCupData({ ...cupData });
-    }
-    const promises = [
-      handleAddPlayerByGamesCategory(),
-      updateData("cups", newCupData.id, newCupData),
-      updateData("cupsjoin", joinInfo.id, {
-        ...joinInfo,
-        isConfirmed: value,
-        feeInfo,
-      }),
-    ];
-
-    await Promise.all(promises);
   };
 
-  const handleAddPlayerByGamesCategory = () => {
+  const handleAddPlayerByGamesCategory = async () => {
     const updatedGamesCategory = cupData.gamesCategory.map((category) => {
       const game = joinGames.find((game) => game.id === category.id);
       if (!game) return category;
@@ -178,7 +176,7 @@ const EditInvoice = (props) => {
     // console.log(data);
     data.joinGames && setJoinGames([...data.joinGames]);
     data.docuId && setJoinInfo({ ...data });
-    data.dacuId && setFeeInfo({ ...data.feeInfo });
+    data.docuId && setFeeInfo({ ...data.feeInfo });
   }, [data]);
 
   useMemo(() => {
@@ -194,17 +192,19 @@ const EditInvoice = (props) => {
     if (joinInfo.docuId) {
       cupGetDocument("cups", data.cupId);
       setIncomeFee(joinInfo.feeInfo.incomeFee);
+
       //setJoinFee(joinInfo.feeInfo.joinFee);
       setIsLoading(false);
     }
   }, [joinInfo]);
 
   useMemo(() => {
-    if (cupData.cupName) {
-      setNewCupData({ ...cupData });
+    console.log(cupData);
+    if (cupData.id) {
+      handleAddPlayerByGamesCategory();
     }
   }, [cupData]);
-  useMemo(() => console.log(feeInfo), [feeInfo]);
+
   useMemo(
     () => setFeeInfo({ ...feeInfo, joinFee, incomeFee }),
     [joinFee, incomeFee]
@@ -216,7 +216,7 @@ const EditInvoice = (props) => {
       style={{ minWidth: "1000px", maxWidth: "1200px" }}
     >
       {isLoading && <div>로딩중</div>}
-      {error && <div>페이지 오류</div>}
+      {error && console.log(error.code)}
       {!isLoading && (
         <>
           <Modal open={modal} onClose={handleCloseModal}>
@@ -348,11 +348,11 @@ const EditInvoice = (props) => {
               <div className="flex text-white text-sm w-28">성별</div>
               <div className="flex ml-2 text-white">
                 {isLock ? (
-                  <span className="ml-3">
+                  <span className="ml-3 text-sm">
                     {data.pGender === "m" ? "남자" : "여자"}
                   </span>
                 ) : (
-                  <div className="ml-3">
+                  <div className="ml-3 flex gap-x-5">
                     <label htmlFor="pGenderM">
                       <input
                         type="radio"
@@ -362,7 +362,7 @@ const EditInvoice = (props) => {
                         value="m"
                         onClick={(e) => handleInputs(e)}
                       />
-                      <span className="text-white ml-2">남자</span>
+                      <span className="text-white ml-2 text-sm">남자</span>
                     </label>
                     <label htmlFor="pGenderM">
                       <input
@@ -373,7 +373,7 @@ const EditInvoice = (props) => {
                         value="f"
                         onClick={(e) => handleInputs(e)}
                       />
-                      <span className="text-white ml-2">여자</span>
+                      <span className="text-white ml-2 text-sm">여자</span>
                     </label>
                   </div>
                 )}

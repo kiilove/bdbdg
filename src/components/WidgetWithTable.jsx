@@ -67,9 +67,9 @@ const WidgetWithTable = (props) => {
             <span className="text-white text-base ">{props.data.title}</span>
           </div>
 
-          {props.editIcon && (
+          {props.data.editIcon && (
             <div
-              className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+              className="flex justify-center items-center w-8 h-8 bg-sky-500 rounded-xl hover:cursor-pointer"
               onClick={() =>
                 handleOpenModal({
                   component: props.data.modalComponent,
@@ -78,10 +78,7 @@ const WidgetWithTable = (props) => {
                 })
               }
             >
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="text-white text-lg"
-              />
+              <FontAwesomeIcon icon={faPenToSquare} className="text-white" />
             </div>
           )}
         </div>

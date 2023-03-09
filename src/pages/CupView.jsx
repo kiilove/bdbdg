@@ -40,7 +40,7 @@ import EditAssignReferees from "../modals/EditAssignReferees";
 import dayjs from "dayjs";
 import EditInvoice from "../modals/EditInvoice";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
-const PLAYER_HEADERS = ["ID", "이름", "이메일"];
+const PLAYER_HEADERS = ["이름", "연락처", "참가신청서"];
 const INVOICE_HEADERS = [
   "이름",
   "이메일",
@@ -129,6 +129,20 @@ const CupView = () => {
     });
   };
 
+  const confirmedPlayerInvoice = (data) => {
+    const result = data.filter((invoice) => invoice.isConfirmed === true);
+
+    console.log(result);
+    return result;
+  };
+
+  const checkListPlayerInvoice = (data) => {
+    const result = data.filter((invoice) => invoice.isConfirmed !== true);
+
+    console.log(result);
+    return result;
+  };
+
   const updateCup = async (data) => {
     (data.cupInfo.cupName !== undefined ||
       data.cupInfo.cupCount !== undefined) &&
@@ -209,6 +223,45 @@ const CupView = () => {
               </button>
             </div>
             <div className="flex"></div>
+          </div>,
+        ];
+        dataArray.push(itemRow);
+      });
+    }
+    console.log(dataArray);
+    return dataArray;
+  };
+
+  const handleConfirmedPlayers = (data) => {
+    let dataArray = [];
+    console.log(data);
+
+    if (data !== undefined && data.length) {
+      data.map((item) => {
+        const itemRow = [
+          item.pName,
+          item.pTel,
+          item.joinGames.length || 0,
+          <div className="flex">
+            <div className="flex">
+              <button
+                onClick={() =>
+                  handleOpenModal({
+                    component: (
+                      <EditInvoice
+                        collectionId={item.id}
+                        cupFee={editCup.cupInfo.cupFee}
+                      />
+                    ),
+                    title: "참가신청서",
+                  })
+                }
+              >
+                <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                  참가신청서 보기
+                </span>
+              </button>
+            </div>
           </div>,
         ];
         dataArray.push(itemRow);
@@ -336,7 +389,9 @@ const CupView = () => {
                   <div className="flex justify-start items-top">
                     <span className="text-white text-base">
                       일자 :{" "}
-                      {cupDate.startDate === null ? "미정" : cupDate.startDate}
+                      {cupDate.startDate === null
+                        ? "미정"
+                        : dayjs(cupDate.startDate).format("YYYY-MM-DD")}
                     </span>
                   </div>
                   <div className="flex justify-start items-top">
@@ -351,10 +406,12 @@ const CupView = () => {
               <div className="flex w-full h-96">
                 <WidgetWithTable
                   data={{
-                    title: "참가신청선수명단",
+                    title: "참가신청선수명단(확인필요)",
                     titleIcon: faPeopleLine,
                     tableHeaders: INVOICE_HEADERS,
-                    tableData: handleInvoicePlayers(invoiceList),
+                    tableData: handleInvoicePlayers(
+                      checkListPlayerInvoice(invoiceList)
+                    ),
                   }}
                 />
               </div>
@@ -369,26 +426,28 @@ const CupView = () => {
                     tableData: handleRefereeTable(editCup.refereeAssign),
                     modalComponent: <EditAssignReferees />,
                     modalTitle: "심판배정",
+                    editIcon: true,
                   }}
                 />
               </div>
               <div className="flex w-1/2 h-96">
                 <WidgetWithTable
                   data={{
-                    title: "출전선수",
+                    title: "출전명단",
                     titleIcon: faPeopleLine,
                     tableHeaders: PLAYER_HEADERS,
-                    tableData: "",
+                    tableData: handleConfirmedPlayers(
+                      confirmedPlayerInvoice(invoiceList)
+                    ),
                     modalComponent: "",
-                    editIcon: false,
                   }}
                 />
               </div>
             </div>
-            <div className="flex w-full h-96">
+            <div className="flex w-full h-full">
               <GameCategoryTable
                 data={{
-                  title: "개최종목",
+                  title: "개최종목 (종목 드래그로 순서변경가능)",
                   titleIcon: faSitemap,
                   actionIcon: faPlus,
                 }}
