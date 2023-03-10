@@ -39,6 +39,7 @@ import GameCategoryTable from "../components/GameCategoryTable";
 import EditAssignReferees from "../modals/EditAssignReferees";
 import dayjs from "dayjs";
 import EditInvoice from "../modals/EditInvoice";
+import PlayerOrderTable from "../components/PlayerOrderTable";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["이름", "연락처", "참가신청서"];
 const INVOICE_HEADERS = [
@@ -213,12 +214,12 @@ const CupView = () => {
                         cupFee={editCup.cupInfo.cupFee}
                       />
                     ),
-                    title: "참가신청서",
+                    title: "참가신청서(신청서상 정보만 변경)",
                   })
                 }
               >
                 <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
-                  참가신청서 보기
+                  참가신청서
                 </span>
               </button>
             </div>
@@ -253,12 +254,12 @@ const CupView = () => {
                         cupFee={editCup.cupInfo.cupFee}
                       />
                     ),
-                    title: "참가신청서",
+                    title: "참가신청서(신청서상 정보만 변경)",
                   })
                 }
               >
                 <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
-                  참가신청서 보기
+                  참가신청서
                 </span>
               </button>
             </div>

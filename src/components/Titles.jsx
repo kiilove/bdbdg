@@ -6,7 +6,7 @@ export const pageTitle = (props) => (
 );
 
 export const widgetTitle = (props) => (
-  <div className="flex w-full h-12 items-center ">
+  <div className="flex w-full h-12 items-center  ">
     <p className="text-white text-lg font-base font-semibold">{props.title}</p>
   </div>
 );

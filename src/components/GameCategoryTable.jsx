@@ -11,8 +11,8 @@ import { EditCupManage } from "../modals/EditCupManage";
 import EditAssignPlayers from "../modals/EditAssignPlayers";
 
 const GAME_HEADERS = [
-  { title: "경기순서", size: "5%" },
-  { title: "종목명", size: "20%" },
+  { title: "경기순서", size: "8%" },
+  { title: "종목명", size: "17%" },
   { title: "체급별 확정선수", size: "40%" },
   { title: "체급관리 및 심판배정", size: "15%" },
   { title: "심판배정", size: "10%" },
@@ -217,48 +217,46 @@ const GameCategoryTable = (props) => {
                                   >
                                     <div className="flex w-full flex-wrap gap-2">
                                       {items.launched ? (
-                                        items.class.map((item, cIdx) => (
-                                          <button
-                                            onClick={() =>
-                                              handleOpenModal({
-                                                component: (
-                                                  <EditAssignPlayers
-                                                    cupId={editCup.id}
-                                                    gameId={items.id}
-                                                    gameTitle={items.title}
-                                                    gameClass={item.title}
-                                                  />
-                                                ),
-                                              })
-                                            }
-                                          >
-                                            {(!item.players ||
-                                              item.players.length <= 0) && (
-                                              <span className="bg-red-500 py-1 px-2 text-xs rounded-lg">
-                                                {item.title}
-                                                {item.players &&
-                                                  ` / ${item.players.length}`}
-                                              </span>
-                                            )}
-                                            {item.players &&
-                                              item.players.length > 0 &&
-                                              item.players.length <= 2 && (
+                                        items.class.map((item, cIdx) =>
+                                          item.launched ? (
+                                            <button
+                                              key={cIdx}
+                                              onClick={() =>
+                                                handleOpenModal({
+                                                  component: (
+                                                    <EditAssignPlayers
+                                                      cupId={editCup.id}
+                                                      gameId={items.id}
+                                                      gameTitle={items.title}
+                                                      gameClass={item.title}
+                                                    />
+                                                  ),
+                                                })
+                                              }
+                                            >
+                                              {!item.players ||
+                                              item.players.length <= 0 ? (
+                                                <span className="bg-red-500 py-1 px-2 text-xs rounded-lg">
+                                                  {item.title}
+                                                  {item.players &&
+                                                    ` / ${item.players.length}`}
+                                                </span>
+                                              ) : item.players.length <= 2 ? (
                                                 <span className="bg-yellow-500 py-1 px-2 text-xs rounded-lg">
                                                   {item.title}
                                                   {item.players &&
                                                     ` / ${item.players.length}`}
                                                 </span>
-                                              )}
-                                            {item.players &&
-                                              item.players.length >= 3 && (
+                                              ) : (
                                                 <span className="bg-sky-500 py-1 px-2 text-xs rounded-lg">
                                                   {item.title}
                                                   {item.players &&
                                                     ` / ${item.players.length}`}
                                                 </span>
                                               )}
-                                          </button>
-                                        ))
+                                            </button>
+                                          ) : null
+                                        )
                                       ) : (
                                         <div>
                                           <span className="font-light italic text-gray-500">
@@ -290,20 +288,20 @@ const GameCategoryTable = (props) => {
                                       {(!items.refereeAssign ||
                                         items.refereeAssign.length <= 0) && (
                                         <span className="bg-red-500 py-1 px-2 text-xs rounded-lg">
-                                          체급 및 심판 배정
+                                          종목/심판관리
                                         </span>
                                       )}
                                       {items.refereeAssign &&
                                         items.refereeAssign.length > 0 &&
                                         items.refereeAssign.length < 8 && (
                                           <span className="bg-yellow-500 py-1 px-2 text-xs rounded-lg">
-                                            체급 및 심판 배정
+                                            종목/심판관리
                                           </span>
                                         )}
                                       {items.refereeAssign &&
                                         items.refereeAssign.length >= 9 && (
                                           <span className="bg-sky-500 py-1 px-2 text-xs rounded-lg">
-                                            체급 및 심판 배정
+                                            종목/심판관리
                                           </span>
                                         )}
                                     </button>

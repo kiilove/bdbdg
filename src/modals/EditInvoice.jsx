@@ -13,6 +13,7 @@ const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
 const EditInvoice = (props) => {
+  console.log(props);
   const [isLock, setIsLock] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -229,11 +230,11 @@ const EditInvoice = (props) => {
             >
               {/* Modal창을 닫기 위해 제목을 부모창에서 열도록 설계했음 */}
               <div className="flex w-full">
-                <div className="flex w-1/2">
+                <div className="flex w-3/4">
                   {widgetTitle({ title: modalTitle })}
                 </div>
                 <div
-                  className="flex w-1/2 justify-end items-center hover:cursor-pointer"
+                  className="flex w-1/4 justify-end items-center hover:cursor-pointer "
                   onClick={() => handleCloseModal()}
                 >
                   <FontAwesomeIcon
@@ -347,7 +348,7 @@ const EditInvoice = (props) => {
             <div className={inputBoxStyle}>
               <div className="flex text-white text-sm w-28">성별</div>
               <div className="flex ml-2 text-white">
-                {isLock ? (
+                {isConfirmed ? (
                   <span className="ml-3 text-sm">
                     {data.pGender === "m" ? "남자" : "여자"}
                   </span>
@@ -386,7 +387,7 @@ const EditInvoice = (props) => {
                   type="text"
                   name="invoiceDate"
                   id="invoiceDate"
-                  disabled={isLock}
+                  disabled
                   value={data.invoiceDate}
                   onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
@@ -424,16 +425,16 @@ const EditInvoice = (props) => {
                   className={inputTextStyle}
                 />
               </div>
-              {!isLock && (
+              {!isConfirmed && (
                 <div className="flex w-1/2 justify-start items-center gap-x-2">
                   <button
-                    className="bg-blue-500 text-white w-14 py-1 px-2 rounded-lg text-xs"
+                    className="bg-white  w-14 py-2 px-2 rounded-lg text-xs"
                     onClick={() => setIncomeFee(joinFee)}
                   >
                     정액
                   </button>
                   <button
-                    className="bg-blue-500 text-white w-24 py-1 px-2 rounded-lg text-xs"
+                    className="bg-orange-600 text-white w-24 py-2 px-2 rounded-lg text-xs"
                     onClick={() => handleFeeInfo()}
                   >
                     입금확인
@@ -453,8 +454,8 @@ const EditInvoice = (props) => {
                     </div>
                   ))}
               </div>
-              {!isLock && (
-                <div className="flex text-white ml-2 gap-2 flex-wrap justify-start items-center">
+              {!isConfirmed && (
+                <div className="flex text-white ml-2 gap-2 flex-wrap justify-start items-center w-32">
                   <div className="flex flex-wrap h-full p-1">
                     <button
                       onClick={() => {
@@ -469,7 +470,7 @@ const EditInvoice = (props) => {
                         });
                       }}
                     >
-                      <span className="bg-blue-500 py-1 px-2 text-xs rounded-lg">
+                      <span className="bg-orange-600 py-2 px-2 text-xs rounded-lg">
                         신청종목 변경
                       </span>
                     </button>

@@ -8,7 +8,7 @@ export const BasicTable = (props) => {
   const [tableData, setTableData] = useState([]);
 
   //console.log(tableHeaders);
-  // console.log(props.data);
+  //console.log(props.data);
 
   useEffect(() => {
     setTableHeaders(props.headers);
