@@ -15,8 +15,7 @@ const GameList = () => {
   const [isRefresh, setIsRefresh] = useState(false);
   const [modal, setModal] = useState(false);
   const [modalComponent, setModalComponent] = useState();
-  const { data, loading, error, readData, addData, deleteData, updateData } =
-    useFirestore();
+  const { data, loading, error, readData } = useFirestore();
 
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
