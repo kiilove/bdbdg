@@ -43,6 +43,7 @@ import PlayerOrderTable from "../components/PlayerOrderTable";
 import Loading from "./Loading";
 import useFirestore from "../customhooks/useFirestore";
 import useFirestoreSearch from "../customhooks/useFirestoreSearch";
+import CupInfo from "../components/CupInfo";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["이름", "연락처", "참가신청서"];
 const INVOICE_HEADERS = [
@@ -62,7 +63,7 @@ const GAME_HEADERS = [
   { title: "배정된 심판", size: "10%" },
   { title: "액션", size: "10%" },
 ];
-
+const TABS = ["대회정보/참가신청서", "종목/심판배정", "출전선수확정/배정"];
 const CupView = () => {
   const params = useParams();
   const [cupId, setCupId] = useState(params.cupId);
@@ -74,6 +75,7 @@ const CupView = () => {
   const [modalTitle, setModalTitle] = useState("");
   const [modalComponent, setModalComponent] = useState();
   const [isLoading, setIsLoading] = useState(true);
+  const [currentTab, setCurrentTab] = useState(0);
 
   const { dispatch, editCup } = useContext(EditcupContext);
   const {
@@ -138,16 +140,46 @@ const CupView = () => {
       {isLoading && <Loading />}
       {getCupData.id && (
         <>
-          <div className="flex w-full h-full flex-col gap-y-5">
-            <div className="flex w-full h-20 bg-slate-800">
-              <div className="flex w-full h-full">대회정보/참가신청서</div>
-              <div className="flex w-full h-full">종목/심판배정</div>
-              <div className="flex w-full h-full">출전선수확정/배정</div>
+          <div className="flex w-full h-full flex-col gap-y-2">
+            <div
+              className="flex w-full h-14 p-2 rounded-lg"
+              style={{ backgroundColor: "rgba(7,11,41,0.5)" }}
+            >
+              {TABS.map((tab, idx) => (
+                <button
+                  className={`${
+                    currentTab === idx
+                      ? "  bg-gray-300 text-gray-800 "
+                      : " text-gray-200 "
+                  }flex w-full h-full rounded-lg justify-center items-center text-base font-semibold`}
+                  onClick={() => setCurrentTab((prev) => (prev = idx))}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+            <div
+              className="flex w-full rounded-lg h-full"
+              style={{
+                minHeight: "550px",
+              }}
+            >
+              {currentTab === 0 && (
+                <div className="flex w-full justify-around items-start flex-wrap box-border rounded-lg p-1">
+                  <div
+                    className="flex w-full h-full bg-gray-900 rounded-lg"
+                    // style={{
+                    //   backgroundColor: "rgba(7,11,41,0.5)",
+                    // }}
+                  >
+                    <CupInfo cupInfo={getCupData.cupInfo} mode="edit" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </>
       )}
-      )
     </div>
   );
 };
