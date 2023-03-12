@@ -12,6 +12,7 @@ import { db } from "../firebase";
 
 const CupItem = ({
   cupId,
+  cupInfoId,
   cupName,
   cupCount,
   cupDate,

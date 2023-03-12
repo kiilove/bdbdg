@@ -7,6 +7,7 @@ import {
   getMetadata,
   updateMetadata,
 } from "firebase/storage";
+import ColorThief from "colorthief";
 import { compressImage } from "./imageUtils";
 
 const useFirebaseStorage = (files, storagePath) => {
@@ -29,7 +30,10 @@ const useFirebaseStorage = (files, storagePath) => {
         if (existingMetadata && existingMetadata.size === file.size) {
           setUrls((prevUrls) => [
             ...prevUrls,
-            existingMetadata.customMetadata.url,
+            {
+              url: existingMetadata.customMetadata.compressedUrl,
+              ...existingMetadata.customMetadata,
+            },
           ]);
           return null;
         }
@@ -51,6 +55,31 @@ const useFirebaseStorage = (files, storagePath) => {
             url: "",
           },
         };
+
+        // ColorThief 라이브러리를 사용하여 테마 색상 추출
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = URL.createObjectURL(compressedFile);
+        const colorThief = new ColorThief();
+        const colorPalette = await new Promise((resolve) => {
+          img.addEventListener("load", () => {
+            const palette = colorThief.getPalette(img, 5);
+            resolve(palette);
+          });
+        });
+
+        const customMetadata = {
+          name: compressedFile.name, // 원래 파일 이름 설정
+          contentDisposition: `attachment; filename="${compressedFile.name}"`, // 다운로드 시 파일 이름 설정
+          colorTheme: [
+            `rgb(${colorPalette[0].join(",")})`,
+            `rgb(${colorPalette[1].join(",")})`,
+            `rgb(${colorPalette[2].join(",")})`,
+            `rgb(${colorPalette[3].join(",")})`,
+            `rgb(${colorPalette[4].join(",")})`,
+          ],
+        };
+
         const uploadTask = uploadBytesResumable(
           uploadRef,
           compressedFile,
@@ -81,14 +110,20 @@ const useFirebaseStorage = (files, storagePath) => {
                 const compressedUrl = shouldCompress
                   ? downloadURL
                   : originalUrl;
+
+                // 이미지 메타데이터 업데이트
+                updateMetadata(uploadRef, { customMetadata });
+
                 setUrls((prevUrls) => [
                   ...prevUrls,
-                  { originalUrl, compressedUrl },
+                  { url: originalUrl, compressedUrl, ...customMetadata },
                 ]);
-                updateMetadata(uploadRef, {
-                  customMetadata: { url: downloadURL },
-                });
-                const image = { originalUrl, compressedUrl };
+
+                const image = {
+                  url: originalUrl,
+                  compressedUrl,
+                  ...customMetadata,
+                };
                 if (index === 0) {
                   setRepresentativeImage(image);
                 }
@@ -100,11 +135,12 @@ const useFirebaseStorage = (files, storagePath) => {
           if (!image) {
             return null;
           }
-          const { originalUrl, compressedUrl } = image;
-          const finalUrl = compressedUrl || originalUrl;
+          const { url, compressedUrl, ...metadata } = image;
+          const finalUrl = compressedUrl || url;
           return {
-            originalUrl,
+            url,
             compressedUrl: compressedUrl ? finalUrl : null,
+            ...metadata,
           };
         });
       });
@@ -114,9 +150,10 @@ const useFirebaseStorage = (files, storagePath) => {
       setProgress(0);
       const uploadedUrls = uploadedImages
         .filter((image) => image !== null)
-        .map((image) => ({
-          originalUrl: image.originalUrl,
-          compressedUrl: image.compressedUrl,
+        .map(({ url, compressedUrl, ...metadata }) => ({
+          originalUrl: url,
+          compressedUrl,
+          ...metadata,
         }));
       setUrls(uploadedUrls);
     });

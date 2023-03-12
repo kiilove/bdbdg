@@ -1,0 +1,60 @@
+.time-picker-container {
+  position: relative;
+}
+
+.time-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 200px;
+  height: 200px;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid gray;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.time-input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.time-input-container input {
+  width: 40px;
+  margin: 0 5px;
+  padding: 5px;
+  font-size: 16px;
+  text-align: center;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+}
+
+.time-separator {
+  margin: 0 5px;
+}
+
+.time-picker-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.time-picker-buttons button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.time-picker-buttons button:first-child {
+  background-color: lightgray;
+}
+
+.time-picker-buttons button:last-child {
+  background-color: dodgerblue;
+  color: white;
+}

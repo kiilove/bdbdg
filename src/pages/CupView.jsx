@@ -69,11 +69,15 @@ const CupView = () => {
   const [cupId, setCupId] = useState(params.cupId);
   const [error, setError] = useState(null);
   const [getCupData, setGetCupData] = useState({});
+  const [getCupInfoData, setGetCupInfoData] = useState({});
+  const [getOrgsData, setGetOrgsData] = useState([]);
   const [getInvoiceData, setGetInvoiceDate] = useState([]);
 
   const [modal, setModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalComponent, setModalComponent] = useState();
+
+  const [refIds, setRefIds] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -82,6 +86,19 @@ const CupView = () => {
     data: cupData,
     error: cupError,
     getDocument: cupGetDocument,
+  } = useFirestore();
+
+  const {
+    data: orgsData,
+    error: orgsError,
+    readData: orgsReadData,
+  } = useFirestore();
+
+  const {
+    data: cupInfoData,
+    error: cupInfoError,
+    updateData: cupInfoUpdate,
+    getDocument: cupInfoGetDocument,
   } = useFirestore();
 
   const { data: invoiceData, error: invoiceError } = useFirestoreSearch(
@@ -100,6 +117,41 @@ const CupView = () => {
     setModal(() => false);
   };
 
+  const updateOn = async (updatedCupData, requestComponent) => {
+    switch (requestComponent) {
+      case "cupInfo":
+        const updateCallback = (returnData) => {
+          console.log("업데이트완료", returnData);
+        };
+        cupInfoUpdate(
+          "cupInfo",
+          refIds.refCupInfo,
+          updatedCupData,
+          updateCallback()
+        );
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  useMemo(() => console.log(getCupInfoData), [getCupInfoData]);
+
+  useMemo(() => {
+    if (!cupInfoData.id) {
+      return;
+    }
+    setGetCupInfoData({ ...cupInfoData });
+  }, [cupInfoData]);
+
+  useMemo(() => {
+    if (!getCupData.refCupInfo) {
+      return;
+    }
+    cupInfoGetDocument("cupInfo", getCupData.refCupInfo);
+  }, [getCupData.refCupInfo]);
+
   useMemo(() => {
     if (!getCupData.id) {
       return;
@@ -108,6 +160,8 @@ const CupView = () => {
       type: "EDIT",
       payload: { cupData: { ...getCupData } },
     });
+
+    setRefIds({ ...getCupData });
 
     setIsLoading(false);
   }, [getCupData]);
@@ -120,20 +174,24 @@ const CupView = () => {
     if (invoiceData.length) {
       setGetInvoiceDate(invoiceData);
     }
+
+    if (orgsData.length) {
+      setGetOrgsData([...orgsData]);
+    }
+    console.log(orgsData);
+
     setGetCupData(cupData);
-  }, [cupData, invoiceData]);
+  }, [cupData, invoiceData, orgsData]);
 
   useEffect(() => {
     if (!cupId) {
       return;
     }
     cupGetDocument("cups", cupId);
+    orgsReadData("orgs");
 
-    return () => {
-      setGetCupData({});
-      setGetInvoiceDate([]);
-    };
-  }, []);
+    return () => {};
+  }, [cupId]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-5">
@@ -165,14 +223,18 @@ const CupView = () => {
               }}
             >
               {currentTab === 0 && (
-                <div className="flex w-full justify-around items-start flex-wrap box-border rounded-lg p-1">
+                <div className="flex w-full justify-around items-start flex-wrap box-border rounded-lg p-0">
                   <div
-                    className="flex w-full h-full bg-gray-900 rounded-lg"
+                    className="flex w-full h-full rounded-lg"
                     // style={{
                     //   backgroundColor: "rgba(7,11,41,0.5)",
                     // }}
                   >
-                    <CupInfo cupInfo={getCupData.cupInfo} mode="edit" />
+                    <CupInfo
+                      orgs={getOrgsData}
+                      cupInfo={getCupInfoData}
+                      updateOn={updateOn}
+                    />
                   </div>
                 </div>
               )}

@@ -31,6 +31,7 @@ const useFirestore = () => {
   };
 
   const readData = async (collectionName) => {
+    console.log(collectionName);
     try {
       const querySnapshot = await getDocs(collection(db, collectionName));
       const documents = querySnapshot.docs.map((doc) => ({
@@ -48,11 +49,14 @@ const useFirestore = () => {
   const addData = async (collectionName, newData, callback) => {
     try {
       const docRef = await addDoc(collection(db, collectionName), newData);
-      const addedData = { id: docRef.id, ...newData };
-      setData((prevState) => [...prevState, addedData]);
-      callback && callback();
+      const addedData = { ...newData, id: docRef.id };
+      setData(() => ({ ...addedData }));
+      callback && callback(addedData);
+      return addedData;
     } catch (error) {
       setError(error);
+    } finally {
+      setData("");
     }
   };
 
@@ -66,13 +70,16 @@ const useFirestore = () => {
     }
   };
 
-  const updateData = async (collectionName, id, updatedData, callback) => {
-    console.log(updatedData);
+  const updateData = async (collectionName, id, newData, callback) => {
     try {
-      await updateDoc(doc(db, collectionName, id), updatedData);
-      callback && callback();
+      const docRef = await updateDoc(doc(db, collectionName, id), newData);
+      const updatedData = { ...docRef.data(), id: docRef.id };
+      callback && callback(updatedData);
+      return updatedData;
     } catch (error) {
       setError(error);
+    } finally {
+      setData("");
     }
   };
 

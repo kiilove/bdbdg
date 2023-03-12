@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import OrgList from "./pages/OrgList";
 import { NewcupContextProvider } from "./context/NewcupContext";
 import GameList from "./pages/GameList";
+import CupNew from "./pages/CupNew";
 
 function App() {
   return (
@@ -40,7 +41,7 @@ function App() {
               />
               <Route
                 path="/newcup"
-                element={<CupMain component={<NewCupPage />} />}
+                element={<CupMain component={<CupNew />} />}
               />
               <Route path="/cuplist" element={<CupList />} />
               <Route
