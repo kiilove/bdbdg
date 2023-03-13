@@ -300,7 +300,7 @@ const EditAssignPlayers = ({ cupId, gameId, gameTitle, gameClass }) => {
                       onClick={(e) => setHeader(e.target.id)}
                     />
                     <div
-                      className={`h-full w-full absolute inset-0 ${
+                      className={`h-full w-full absolute inset-0 flex-col ${
                         header === "header3" ? "bg-white" : ""
                       } rounded-xl justify-center items-center flex hover:cursor-pointer`}
                     >
@@ -309,7 +309,14 @@ const EditAssignPlayers = ({ cupId, gameId, gameTitle, gameClass }) => {
                           header === "header3" ? "text-black" : ""
                         }`}
                       >
-                        누락된 선수 명단
+                        대기 선수 명단
+                      </span>
+                      <span
+                        className={`text-white text-sm ${
+                          header === "header3" ? "text-black" : ""
+                        }`}
+                      >
+                        출전확정이 필요한 명단
                       </span>
                     </div>
                   </label>

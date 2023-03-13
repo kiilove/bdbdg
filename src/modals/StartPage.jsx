@@ -23,8 +23,10 @@ const StartPage = ({ cupCreatedOn, isCreated }) => {
       // Create new documents in the "cupInfo", "refereeAssign", and "categoryAssign" collections
       const [
         { id: cupInfoId },
-        { id: refereeAssignId },
-        { id: categoryAssignId },
+        { id: cupRefereeId },
+        { id: cupCategoryId },
+        { id: cupJoinId },
+        { id: cupScoreId },
       ] = await Promise.all([
         addData("cupInfo", {
           refCupId: cupId,
@@ -36,16 +38,21 @@ const StartPage = ({ cupCreatedOn, isCreated }) => {
           cupAgency: "",
           cupLocation: "",
           cupLocationAddr: "",
+          cupState: "대회준비중",
           cupFee: { basicFee: 0, extraFee: 0, extraType: "없음" },
         }),
-        addData("refereeAssign", { refCupId: cupId, refIds: [] }),
-        addData("categoryAssign", { refCupId: cupId, cateIds: [] }),
+        addData("cupReferee", { refCupId: cupId, refIds: [] }),
+        addData("cupCategory", { refCupId: cupId, cateIds: [] }),
+        addData("cupInvoice", { refCupId: cupId, invoiceIds: [] }),
+        addData("cupScore", { refCupId: cupId, scoreIds: [] }),
       ]);
       // Update the "cups" document with the ids of the child documents
       const refs = {
         refCupInfo: cupInfoId,
-        refRefereeAssing: refereeAssignId,
-        refCategoryAssign: categoryAssignId,
+        refCupReferee: cupRefereeId,
+        refCupGategory: cupCategoryId,
+        refCupJoinId: cupJoinId,
+        refCupScoreId: cupScoreId,
       };
 
       updateData("cups", cupId, refs, (updatedData) => {

@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 const menuItems = [
   { id: 1, title: "Dashboard", link: "/dashboard", icon: faGaugeHigh },
   { id: 2, title: "경기 새로시작", link: "/newcup", icon: faTrophy },
-  { id: 4, title: "경기 기록관", link: "/cuplist", icon: faLandmarkDome },
+  { id: 4, title: "대회관리", link: "/cuplist", icon: faLandmarkDome },
   { id: 5, title: "심판진", link: "/refereelist", icon: faScaleBalanced },
   { id: 6, title: "선수진", link: "/refereemanager", icon: faPeopleLine },
   { id: 7, title: "종목", link: "/gamelist", icon: faBuilding },

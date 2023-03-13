@@ -89,6 +89,7 @@ const EditInvoice = (props) => {
   const handleInputs = (e) => {
     if (e.target.name !== "cupPoster") {
       setJoinInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+      console.log(joinInfo);
     }
   };
   const handleComma = (e) => {
@@ -194,13 +195,12 @@ const EditInvoice = (props) => {
       cupGetDocument("cups", data.cupId);
       setIncomeFee(joinInfo.feeInfo.incomeFee);
 
-      //setJoinFee(joinInfo.feeInfo.joinFee);
       setIsLoading(false);
     }
   }, [joinInfo]);
 
   useMemo(() => {
-    console.log(cupData);
+    //console.log(cupData);
     if (cupData.id) {
       handleAddPlayerByGamesCategory();
     }
@@ -287,7 +287,9 @@ const EditInvoice = (props) => {
             </div>
             <div className={inputBoxStyle}>
               <div className="flex text-white text-sm w-28">일련번호</div>
-              <div className="flex text-white text-sm ml-5">{data.docuId}</div>
+              <div className="flex text-white text-sm ml-5">
+                {joinInfo.docuId}
+              </div>
             </div>
             <div className={inputBoxStyle}>
               <div className="flex text-white text-sm w-28">선수이름</div>
@@ -297,7 +299,7 @@ const EditInvoice = (props) => {
                   name="pName"
                   id="pName"
                   disabled={isLock}
-                  value={data.pName}
+                  value={joinInfo.pName}
                   onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
                 />
@@ -311,7 +313,7 @@ const EditInvoice = (props) => {
                   name="pEmail"
                   id="pEmail"
                   disabled={isLock}
-                  value={data.pEmail || ""}
+                  value={joinInfo.pEmail}
                   onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
                 />
@@ -325,7 +327,7 @@ const EditInvoice = (props) => {
                   name="pTel"
                   id="pTel"
                   disabled={isLock}
-                  value={data.pTel}
+                  value={joinInfo.pTel}
                   onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
                 />
@@ -339,7 +341,7 @@ const EditInvoice = (props) => {
                   name="pBirth"
                   id="pBirth"
                   disabled={isLock}
-                  value={data.pBirth}
+                  value={joinInfo.pBirth}
                   onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
                 />
@@ -350,7 +352,7 @@ const EditInvoice = (props) => {
               <div className="flex ml-2 text-white">
                 {isConfirmed ? (
                   <span className="ml-3 text-sm">
-                    {data.pGender === "m" ? "남자" : "여자"}
+                    {joinInfo.pGender === "m" ? "남자" : "여자"}
                   </span>
                 ) : (
                   <div className="ml-3 flex gap-x-5">
@@ -359,18 +361,18 @@ const EditInvoice = (props) => {
                         type="radio"
                         name="pGender"
                         id="pGenderM"
-                        checked={data.pGender === "m"}
+                        checked={joinInfo.pGender === "m"}
                         value="m"
-                        onClick={(e) => handleInputs(e)}
+                        onChange={(e) => handleInputs(e)}
                       />
                       <span className="text-white ml-2 text-sm">남자</span>
                     </label>
-                    <label htmlFor="pGenderM">
+                    <label htmlFor="pGenderF">
                       <input
                         type="radio"
                         name="pGender"
-                        id="pGenderM"
-                        checked={data.pGender === "f"}
+                        id="pGenderF"
+                        checked={joinInfo.pGender === "f"}
                         value="f"
                         onClick={(e) => handleInputs(e)}
                       />
@@ -388,7 +390,7 @@ const EditInvoice = (props) => {
                   name="invoiceDate"
                   id="invoiceDate"
                   disabled
-                  value={data.invoiceDate}
+                  value={joinInfo.invoiceDate}
                   onChange={(e) => handleInputs(e)}
                   className={inputTextStyle}
                 />

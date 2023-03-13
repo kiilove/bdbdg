@@ -15,6 +15,8 @@ import OrgList from "./pages/OrgList";
 import { NewcupContextProvider } from "./context/NewcupContext";
 import GameList from "./pages/GameList";
 import CupNew from "./pages/CupNew";
+import ModalTest from "./pages/ModalTest";
+import PlayerOrderTable from "./components/PlayerOrderTable";
 
 function App() {
   return (
@@ -41,17 +43,20 @@ function App() {
               />
               <Route
                 path="/newcup"
-                element={<CupMain component={<CupNew />} />}
+                element={<CupMain component={<NewCupPage />} />}
               />
               <Route path="/cuplist" element={<CupList />} />
               <Route
                 path="/cupview/:cupId"
                 element={<CupMain component={<CupView />} />}
               ></Route>
-              <Route path="/test" element={<DragTable />} />
-
-              <Route path="/refereelist" element={<RefereeList />} />
+              <Route path="/test" element={<ModalTest />} />
               <Route path="/orglist" element={<OrgList />} />
+
+              <Route
+                path="/playerorder/:cupId"
+                element={<PlayerOrderTable />}
+              />
               <Route path="/gamelist" element={<GameList />} />
             </Routes>
           </div>

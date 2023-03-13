@@ -5,9 +5,15 @@ import useFirestoreSearch from "../customhooks/useFirestoreSearch";
 
 const CupList = () => {
   const [getCupsList, setGetCupsList] = useState([]);
+  const [titlePoster, setTitlePoster] = useState();
   //const { data, error, loading } = useFirestoreSearch();
   const { data: cupListsData, readData: cupListsReadData } = useFirestore();
 
+  useMemo(() => {
+    if (!getCupsList.length) {
+      return;
+    }
+  }, [getCupsList]);
   useMemo(() => {
     if (!cupListsData.length) {
       return;
@@ -16,7 +22,7 @@ const CupList = () => {
   }, [cupListsData]);
 
   useEffect(() => {
-    cupListsReadData("cupInfo");
+    cupListsReadData("cups");
 
     return () => {
       setGetCupsList([]);
@@ -39,17 +45,25 @@ const CupList = () => {
             {cupListsData.map((cup, idx) => (
               <div className="flex">
                 <CupItem
-                  cupId={cup.refCupId}
-                  cupName={cup.cupName ? cup.cupName : "준비중 대회"}
-                  cupCount={cup.cupCount ? cup.cupCount : "데이터불안정"}
+                  cupId={cup.id}
+                  cupName={
+                    cup.cupInfo.cupName ? cup.cupInfo.cupName : "준비중 대회"
+                  }
+                  cupCount={
+                    cup.cupInfo.cupCount ? cup.cupInfo.cupCount : "데이터불안정"
+                  }
                   cupDate={
-                    cup.cupDate.startDate
-                      ? cup.cupDate.startDate
+                    cup.cupInfo.cupDate.startDate
+                      ? cup.cupInfo.cupDate.startDate
                       : "데이터불안정"
                   }
-                  cupState={cup.cupState ? cup.cupState : "데이터불안정"}
+                  cupState={
+                    cup.cupInfo.cupState ? cup.cupInfo.cupState : "데이터불안정"
+                  }
                   cupPoster={
-                    cup.cupPoster.length ? cup.cupPoster[0].compressedUrl : ""
+                    cup.cupInfo.cupPoster.length
+                      ? cup.cupInfo.cupPoster[0].link
+                      : ""
                   }
                 />
               </div>

@@ -1,6 +1,7 @@
 import { async } from "@firebase/util";
 import {
   faEye,
+  faList12,
   faPenToSquare,
   faTrashCan,
   faTrophy,
@@ -76,6 +77,14 @@ const CupItem = ({
             </div>
           </div>
           <div className="flex w-1/2 gap-x-3 justify-end">
+            <div
+              className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+              onClick={() => {
+                window.location.href = `/playerorder/${cupId}`;
+              }}
+            >
+              <FontAwesomeIcon icon={faList12} className="text-white text-lg" />
+            </div>
             <div
               className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
               onClick={() => {

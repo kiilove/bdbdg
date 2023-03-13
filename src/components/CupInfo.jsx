@@ -46,7 +46,7 @@ const CupInfo = ({ orgs, cupInfo, updateOn }) => {
   );
 
   dayjs.locale("ko");
-  console.log(cupInfo);
+
   const handleTimeSelect = (time) => {
     setSelectedTime(time);
     setShowPicker(false);
