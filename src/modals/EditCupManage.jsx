@@ -14,6 +14,7 @@ import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import useFirestore from "../customhooks/useFirestore";
 
 export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
   const { dispatch, editCup } = useContext(EditcupContext);
@@ -28,6 +29,9 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
     editCup.gamesCategory[pIndex].refereeAssign || []
   );
   const [searchCount, setSearchCount] = useState(undefined);
+
+  const { data: gameData, updateData: gameUpdate } = useFirestore;
+
   const chkRef = useRef([]);
   const getRefereePool = async () => {
     let dataArray = [];
@@ -175,6 +179,7 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
   }, [classIsTrue]);
 
   useMemo(() => {
+    console.log(gameInfo);
     const gameNewData = handleGamesCategory(gameInfo);
     const cupData = { ...editCup, gamesCategory: [...gameNewData] };
     dispatch({ type: "EDIT", payload: { cupData } });
@@ -246,9 +251,20 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
                     </span>
                   </>
                 ) : (
-                  <span className="text-white font-semibold">
-                    {gameInfo.title || ""}
-                  </span>
+                  <>
+                    <span className="text-white font-semibold">
+                      {gameInfo.title || ""}
+                    </span>
+                    <button
+                      className="text-white text-xs ml-10"
+                      onClick={() => {
+                        console.log("first");
+                        setGameInfo({ ...gameInfo, state: "진행중" });
+                      }}
+                    >
+                      진행중으로변경
+                    </button>
+                  </>
                 )}
               </div>
             </div>

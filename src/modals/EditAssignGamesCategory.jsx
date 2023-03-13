@@ -15,6 +15,7 @@ import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 import useFirestore from "../customhooks/useFirestore";
+import Loading from "../pages/Loading";
 
 export const EditAssignGameCategory = (props) => {
   const [joinGames, setJoinGames] = useState([]);
@@ -59,8 +60,8 @@ export const EditAssignGameCategory = (props) => {
 
   return (
     <div className="w-full flex flex-col">
-      {loading && <div>로딩중</div>}
-      {error && <div>페이지 오류</div>}
+      {loading && <Loading />}
+
       <div
         className="flex w-full h-full flex-col overflow-y-auto"
         style={{ maxWidth: "900px", maxHeight: "800px" }}

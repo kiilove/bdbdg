@@ -8,6 +8,7 @@ import {
   faPenToSquare,
   faPeopleLine,
   faPlus,
+  faSatellite,
   faScaleBalanced,
   faSitemap,
   faSquarePen,
@@ -41,6 +42,7 @@ import dayjs from "dayjs";
 import EditInvoice from "../modals/EditInvoice";
 import PlayerOrderTable from "../components/PlayerOrderTable";
 import Loading from "./Loading";
+import { updateGamesCategoryState } from "../customhooks/updateGamesCategoryState";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["이름", "연락처", "참가신청서"];
 const INVOICE_HEADERS = [
@@ -95,6 +97,22 @@ const CupView = () => {
     setCupId(() => params.cupId);
   }, [params]);
 
+  function updateGameState() {
+    const newGamesCategory = editCup.gamesCategory.map((game) => {
+      return {
+        ...game,
+        state: "경기시작전",
+      };
+    });
+    dispatch({
+      type: "EDIT",
+      payload: {
+        cupData: { ...editCup, gamesCategory: [...newGamesCategory] },
+      },
+    });
+
+    console.log(newGamesCategory); // 변경된 배열 콘솔에 출력
+  }
   const getCup = async () => {
     setIsLoading(true);
     await getDoc(doc(db, "cups", cupId))
@@ -349,6 +367,15 @@ const CupView = () => {
                           기초정보(모집공고)
                         </span>
                       </div>
+                      {/* <div
+                        className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+                        onClick={() => updateGameState()}
+                      >
+                        <FontAwesomeIcon
+                          icon={faSatellite}
+                          className="text-white text-lg hover:cursor-pointer"
+                        />
+                      </div> */}
                       <div
                         className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
                         onClick={() =>
