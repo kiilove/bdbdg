@@ -84,19 +84,21 @@ const PlayerOrderTable = () => {
     }
 
     const validClasses = data.gamesCategory.flatMap((category) =>
-      category.class.flatMap((classItem) =>
-        Array.isArray(classItem.players) && classItem.players.length > 0
-          ? {
-              class: classItem,
-              gameTitle: category.title,
-              classTitle: classItem.title,
-            }
-          : []
-      )
+      category.class.flatMap((classItem) => {
+        if (Array.isArray(classItem.players) && classItem.players.length > 0) {
+          return {
+            class: classItem,
+            gameTitle: category.title,
+            classTitle: classItem.title,
+          };
+        }
+        return [];
+      })
     );
     setIsEntryGamesList([...validClasses]);
-    setHeaderIdx({ idx: 0, title: validClasses[0].title });
+    setHeaderIdx({ idx: 0, title: validClasses[0]?.title });
   };
+
   useMemo(() => {
     if (!cupData.id) {
       return;

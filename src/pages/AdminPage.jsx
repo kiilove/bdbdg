@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import FakeUser from "./adminTools/FakeUser";
+import Schedule from "./adminTools/Schedule";
 import Loading from "./Loading";
 
 const AdminPage = () => {
@@ -12,7 +13,7 @@ const AdminPage = () => {
 
   const menuArray = [
     { idx: 0, title: "데모 참가신청 만들기", component: <FakeUser /> },
-    { idx: 1, title: "대회중 컨트롤하기", component: <FakeUser /> },
+    { idx: 1, title: "대회중 컨트롤하기", component: <Schedule /> },
   ];
   return (
     <div className="flex w-full h-full flex-col gap-y-5">

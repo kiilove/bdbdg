@@ -13,7 +13,7 @@ const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
 const EditInvoice = (props) => {
-  console.log(props);
+  //console.log(props);
   const [isLock, setIsLock] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -40,7 +40,7 @@ const EditInvoice = (props) => {
     const extraFee = props.cupFee.extraFee;
     const extraType = props.cupFee.extraType;
     const gameCount = joinGames.length;
-    console.log(extraFee);
+    //console.log(extraFee);
     if (gameCount <= 1) {
       extraCount = 0;
     } else {
@@ -70,7 +70,7 @@ const EditInvoice = (props) => {
       default:
         break;
     }
-    console.log(sumFee);
+    //console.log(sumFee);
     setJoinFee(sumFee);
     setFeeInfo({ ...feeInfo, joinFee: sumFee });
   };
@@ -89,7 +89,7 @@ const EditInvoice = (props) => {
   const handleInputs = (e) => {
     if (e.target.name !== "cupPoster") {
       setJoinInfo((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-      console.log(joinInfo);
+      //console.log(joinInfo);
     }
   };
   const handleComma = (e) => {
@@ -98,7 +98,7 @@ const EditInvoice = (props) => {
   };
 
   const handleFeeInfo = () => {
-    console.log(feeInfo);
+    //console.log(feeInfo);
     setFeeInfo({ ...feeInfo, joinFee, incomeFee });
   };
 
@@ -121,9 +121,11 @@ const EditInvoice = (props) => {
     });
     setIsLock(value);
     setIsConfirmed(value);
+    props.handleRefresh();
   };
 
   const handleAddPlayerByGamesCategory = async () => {
+    //console.log(cupData);
     const updatedGamesCategory = cupData.gamesCategory.map((category) => {
       const game = joinGames.find((game) => game.id === category.id);
       if (!game) return category;
@@ -156,6 +158,7 @@ const EditInvoice = (props) => {
       };
       return { ...category, class: classArray };
     });
+    //console.log("updatedGamesCategory", updatedGamesCategory);
     setNewCupData({ ...cupData, gamesCategory: updatedGamesCategory });
   };
 
@@ -185,6 +188,7 @@ const EditInvoice = (props) => {
     if (props.cupFee && joinGames) {
       handleFee();
     }
+    //console.log("joinGames Check", joinGames);
     setJoinInfo((prev) => ({ ...prev, joinGames }));
   }, [joinGames]);
 
@@ -192,6 +196,7 @@ const EditInvoice = (props) => {
     setFeeInfo(joinInfo.feeInfo);
     setIsConfirmed(joinInfo.isConfirmed);
     if (joinInfo.docuId) {
+      //console.log("joinInfo", joinInfo);
       cupGetDocument("cups", data.cupId);
       setIncomeFee(joinInfo.feeInfo.incomeFee);
 

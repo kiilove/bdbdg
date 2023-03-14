@@ -69,7 +69,7 @@ const FakeUser = () => {
     const pGender = faker.datatype.boolean() ? "m" : "f";
     const pBirth = generateBirthDate();
     const pUid = faker.datatype.uuid();
-    const pid = faker.datatype.uuid();
+    const pId = faker.datatype.uuid();
     const pPic = faker.image.avatar();
 
     return {
@@ -80,7 +80,7 @@ const FakeUser = () => {
       pGender,
       pBirth,
       pUid,
-      pid,
+      pId,
       pPic,
     };
   };

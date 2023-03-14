@@ -1,23 +1,12 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useMemo, useState } from "react";
 
-import { EditcupContext } from "../context/EditcupContext";
-
-import { Decrypter, Encrypter } from "../components/Encrypto";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import useFirestore from "../customhooks/useFirestore";
 import Loading from "../pages/Loading";
 
 export const EditAssignGameCategory = (props) => {
+  console.log(props);
   const [joinGames, setJoinGames] = useState([]);
 
   const { data, loading, error, getDocument } = useFirestore();

@@ -152,8 +152,8 @@ export const NewCupInfo = () => {
               type="radio"
               name="cupState"
               id="cupState1"
-              value="대회준비중"
-              checked={cupState === "대회준비중"}
+              value="신청접수중"
+              checked={cupState === "신청접수중"}
               onChange={(e) => setCupState((prev) => (prev = e.target.value))}
             />
             <span className="flex justify-start items-center text-white text-sm ml-3">

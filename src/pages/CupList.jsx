@@ -53,9 +53,9 @@ const CupList = () => {
                     cup.cupInfo.cupCount ? cup.cupInfo.cupCount : "데이터불안정"
                   }
                   cupDate={
-                    cup.cupInfo.cupDate.startDate
-                      ? cup.cupInfo.cupDate.startDate
-                      : "데이터불안정"
+                    cup.cupInfo.cupDate === undefined
+                      ? "데이터불안정"
+                      : cup.cupInfo.cupDate.startDate
                   }
                   cupState={
                     cup.cupInfo.cupState ? cup.cupInfo.cupState : "데이터불안정"
