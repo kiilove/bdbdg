@@ -27,7 +27,7 @@ export const EditCupInfo = () => {
     extraFee: 0,
     extraType: "없음",
   });
-  const [cupState, setCupState] = useState("대회준비중");
+  const [cupState, setCupState] = useState("신청접수중");
   const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [modal, setModal] = useState(false);
@@ -85,7 +85,7 @@ export const EditCupInfo = () => {
     setPosterList([...editCup.cupInfo.cupPoster] || []);
     setCupOrg(editCup.cupInfo.cupOrg || "");
     setCupDate(editCup.cupInfo.cupDate || { startDate: new Date() });
-    setCupState(editCup.cupInfo.cupState || "대회준비중");
+    setCupState(editCup.cupInfo.cupState || "신청접수중");
     setFee(editCup.cupInfo.cupFee || {});
   }, []);
 
@@ -159,12 +159,12 @@ export const EditCupInfo = () => {
               type="radio"
               name="cupState"
               id="cupState1"
-              value="대회준비중"
-              checked={cupState === "대회준비중"}
+              value="신청접수중"
+              checked={cupState === "신청접수중"}
               onChange={(e) => setCupState((prev) => (prev = e.target.value))}
             />
             <span className="flex justify-start items-center text-white text-sm ml-3">
-              대회준비중
+              신청접수중
             </span>
           </label>
           <label className="flex w-1/4 justify-center items-center">

@@ -27,7 +27,7 @@ export const NewCupInfo = () => {
   });
 
   const [cupOrg, setCupOrg] = useState("");
-  const [cupState, setCupState] = useState("대회준비중");
+  const [cupState, setCupState] = useState("신청접수중");
   const [cupDate, setCupDate] = useState({});
   const [posterList, setPosterList] = useState([...(cupInfo.cupPoster || [])]);
   const [modal, setModal] = useState(false);
@@ -85,7 +85,7 @@ export const NewCupInfo = () => {
     setPosterList([...newCup.cupInfo.cupPoster] || []);
     setCupOrg(newCup.cupInfo.cupOrg || "");
     setCupDate(newCup.cupInfo.cupDate || { startDate: new Date() });
-    setCupState(newCup.cupInfo.cupState || "대회준비중");
+    setCupState(newCup.cupInfo.cupState || "신청접수중");
   }, []);
 
   useMemo(
@@ -157,7 +157,7 @@ export const NewCupInfo = () => {
               onChange={(e) => setCupState((prev) => (prev = e.target.value))}
             />
             <span className="flex justify-start items-center text-white text-sm ml-3">
-              대회준비중
+              신청접수중
             </span>
           </label>
           <label className="flex w-1/4 justify-center items-center">

@@ -8,8 +8,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { deleteDoc, doc } from "firebase/firestore";
-import React from "react";
+import React, { useState } from "react";
 import { db } from "../firebase";
+import ConfirmationModal from "../modals/ConfirmationModal";
 
 const CupItem = ({
   cupId,
@@ -20,12 +21,30 @@ const CupItem = ({
   cupState,
   cupPoster,
 }) => {
-  const handleDel = async (id) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDeleteClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
-      await deleteDoc(doc(db, "cups", id));
+      await deleteDoc(doc(db, "cups", cupId));
     } catch (error) {
       console.log(error);
     }
+    setIsModalOpen(false);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const message = {
+    title: "삭제확인",
+    body: "해당 대회 정보를 삭제하시겠습니까?",
+    confirmButtonText: "삭제",
+    cancelButtonText: "취소",
   };
   return (
     <div
@@ -99,7 +118,7 @@ const CupItem = ({
             <button
               className="flex justify-center items-center w-10 h-10 bg-orange-500 rounded-xl hover:cursor-pointer"
               onClick={() => {
-                handleDel(cupId);
+                handleDeleteClick();
               }}
             >
               <FontAwesomeIcon
@@ -107,6 +126,12 @@ const CupItem = ({
                 className="text-white text-lg"
               />
             </button>
+            <ConfirmationModal
+              isOpen={isModalOpen}
+              onConfirm={handleDeleteConfirm}
+              onCancel={handleModalClose}
+              message={message}
+            />
           </div>
         </div>
       </div>

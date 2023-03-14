@@ -17,6 +17,7 @@ import GameList from "./pages/GameList";
 import CupNew from "./pages/CupNew";
 import ModalTest from "./pages/ModalTest";
 import PlayerOrderTable from "./components/PlayerOrderTable";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
@@ -36,7 +37,7 @@ function App() {
           </div>
           <div className="flex w-full min-h-screen ">
             <Routes>
-              <Route path="/" element={<CupMain component={<Dashboard />} />} />
+              <Route path="/" element={<CupMain component={<CupList />} />} />
               <Route
                 path="/dashboard"
                 element={<CupMain component={<Dashboard />} />}
@@ -58,6 +59,8 @@ function App() {
                 element={<PlayerOrderTable />}
               />
               <Route path="/gamelist" element={<GameList />} />
+              <Route path="/refereelist" element={<RefereeList />} />
+              <Route path="/onlyadmin" element={<AdminPage />} />
             </Routes>
           </div>
         </div>

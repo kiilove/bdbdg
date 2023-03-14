@@ -43,7 +43,7 @@ const CupList = () => {
         <div className="flex w-full px-5">
           <div className="flex w-full flex-wrap box-border justify-between gap-y-5">
             {cupListsData.map((cup, idx) => (
-              <div className="flex">
+              <div className="flex ">
                 <CupItem
                   cupId={cup.id}
                   cupName={
