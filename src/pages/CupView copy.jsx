@@ -9,7 +9,6 @@ import {
   faPeopleLine,
   faPlus,
   faSatellite,
-  faSave,
   faScaleBalanced,
   faSitemap,
   faSquarePen,
@@ -44,7 +43,6 @@ import EditInvoice from "../modals/EditInvoice";
 import PlayerOrderTable from "../components/PlayerOrderTable";
 import Loading from "./Loading";
 import { updateGamesCategoryState } from "../customhooks/updateGamesCategoryState";
-import useFirestore from "../customhooks/useFirestore";
 const REFEREE_HEADERS = ["이름", "이메일", "연락처"];
 const PLAYER_HEADERS = ["이름", "연락처", "참가신청서"];
 const INVOICE_HEADERS = [
@@ -83,12 +81,6 @@ const CupView = () => {
 
   const [invoiceList, setInvoiceList] = useState([]);
   const { dispatch, editCup } = useContext(EditcupContext);
-  const { updateData: cupUpdate } = useFirestore();
-  const {
-    updateData: updateSchedule,
-    readData: readSchedule,
-    addData: addSchedule,
-  } = useFirestore();
 
   const handleOpenModal = ({ component, title }) => {
     setModalComponent(() => component);
@@ -105,6 +97,22 @@ const CupView = () => {
     setCupId(() => params.cupId);
   }, [params]);
 
+  function updateGameState() {
+    const newGamesCategory = editCup.gamesCategory.map((game) => {
+      return {
+        ...game,
+        state: "경기시작전",
+      };
+    });
+    dispatch({
+      type: "EDIT",
+      payload: {
+        cupData: { ...editCup, gamesCategory: [...newGamesCategory] },
+      },
+    });
+
+    console.log(newGamesCategory); // 변경된 배열 콘솔에 출력
+  }
   const getCup = async () => {
     setIsLoading(true);
     await getDoc(doc(db, "cups", cupId))
@@ -157,120 +165,31 @@ const CupView = () => {
     return result;
   };
 
-  // const filterEmptyClasses = (gamesCategory) => {
-  //   const filteredCategories = gamesCategory.map((gameCategory) => ({
-  //     ...gameCategory,
-  //     class:
-  //       gameCategory.class?.filter(
-  //         (classItem) => classItem.players?.length > 0
-  //       ) || [],
-  //   }));
-  //   return filteredCategories.filter((category) => category.class.length > 0);
-  // };
-
-  // const filterEmptyClasses = (gamesCategory) => {
-  //   const filteredCategories = gamesCategory.map((gameCategory) => ({
-  //     ...gameCategory,
-  //     class:
-  //       gameCategory.class?.filter(
-  //         (classItem) => classItem.players?.length > 0
-  //       ) || [],
-  //   }));
-
-  //   filteredCategories[0].state = "입장가능";
-  //   filteredCategories.slice(1).forEach((category) => {
-  //     category.state = "시작전";
-  //   });
-
-  //   return filteredCategories.filter((category) => category.class.length > 0);
-  // };
-
-  const filterEmptyClasses = (gamesCategory) => {
-    const filteredCategories = gamesCategory.map((gameCategory) => ({
-      ...gameCategory,
-      class:
-        gameCategory.class?.filter(
-          (classItem) => classItem.players?.length > 0
-        ) || [],
-    }));
-
-    const finalCategories = filteredCategories.filter(
-      (category) => category.class.length > 0
-    );
-
-    if (finalCategories.length > 0) {
-      // If there is at least one category, set the first category to "입장가능"
-      finalCategories[0].state = "입장가능";
-      // Set the remaining categories to "시작전"
-      for (let i = 1; i < finalCategories.length; i++) {
-        finalCategories[i].state = "시작전";
-      }
-    }
-
-    return finalCategories;
+  const updateCup = async (data) => {
+    (data.cupInfo.cupName !== undefined ||
+      data.cupInfo.cupCount !== undefined) &&
+      (await setDoc(doc(db, "cups", cupId), { ...data }, { merge: true }).then(
+        () => refreshState()
+      ));
   };
+  const refreshState = () => {
+    const promises = [
+      setCupInfo((prev) => (prev = editCup.cupInfo) || {}),
+      setPosterList([...editCup.cupInfo.cupPoster] || []),
+      setCupOrg(editCup.cupInfo.cupOrg || ""),
+      setCupDate(editCup.cupInfo.cupDate || { startDate: null }),
+      setCupState(editCup.cupInfo.cupState || "대회준비중"),
+    ];
 
-  const handleUpdate = async (data) => {
-    if (!data) {
-      return;
-    }
-
-    await cupUpdate("cups", cupId, { ...data });
-    console.log(filterEmptyClasses(data.gamesCategory));
-
-    if (data.cupInfo.cupState === "대회중") {
-      const scheduleId = data.refScheduleId;
-      console.log(scheduleId);
-      const scheduleData = await readSchedule("schedule");
-      console.log(scheduleData);
-
-      if (!scheduleId) {
-        const addedSchedule = await addSchedule("schedule", {
-          gameOrderLists: filterEmptyClasses(data.gamesCategory),
-          refCupId: cupId,
-        });
-        // Update refScheduleId in cups collection
-        await cupUpdate("cups", cupId, { refScheduleId: addedSchedule.id });
-      } else {
-        const scheduleDocument = scheduleData.find(
-          (schedule) => schedule.id === scheduleId
-        );
-
-        if (!scheduleDocument) {
-          const addedSchedule = await addSchedule("schedule", {
-            gameOrderLists: filterEmptyClasses(data.gamesCategory),
-            refCupId: cupId,
-          });
-          // Update refScheduleId in cups collection
-          await cupUpdate("cups", cupId, { refScheduleId: addedSchedule.id });
-        } else {
-          const filteredGamesCategory = filterEmptyClasses(data.gamesCategory);
-          await updateSchedule("schedule", scheduleId, {
-            gameOrderLists: filteredGamesCategory,
-          });
-        }
-      }
-    }
+    Promise.all(promises);
   };
-
-  // const refreshState = () => {
-  //   const promises = [
-  //     setCupInfo((prev) => (prev = editCup.cupInfo) || {}),
-  //     setPosterList([...editCup.cupInfo.cupPoster] || []),
-  //     setCupOrg(editCup.cupInfo.cupOrg || ""),
-  //     setCupDate(editCup.cupInfo.cupDate || { startDate: null }),
-  //     setCupState(editCup.cupInfo.cupState || "대회준비중"),
-  //   ];
-
-  //   Promise.all(promises);
-  // };
   useMemo(() => {
     getCup();
     getPlayerInvoice();
   }, [params]);
 
   useMemo(() => {
-    setCupData((prev) => ({ ...prev, editCup }));
+    updateCup(editCup);
   }, [editCup]);
 
   const handlePosterTitle = (posters) => {
@@ -353,7 +272,7 @@ const CupView = () => {
                     component: (
                       <EditInvoice
                         collectionId={item.id}
-                        cupFee={cupData.cupInfo.cupFee}
+                        cupFee={editCup.cupInfo.cupFee}
                       />
                     ),
                     title: "참가신청서(신청서상 정보만 변경)",
@@ -457,30 +376,19 @@ const CupView = () => {
                           className="text-white text-lg hover:cursor-pointer"
                         />
                       </div> */}
-                      <div className="flex gap-x-4">
-                        <div
-                          className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-                          onClick={() =>
-                            handleOpenModal({
-                              component: <EditCupInfo />,
-                              title: "대회정보수정",
-                            })
-                          }
-                        >
-                          <FontAwesomeIcon
-                            icon={faPenToSquare}
-                            className="text-white text-lg hover:cursor-pointer"
-                          />
-                        </div>
-                        <div
-                          className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-                          onClick={() => handleUpdate(editCup)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faSave}
-                            className="text-white text-lg hover:cursor-pointer"
-                          />
-                        </div>
+                      <div
+                        className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
+                        onClick={() =>
+                          handleOpenModal({
+                            component: <EditCupInfo />,
+                            title: "대회정보수정",
+                          })
+                        }
+                      >
+                        <FontAwesomeIcon
+                          icon={faPenToSquare}
+                          className="text-white text-lg hover:cursor-pointer"
+                        />
                       </div>
                     </div>
                   </div>
@@ -488,22 +396,22 @@ const CupView = () => {
                 <div className="flex flex-col w-full h-full px-5 gap-y-2">
                   <div className="flex justify-start items-top ">
                     <span className="text-white text-base">
-                      대회명 : {editCup.cupInfo.cupName}
+                      대회명 : {cupInfo && cupInfo.cupName}
                     </span>
                   </div>
                   <div className="flex justify-start items-top">
                     <span className="text-white text-base">
-                      회차 : {editCup.cupInfo.cupCount}회
+                      회차 : {cupInfo && cupInfo.cupCount}회
                     </span>
                   </div>
                   <div className="flex justify-start items-top">
                     <span className="text-white text-base">
-                      주최 : {editCup.cupInfo.cupOrg}
+                      주최 : {cupInfo && cupOrg}
                     </span>
                   </div>
                   <div className="flex justify-start items-top">
                     <span className="text-white text-base">
-                      장소 : {editCup.cupInfo.cupLocation}
+                      장소 : {cupInfo && cupInfo.cupLocation}
                     </span>
                   </div>
                   <div className="flex justify-start items-top">
@@ -516,7 +424,7 @@ const CupView = () => {
                   </div>
                   <div className="flex justify-start items-top">
                     <span className="text-white text-base">
-                      상태 : {editCup.cupInfo.cupState}
+                      상태 : {cupInfo && cupState}
                     </span>
                   </div>
                 </div>

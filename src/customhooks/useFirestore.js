@@ -40,9 +40,12 @@ const useFirestore = () => {
       }));
       setData(documents);
       setLoading(false);
+      return documents;
     } catch (error) {
+      console.log(error);
       setError(error);
       setLoading(false);
+      return;
     }
   };
 
