@@ -8,7 +8,7 @@ const useRealtimeSchedule = (cupId) => {
   const { data: currentScheduleData, loading: isScheduleLoading } =
     useOnSanpshotFirestore("currentSchedule", [where("refCupId", "==", cupId)]);
 
-  const conditions = [where("refCupId", "==", cupId)];
+  const conditions = [where("refCupId", "==", currentScheduleData.refCupid)];
   const scheduleData = useFirestoreSearch("schedule", conditions);
 
   const [entranceOpenGameCategory, setEntranceOpenGameCategory] = useState([]);
