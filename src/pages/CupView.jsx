@@ -89,6 +89,11 @@ const CupView = () => {
     readData: readSchedule,
     addData: addSchedule,
   } = useFirestore();
+  const {
+    updateData: updateCurrentSchedule,
+    readData: readCurrentSchedule,
+    addData: addCurrentSchedule,
+  } = useFirestore();
 
   const handleOpenModal = ({ component, title }) => {
     setModalComponent(() => component);
@@ -220,33 +225,77 @@ const CupView = () => {
 
     if (data.cupInfo.cupState === "대회중") {
       const scheduleId = data.refScheduleId;
+      const currentScheduleId = data.refCurrentScheduleId;
       console.log(scheduleId);
       const scheduleData = await readSchedule("schedule");
+      const currentScheduleData = await readCurrentSchedule("currentSchedule");
       console.log(scheduleData);
 
       if (!scheduleId) {
+        const gameOrderLists = filterEmptyClasses(data.gamesCategory);
         const addedSchedule = await addSchedule("schedule", {
-          gameOrderLists: filterEmptyClasses(data.gamesCategory),
+          gameOrderLists,
           refCupId: cupId,
         });
+
+        const addedCurrentSchedule = await addCurrentSchedule(
+          "currentSchedule",
+          {
+            refCupId: cupId,
+            refScheduleId: addedSchedule.id,
+            currentGameOrder: {
+              index: 0,
+              gameId: gameOrderLists[0].id,
+            },
+          }
+        );
         // Update refScheduleId in cups collection
-        await cupUpdate("cups", cupId, { refScheduleId: addedSchedule.id });
+        await cupUpdate("cups", cupId, {
+          refScheduleId: addedSchedule.id,
+          refCurrentScheduleId: addedCurrentSchedule.id,
+        });
       } else {
         const scheduleDocument = scheduleData.find(
           (schedule) => schedule.id === scheduleId
         );
 
         if (!scheduleDocument) {
+          const gameOrderLists = filterEmptyClasses(data.gamesCategory);
           const addedSchedule = await addSchedule("schedule", {
-            gameOrderLists: filterEmptyClasses(data.gamesCategory),
+            gameOrderLists,
             refCupId: cupId,
           });
+
+          const addedCurrentSchedule = await addCurrentSchedule(
+            "currentSchedule",
+            {
+              refCupId: cupId,
+              refScheduleId: addedSchedule.id,
+              currentGameOrder: {
+                index: 0,
+                gameId: gameOrderLists[0].id,
+              },
+            }
+          );
           // Update refScheduleId in cups collection
-          await cupUpdate("cups", cupId, { refScheduleId: addedSchedule.id });
+          await cupUpdate("cups", cupId, {
+            refScheduleId: addedSchedule.id,
+            refCurrentScheduleId: addedCurrentSchedule.id,
+            currentGameOrder: {
+              index: 0,
+              gameId: gameOrderLists[0].id,
+            },
+          });
         } else {
           const filteredGamesCategory = filterEmptyClasses(data.gamesCategory);
           await updateSchedule("schedule", scheduleId, {
             gameOrderLists: filteredGamesCategory,
+          });
+          await updateCurrentSchedule("currentSchedule", currentScheduleId, {
+            currentGameOrder: {
+              index: 0,
+              gameId: filteredGamesCategory[0].id,
+            },
           });
         }
       }

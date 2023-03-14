@@ -1,11 +1,16 @@
 import { where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
+import useFirestoreSearch from "./useFirestoreSearch";
 import { useOnSanpshotFirestore } from "./useOnSnapshotFirestore";
 
 const useRealtimeSchedule = (cupId) => {
-  const { data: scheduleData, loading: isScheduleLoading } =
-    useOnSanpshotFirestore("schedule", [where("refCupId", "==", cupId)]);
+  const { data: currentScheduleData, loading: isScheduleLoading } =
+    useOnSanpshotFirestore("currentSchedule", [where("refCupId", "==", cupId)]);
+
+  const conditions = [where("refCupId", "==", cupId)];
+  const scheduleData = useFirestoreSearch("schedule", conditions);
+
   const [entranceOpenGameCategory, setEntranceOpenGameCategory] = useState([]);
   const [beforeStartGameCategory, setBeforeStartGameCategory] = useState([]);
   const [afterEndGameCategory, setAfterEndGameCategory] = useState([]);
