@@ -29,6 +29,7 @@ import {
   query,
   setDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { Bars } from "react-loader-spinner";
@@ -225,34 +226,27 @@ const CupView = () => {
 
     if (data.cupInfo.cupState === "대회중") {
       const scheduleId = data.refScheduleId;
-      const currentScheduleId = data.refCurrentScheduleId;
+
       console.log(scheduleId);
       const scheduleData = await readSchedule("schedule");
-      const currentScheduleData = await readCurrentSchedule("currentSchedule");
+
       console.log(scheduleData);
 
       if (!scheduleId) {
         const gameOrderLists = filterEmptyClasses(data.gamesCategory);
         const addedSchedule = await addSchedule("schedule", {
-          gameOrderLists,
           refCupId: cupId,
         });
 
-        const addedCurrentSchedule = await addCurrentSchedule(
-          "currentSchedule",
-          {
-            refCupId: cupId,
-            refScheduleId: addedSchedule.id,
-            currentGameOrder: {
-              index: 0,
-              gameId: gameOrderLists[0].id,
-            },
-          }
-        );
         // Update refScheduleId in cups collection
         await cupUpdate("cups", cupId, {
           refScheduleId: addedSchedule.id,
-          refCurrentScheduleId: addedCurrentSchedule.id,
+        });
+
+        const classIds = await addClasses(gameOrderLists, addedSchedule.id);
+
+        await updateSchedule("schedule", addedSchedule.id, {
+          classIds,
         });
       } else {
         const scheduleDocument = scheduleData.find(
@@ -262,57 +256,134 @@ const CupView = () => {
         if (!scheduleDocument) {
           const gameOrderLists = filterEmptyClasses(data.gamesCategory);
           const addedSchedule = await addSchedule("schedule", {
-            gameOrderLists,
             refCupId: cupId,
           });
 
-          const addedCurrentSchedule = await addCurrentSchedule(
-            "currentSchedule",
-            {
-              refCupId: cupId,
-              refScheduleId: addedSchedule.id,
-              currentGameOrder: {
-                index: 0,
-                gameId: gameOrderLists[0].id,
-              },
-            }
-          );
           // Update refScheduleId in cups collection
           await cupUpdate("cups", cupId, {
             refScheduleId: addedSchedule.id,
-            refCurrentScheduleId: addedCurrentSchedule.id,
-            currentGameOrder: {
-              index: 0,
-              gameId: gameOrderLists[0].id,
-            },
+          });
+
+          const classIds = await addClasses(gameOrderLists, addedSchedule.id);
+
+          await updateSchedule("schedule", addedSchedule.id, {
+            classIds,
           });
         } else {
           const filteredGamesCategory = filterEmptyClasses(data.gamesCategory);
+          const classIds = await addClasses(filteredGamesCategory, scheduleId);
+
           await updateSchedule("schedule", scheduleId, {
-            gameOrderLists: filteredGamesCategory,
-          });
-          await updateCurrentSchedule("currentSchedule", currentScheduleId, {
-            currentGameOrder: {
-              index: 0,
-              gameId: filteredGamesCategory[0].id,
-            },
+            classIds,
           });
         }
       }
     }
   };
 
-  // const refreshState = () => {
-  //   const promises = [
-  //     setCupInfo((prev) => (prev = editCup.cupInfo) || {}),
-  //     setPosterList([...editCup.cupInfo.cupPoster] || []),
-  //     setCupOrg(editCup.cupInfo.cupOrg || ""),
-  //     setCupDate(editCup.cupInfo.cupDate || { startDate: null }),
-  //     setCupState(editCup.cupInfo.cupState || "대회준비중"),
-  //   ];
+  // 애매한 버전
+  // const addClasses = async (gameOrderLists, scheduleId) => {
+  //   const classData = gameOrderLists.flatMap((order) =>
+  //     order.class.map((classItem) => ({
+  //       ...classItem,
+  //       refOrderId: order.id,
+  //       refScheduleId: scheduleId,
+  //     }))
+  //   );
 
-  //   Promise.all(promises);
+  //   const classRefs = classData.map(() => doc(collection(db, "classes")));
+
+  //   const batch = writeBatch(db);
+
+  //   classRefs.forEach((classRef, index) => {
+  //     batch.set(classRef, classData[index]);
+  //   });
+
+  //   try {
+  //     await batch.commit();
+
+  //     const querySnapshot = await getDocs(collection(db, "classes"));
+
+  //     const classIdsByOrderId = {};
+  //     querySnapshot.forEach((doc) => {
+  //       const classId = doc.id;
+  //       const refOrderId = doc.get("refOrderId");
+
+  //       if (!classIdsByOrderId[refOrderId]) {
+  //         classIdsByOrderId[refOrderId] = [];
+  //       }
+
+  //       classIdsByOrderId[refOrderId].push(classId);
+  //     });
+
+  //     return Object.entries(classIdsByOrderId).map(
+  //       ([refOrderId, classIds]) => ({
+  //         refOrderId,
+  //         classIds,
+  //       })
+  //     );
+  //   } catch (error) {
+  //     console.error(error);
+  //     console.error(error.message);
+  //     await batch.rollback();
+  //     return [];
+  //   }
   // };
+
+  const addClasses = async (gameOrderLists, scheduleId) => {
+    const classIds = [];
+
+    const classData = gameOrderLists.flatMap((order) =>
+      order.class.map((classItem) => ({
+        ...classItem,
+        refOrderId: order.id,
+        refScheduleId: scheduleId,
+      }))
+    );
+
+    const batch = writeBatch(db);
+
+    const existingClasses = await getDocs(
+      query(collection(db, "classes"), where("refScheduleId", "==", scheduleId))
+    );
+
+    existingClasses.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    classData.forEach((classDoc) => {
+      const classRef = doc(collection(db, "classes"));
+      batch.set(classRef, classDoc);
+    });
+
+    try {
+      await batch.commit();
+
+      const querySnapshot = await getDocs(collection(db, "classes"));
+      querySnapshot.forEach((doc) => {
+        classIds.push(doc.id);
+      });
+
+      return classIds;
+    } catch (error) {
+      console.error(error);
+      console.error(error.message);
+      await batch.rollback();
+      return [];
+    }
+  };
+
+  const refreshState = () => {
+    const promises = [
+      setCupInfo((prev) => (prev = editCup.cupInfo) || {}),
+      setPosterList([...editCup.cupInfo.cupPoster] || []),
+      setCupOrg(editCup.cupInfo.cupOrg || ""),
+      setCupDate(editCup.cupInfo.cupDate || { startDate: null }),
+      setCupState(editCup.cupInfo.cupState || "대회준비중"),
+    ];
+
+    Promise.all(promises);
+  };
   useMemo(() => {
     getCup();
     getPlayerInvoice();

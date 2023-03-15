@@ -16,6 +16,8 @@ const Schedule = () => {
   const {
     data: realtimeCupsInApplication,
     loading: isRealtimeCupsInApplicationLoading,
+    isSubscribed: isRealtimeCupsInSubscribed,
+    handleToggleSubscribed: handelRealtimeCupsInApplication,
   } = useOnSanpshotFirestore("cups", queryOptions);
   return (
     <div className="flex w-full bg-gray-900 text-white h-full flex-col justify-start items-center p-2 gap-y-2">
@@ -25,6 +27,11 @@ const Schedule = () => {
         </div>
       ) : (
         <div className="flex justify-start items-center w-full  flex-col">
+          <div className="flex">
+            <button onClick={() => handelRealtimeCupsInApplication()}>
+              {isRealtimeCupsInSubscribed ? "Stop" : "Start"} subscription
+            </button>
+          </div>
           <div className="flex w-full h-full justify-start items-center gap-x-2">
             {realtimeCupsInApplication.map((cup) => (
               <button
@@ -32,7 +39,7 @@ const Schedule = () => {
                 onClick={() => setCupId(cup.id)}
                 className="flex justify-center items-center bg-gray-700 p-3"
               >
-                {cup.cupInfo.cupName}
+                {cup.id}
               </button>
             ))}
           </div>
