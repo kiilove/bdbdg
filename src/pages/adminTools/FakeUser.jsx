@@ -131,12 +131,6 @@ const FakeUser = () => {
     }
     console.log(fakeArray);
 
-    const cupsJoinCollectionRef = collection(db, "cupsjoin"); // cupsjoin 컬렉션 ref
-    for (const user of fakeArray) {
-      // 사용자 문서 추가
-      await addDoc(cupsJoinCollectionRef, user);
-    }
-
     // setFakeUsers를 호출하여 화면에 표시
     setFakeUsers(fakeArray);
   };
@@ -233,6 +227,12 @@ const FakeUser = () => {
               onClick={() => setFakeUsers(handleFake())}
             >
               <span>만들기</span>
+            </button>
+            <button
+              className="flex  w-32 h-full text-white justify-center items-center border"
+              onClick={() => addCupsJoin(fakeUsers)}
+            >
+              <span>참가신청저장</span>
             </button>
           </div>
           <div className="flex w-full h-full flex-col">
