@@ -1,6 +1,7 @@
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Modal } from "@mui/material";
+import dayjs from "dayjs";
 import React, { useContext, useEffect, useState } from "react";
 import { widgetTitle } from "../components/Titles";
 import { EditcupContext } from "../context/EditcupContext";
@@ -154,7 +155,7 @@ const InvoiceTable = ({ data, id, onUpdate }) => {
                 {invoice.pEmail}
               </td>
               <td className="text-white text-sm font-semibold py-3 px-6">
-                {invoice.invoiceDate}
+                {dayjs(invoice.invoiceDate).format("YYYY-MM-DD")}
               </td>
               <td className="text-white text-sm font-semibold py-3 px-6">
                 {invoice[iIdx + 5]}
