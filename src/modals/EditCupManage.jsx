@@ -16,7 +16,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import useFirestore from "../customhooks/useFirestore";
 
-export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
+export const EditCupManage = ({
+  pSetModal,
+  pSetRefresh,
+  pGameId,
+  pIndex,
+  onUpdate,
+}) => {
   const { dispatch, editCup } = useContext(EditcupContext);
   const [gameInfo, setGameInfo] = useState(editCup.gamesCategory[pIndex]);
   const [gamesCategory, setGamesCategory] = useState([
@@ -180,12 +186,14 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
 
   const gameUpdateData = async (data) => {
     await gameUpdate("cups", editCup.id, { ...data });
+    dispatch({ type: "EDIT", payload: { cupData: { ...data } } });
   };
   useMemo(() => {
     console.log(gameInfo);
     const gameNewData = handleGamesCategory(gameInfo);
-    const cupData = { ...editCup, gamesCategory: [...gameNewData] };
-    gameUpdateData(cupData);
+    onUpdate(gameNewData);
+    // const cupData = { ...editCup, gamesCategory: [...gameNewData] };
+    // gameUpdateData(cupData);
   }, [gameInfo]);
 
   const customList = (items) => {

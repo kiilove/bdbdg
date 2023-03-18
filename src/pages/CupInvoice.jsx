@@ -1,29 +1,37 @@
 import dayjs from "dayjs";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import { useParams } from "react-router-dom";
 import useFirestore from "../customhooks/useFirestore";
 import Loading from "./Loading";
 import html2canvas from "html2canvas";
 import InvoiceTable from "./InvoiceTable";
+import { EditcupContext } from "../context/EditcupContext";
 
 const CupInvoice = ({ cupId }) => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const [cupInfo, setCupInfo] = useState({});
-  const [posterTitle, setPosterTitle] = useState();
+  const [invoiceDatas, setInvoiceDatas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(null);
   const params = useParams();
-  const qrCodeRef = useRef(null);
+
   const pageSize = 20;
   const {
+    data: getCups,
+    error: cupsError,
+    updateData: cupsUpdateData,
+  } = useFirestore();
+  const {
     data: getInvoices,
-    error: cupInfoError,
+    error: invoiceError,
+    updateData: invoiceUpdateData,
     readData: invoiceReadData,
   } = useFirestore();
+
+  const { editCus, dispatch } = useContext(EditcupContext);
 
   const handleInvoicePlayers = (data) => {
     let dataArray = [];
@@ -76,11 +84,14 @@ const CupInvoice = ({ cupId }) => {
     return dataArray;
   };
 
+  //
+
   const invoiceTableData = useMemo(() => {
-    if (!getInvoices) {
+    if (!invoiceDatas || !invoiceDatas?.length) {
       return;
     }
-    const filteredInvoice = getInvoices.filter(
+
+    const filteredInvoice = invoiceDatas.filter(
       (filter) => filter.cupId === params.cupId
     );
 
@@ -88,8 +99,17 @@ const CupInvoice = ({ cupId }) => {
 
     setIsLoading(false);
     return result;
+  }, [invoiceDatas]);
+
+  useEffect(() => {
+    if (!getInvoices || !getInvoices?.length) {
+      return;
+    }
+
+    setInvoiceDatas([...getInvoices]);
   }, [getInvoices]);
 
+  //where로 처리해서 read값 줄여야함
   useEffect(() => {
     if (params !== null) {
       invoiceReadData("cupsjoin");
@@ -99,7 +119,7 @@ const CupInvoice = ({ cupId }) => {
   return (
     <div className="flex w-full h-full flex-col gap-y-5">
       {isLoading && <Loading />}
-      {getInvoices && (
+      {invoiceDatas?.length && (
         <div className="flex w-full h-full flex-col gap-y-5">
           <div className="flex w-full gap-x-5">
             <div

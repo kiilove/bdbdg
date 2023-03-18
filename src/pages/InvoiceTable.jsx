@@ -4,6 +4,7 @@ import { Modal } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { widgetTitle } from "../components/Titles";
 import { EditcupContext } from "../context/EditcupContext";
+import useFirestore from "../customhooks/useFirestore";
 import EditInvoice from "../modals/EditInvoice";
 const INVOICE_HEADERS = [
   { title: "확정여부", size: "10%" },
@@ -13,12 +14,43 @@ const INVOICE_HEADERS = [
   { title: "신청일자", size: "15%" },
 ];
 
-const InvoiceTable = ({ data, id }) => {
+const InvoiceTable = ({ data, id, onUpdate }) => {
   const [modal, setModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalComponent, setModalComponent] = useState();
+  const [invoiceTableDatas, setInvoiceTableDatas] = useState([...data]);
 
   const { editCup, dispatch } = useContext(EditcupContext);
+
+  const {
+    data: getCups,
+    error: cupsError,
+    updateData: cupsUpdateData,
+  } = useFirestore();
+  const {
+    data: getInvoices,
+    error: invoiceError,
+    updateData: invoiceUpdateData,
+    readData: invoiceReadData,
+  } = useFirestore();
+
+  const handleStateAndDBUpdate = async ({ id, updatedData }) => {
+    console.log(id);
+    await cupsUpdateData("cups", id, { ...updatedData });
+    dispatch({ type: "EDIT", payload: { cupData: { ...updatedData } } });
+  };
+  const handleListAndDBUpdate = async ({ id, updatedData }) => {
+    await invoiceUpdateData("cupsjoin", id, {
+      ...updatedData,
+    });
+    const filterForRefresh = invoiceTableDatas.findIndex(
+      (filter) => filter.id === id
+    );
+    console.log(filterForRefresh);
+    const newInvoiceTableDatas = [...invoiceTableDatas];
+    newInvoiceTableDatas.splice(filterForRefresh, 1, updatedData);
+    setInvoiceTableDatas(newInvoiceTableDatas);
+  };
 
   const handleOpenModal = ({ component, title }) => {
     setModalComponent(() => component);
@@ -32,8 +64,8 @@ const InvoiceTable = ({ data, id }) => {
   };
 
   useEffect(() => {
-    console.log(editCup);
-  }, [editCup]);
+    console.log(invoiceTableDatas);
+  }, [invoiceTableDatas]);
 
   return (
     <div className="flex w-full">
@@ -79,7 +111,7 @@ const InvoiceTable = ({ data, id }) => {
           </tr>
         </thead>
         <tbody>
-          {data.map((invoice, iIdx) => (
+          {invoiceTableDatas?.map((invoice, iIdx) => (
             <tr>
               <td className=" y-3 px-6  ">
                 {!invoice.isConfirmed ? (
@@ -101,6 +133,8 @@ const InvoiceTable = ({ data, id }) => {
                         <EditInvoice
                           collectionId={invoice.id}
                           cupFee={editCup.cupInfo.cupFee}
+                          onUpdateCup={handleStateAndDBUpdate}
+                          onUpdateJoin={handleListAndDBUpdate}
                         />
                       ),
                       title: "참가신청서(신청서상 정보만 변경)",

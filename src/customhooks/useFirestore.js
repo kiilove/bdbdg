@@ -16,7 +16,7 @@ const useFirestore = () => {
   const [error, setError] = useState(null);
 
   const getDocument = async (collectionName, collectionId) => {
-    console.log(collectionName, collectionId);
+    //console.log(collectionName, collectionId);
     try {
       const docSnapshot = await getDoc(doc(db, collectionName, collectionId));
       if (docSnapshot.exists()) {

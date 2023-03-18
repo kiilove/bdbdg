@@ -61,6 +61,19 @@ const GameCategoryTable = ({ cupId }) => {
   };
   const { dispatch, editCup } = useContext(EditcupContext);
 
+  //gamesCategory만 업데이트
+  const handleStateAndDBUpdate = (updatedData) => {
+    if (!updatedData || updatedData === null || updatedData?.length <= 0) {
+      return;
+    }
+    setGamesCategory((prev) => (prev = updatedData));
+    console.log(updatedData);
+    dispatch({
+      type: "EDIT",
+      payload: { cupData: { ...editCup, gamesCategory: updatedData } },
+    });
+  };
+
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -266,6 +279,9 @@ const GameCategoryTable = ({ cupId }) => {
                                                       gameId={items.id}
                                                       gameTitle={items.title}
                                                       gameClass={item.title}
+                                                      onUpdate={
+                                                        handleStateAndDBUpdate
+                                                      }
                                                     />
                                                   ),
                                                 })
@@ -317,6 +333,7 @@ const GameCategoryTable = ({ cupId }) => {
                                               pSetRefresh={setRefresh}
                                               pGameId={items.id}
                                               pIndex={idx}
+                                              onUpdate={handleStateAndDBUpdate}
                                             />
                                           ),
                                         })

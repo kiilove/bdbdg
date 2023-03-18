@@ -19,7 +19,13 @@ import Loading from "../pages/Loading";
 import EditInvoice from "./EditInvoice";
 import { widgetTitle } from "../components/Titles";
 
-const EditAssignPlayers = ({ cupId, gameId, gameTitle, gameClass }) => {
+const EditAssignPlayers = ({
+  cupId,
+  gameId,
+  gameTitle,
+  gameClass,
+  onUpdate,
+}) => {
   console.log({ cupId, gameId, gameTitle, gameClass });
   const [isLoading, setIsLoading] = useState(true);
   const [getCupData, setGetCupData] = useState({});

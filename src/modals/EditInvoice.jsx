@@ -13,7 +13,6 @@ const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
 const EditInvoice = (props) => {
-  console.log(props);
   const [isLock, setIsLock] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -107,21 +106,33 @@ const EditInvoice = (props) => {
   };
 
   const handleConfirm = async (value) => {
+    console.log(props.collectionId);
     if (!newCupData.id) {
       alert("잠시후 다시 시도해주세요!");
       return;
     }
 
     await handleAddPlayerByGamesCategory();
-    await updateData("cups", newCupData.id, newCupData);
-    await updateData("cupsjoin", joinInfo.id, {
-      ...joinInfo,
-      isConfirmed: value,
-      feeInfo,
+    props.onUpdateCup({
+      id: newCupData.id,
+      updatedData: newCupData,
     });
+    props.onUpdateJoin({
+      id: props.collectionId,
+      updatedData: {
+        ...joinInfo,
+        isConfirmed: value,
+        feeInfo,
+      },
+    });
+    // await updateData("cups", newCupData.id, newCupData);
+    // await updateData("cupsjoin", joinInfo.id, {
+    //   ...joinInfo,
+    //   isConfirmed: value,
+    //   feeInfo,
+    // });
     setIsLock(value);
     setIsConfirmed(value);
-    props.handleRefresh();
   };
 
   const handleAddPlayerByGamesCategory = async () => {
@@ -178,7 +189,6 @@ const EditInvoice = (props) => {
   }, [props.collectionId]);
 
   useEffect(() => {
-    console.log(data);
     data.joinGames && setJoinGames([...data.joinGames]);
     data.docuId && setJoinInfo({ ...data });
     data.docuId && setFeeInfo({ ...data.feeInfo });
