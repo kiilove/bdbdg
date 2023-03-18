@@ -30,7 +30,7 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
   );
   const [searchCount, setSearchCount] = useState(undefined);
 
-  const { data: gameData, updateData: gameUpdate } = useFirestore;
+  const { data: gameData, updateData: gameUpdate } = useFirestore();
 
   const chkRef = useRef([]);
   const getRefereePool = async () => {
@@ -178,11 +178,14 @@ export const EditCupManage = ({ pSetModal, pSetRefresh, pGameId, pIndex }) => {
     setGameInfo(() => ({ ...gameInfo, launched: !classIsTrue }));
   }, [classIsTrue]);
 
+  const gameUpdateData = async (data) => {
+    await gameUpdate("cups", editCup.id, { ...data });
+  };
   useMemo(() => {
     console.log(gameInfo);
     const gameNewData = handleGamesCategory(gameInfo);
     const cupData = { ...editCup, gamesCategory: [...gameNewData] };
-    dispatch({ type: "EDIT", payload: { cupData } });
+    gameUpdateData(cupData);
   }, [gameInfo]);
 
   const customList = (items) => {

@@ -213,7 +213,18 @@ export const NewCupInfo = () => {
             회
           </span>
         </div>
-        <div className="flex w-full">{formTitle({ title: "주최기관" })}</div>
+        <div className="flex w-full">{formTitle({ title: "주최" })}</div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupAgency"
+            id="cupAgency"
+            value={cupInfo.cupAgency}
+            onChange={(e) => handleCupInfo(e)}
+            className={inputTextStyle}
+          />
+        </div>
+        <div className="flex w-full">{formTitle({ title: "주관" })}</div>
         <div className={inputBoxStyle}>
           {orgList.length && (
             <select
@@ -235,13 +246,24 @@ export const NewCupInfo = () => {
             </select>
           )}
         </div>
-        <div className="flex w-full">{formTitle({ title: "장소" })}</div>
+        <div className="flex w-full">{formTitle({ title: "대회장소" })}</div>
         <div className={inputBoxStyle}>
           <input
             type="text"
             name="cupLocation"
             id="cupLocation"
             value={cupInfo.cupLocation}
+            onChange={(e) => handleCupInfo(e)}
+            className={inputTextStyle}
+          />
+        </div>
+        <div className="flex w-full">{formTitle({ title: "대회장주소" })}</div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupLocationAddr"
+            id="cupLocationAddr"
+            value={cupInfo.cupLocationAddr}
             onChange={(e) => handleCupInfo(e)}
             className={inputTextStyle}
           />
@@ -322,7 +344,7 @@ export const NewCupInfo = () => {
         </div>
 
         <div className="flex w-full mt-5">
-          {formTitle({ title: "복수 종목 참가비" })}
+          {formTitle({ title: "중복참가비" })}
           <div className="flex gap-x-2 justify-end items-center bg-slate-400 px-1 h-8 rounded-full">
             <label htmlFor="priceExtraType1">
               <input
@@ -497,6 +519,17 @@ export const NewCupInfo = () => {
             useRange={false}
             onChange={(value) => setCupDate((prev) => (prev = value))}
             classNames="dark:slate-800"
+          />
+        </div>
+        <div className="flex w-full">{formTitle({ title: "알림사항" })}</div>
+        <div className={inputBoxStyle}>
+          <input
+            type="text"
+            name="cupNotice"
+            id="cupNotice"
+            value={cupInfo.cupNotice}
+            onChange={(e) => handleCupInfo(e)}
+            className={inputTextStyle}
           />
         </div>
       </div>

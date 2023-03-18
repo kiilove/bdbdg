@@ -7,12 +7,12 @@ import { useParams } from "react-router";
 import Loading from "../pages/Loading";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-const PlayerOrderTable = () => {
+const PlayerOrderTable = ({ id }) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [headerIdx, setHeaderIdx] = useState({ idx: 0, title: "" });
   const [isEntryGamesList, setIsEntryGamesList] = useState([]);
-  const [cupId, setCupId] = useState(params.cupId);
+  const [cupId, setCupId] = useState(id);
   const [refresh, setRefresh] = useState(false);
   const [getCupData, setGetCupData] = useState({});
   const [players, setPlayers] = useState([]);
@@ -110,14 +110,14 @@ const PlayerOrderTable = () => {
   }, [cupData]);
 
   useEffect(() => {
-    if (!cupId) {
+    if (!id) {
       return;
     }
-    cupGetDocument("cups", cupId);
-  }, [cupId]);
+    cupGetDocument("cups", id);
+  }, []);
 
   return (
-    <div className="flex w-full h-full p-5">
+    <div className="flex w-full h-full">
       {isLoading && <Loading />}
       {getCupData.id && (
         <div

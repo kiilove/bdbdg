@@ -6,9 +6,13 @@ import {
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNavigate } from "react-router-dom";
+import { useMenu } from "../context/MenuContext";
 import { pageTitle } from "./Titles";
 
 const TopMenus = () => {
+  const { state: menuState } = useMenu();
+  const navigate = useNavigate();
   return (
     <div
       id="topContainer"
@@ -21,8 +25,8 @@ const TopMenus = () => {
           className="flex text-white font-semibold text-2xl"
         >
           {pageTitle({
-            title: "경기 기록관",
-            desp: "새로운 경기를 준비하고 지난 경기 결과를 검색할 수 있습니다.",
+            title: menuState.title,
+            desp: menuState.helptext,
           })}
         </span>
       </div>
@@ -30,7 +34,7 @@ const TopMenus = () => {
         <div id="topRightBox" className="flex gap-x-4">
           <div
             id="topSearchBox"
-            className="flex border border-gray-500 rounded-3xl w-56 h-10 px-1"
+            className="flex border border-gray-500 rounded-3xl w-72 h-10 px-1"
           >
             <div
               id="topSearchIconBox"
@@ -54,15 +58,16 @@ const TopMenus = () => {
             id="topRightIconBox"
             className="flex w-full justify-around items-center gap-x-3"
           >
-            <div
+            <button
               id="topRightUser"
               className="flex gap-x-2 justify-center items-center"
+              onClick={() => navigate("/login")}
             >
               <FontAwesomeIcon
                 icon={faCircleUser}
-                className={"text-white text-xl"}
+                className={"text-white text-2xl"}
               />
-            </div>
+            </button>
           </div>
         </div>
       </div>

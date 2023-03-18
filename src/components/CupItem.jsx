@@ -1,6 +1,7 @@
 import { async } from "@firebase/util";
 import {
   faEye,
+  faInfo,
   faList12,
   faPenToSquare,
   faTrashCan,
@@ -49,7 +50,7 @@ const CupItem = ({
   return (
     <div
       className="flex flex-wrap box-border p-5 rounded-lg"
-      style={{ width: "380px", backgroundColor: "rgba(7,11,41,0.4)" }}
+      style={{ width: "480px", backgroundColor: "rgba(7,11,41,0.4)" }}
     >
       <div className="flex flex-col w-full">
         <div className="flex w-full gap-x-5">
@@ -99,15 +100,7 @@ const CupItem = ({
             <div
               className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
               onClick={() => {
-                window.location.href = `/playerorder/${cupId}`;
-              }}
-            >
-              <FontAwesomeIcon icon={faList12} className="text-white text-lg" />
-            </div>
-            <div
-              className="flex justify-center items-center w-10 h-10 bg-sky-500 rounded-xl hover:cursor-pointer"
-              onClick={() => {
-                window.location.href = `/cupview/${cupId}`;
+                window.location.href = `/cupinfo/${cupId}`;
               }}
             >
               <FontAwesomeIcon

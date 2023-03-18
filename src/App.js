@@ -18,6 +18,10 @@ import CupNew from "./pages/CupNew";
 import ModalTest from "./pages/ModalTest";
 import PlayerOrderTable from "./components/PlayerOrderTable";
 import AdminPage from "./pages/AdminPage";
+import CupInfo from "./components/CupInfo";
+import CupInfoView from "./pages/CupInfoView";
+import CupViewContainer from "./pages/CupViewContainer";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -26,9 +30,9 @@ function App() {
     //   style={{ backgroundImage: "url(" + BackgroundImage + ")" }}
     // >
     <BrowserRouter>
-      <div className="flex w-full min-h-screen p-3 gap-x-3 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900 box-border">
+      <div className="flex w-full min-h-screen p-2 gap-x-1 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900 box-border">
         <ToastContainer />
-        <div className="flex w-60 opacity-90">
+        <div className="flex w-48 opacity-90">
           <SideMenus />
         </div>
         <div className="flex flex-col w-full h-full">
@@ -48,8 +52,8 @@ function App() {
               />
               <Route path="/cuplist" element={<CupList />} />
               <Route
-                path="/cupview/:cupId"
-                element={<CupMain component={<CupView />} />}
+                path="/cupInfo/:cupId"
+                element={<CupMain component={<CupViewContainer />} />}
               ></Route>
               <Route path="/test" element={<ModalTest />} />
               <Route path="/orglist" element={<OrgList />} />
@@ -61,6 +65,8 @@ function App() {
               <Route path="/gamelist" element={<GameList />} />
               <Route path="/refereelist" element={<RefereeList />} />
               <Route path="/onlyadmin" element={<AdminPage />} />
+              <Route path="/test2" element={<CupNew />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
           </div>
         </div>

@@ -16,6 +16,7 @@ const useFirestore = () => {
   const [error, setError] = useState(null);
 
   const getDocument = async (collectionName, collectionId) => {
+    console.log(collectionName, collectionId);
     try {
       const docSnapshot = await getDoc(doc(db, collectionName, collectionId));
       if (docSnapshot.exists()) {
@@ -23,7 +24,9 @@ const useFirestore = () => {
       } else {
         setError({ message: "Document does not exist" });
       }
+
       setLoading(false);
+      return data;
     } catch (error) {
       setError(error);
       setLoading(false);
@@ -38,6 +41,7 @@ const useFirestore = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log(documents);
       setData(documents);
       setLoading(false);
       return documents;
@@ -74,6 +78,7 @@ const useFirestore = () => {
   };
 
   const updateData = async (collectionName, id, newData, callback) => {
+    console.log(collectionName, id, newData);
     try {
       const docRef = await updateDoc(doc(db, collectionName, id), newData);
       const updatedData = { ...docRef.data(), id: docRef.id };
@@ -81,6 +86,7 @@ const useFirestore = () => {
       return updatedData;
     } catch (error) {
       setError(error);
+      console.log(error);
     } finally {
       setData("");
     }

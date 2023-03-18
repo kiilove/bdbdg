@@ -10,8 +10,8 @@ import {
   faScaleBalanced,
   faPeopleLine,
 } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Fragment, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const menuItems = [
   { id: 1, title: "Dashboard", link: "/dashboard", icon: faGaugeHigh },
@@ -24,9 +24,40 @@ const menuItems = [
   { id: 9, title: "관리자", link: "/onlyadmin", icon: faUserSecret },
   { id: 10, title: "테스트페이지", link: "/test", icon: faUserSecret },
 ];
-const SideMenus = () => {
-  const [selected, setSelected] = useState("");
 
+const menus = [
+  {
+    title: "협회관리",
+    link: "/",
+    subMenus: [
+      { title: "기본데이터", link: "/orglist" },
+      { title: "소속심판데이터", link: "/refereelist" },
+      { title: "선수데이터", link: "/sub-menu-2" },
+    ],
+  },
+  {
+    title: "대회관리",
+    link: "/cuplist",
+    subMenus: [
+      { title: "새 대회개최 준비", link: "/newcup" },
+      { title: "대회목록", link: "/cuplist" },
+      { title: "참가신청서", link: "/sub-menu-2" },
+      { title: "참가선수관리", link: "/sub-menu-2" },
+      { title: "계측(출전순서)", link: "/sub-menu-2" },
+      { title: "종목관리", link: "/sub-menu-2" },
+    ],
+  },
+  {
+    title: "관리자",
+    link: "/onlyadmin",
+    subMenus: [{ title: "데모용 데이터", link: "/onlyadmin" }],
+  },
+];
+const SideMenus = () => {
+  const [showMenu, setShowMenu] = useState(false);
+  const [showSubMenuId, setShowSubMenuId] = useState(null);
+  const [selected, setSelected] = useState("");
+  const navigate = useNavigate();
   const handleMenuClick = (props) => {
     setSelected(() => props.title);
     window.location.href = props.link;
@@ -42,48 +73,45 @@ const SideMenus = () => {
       style={{ height: "900px", backgroundColor: "rgba(13,14,45,0.9" }}
     >
       <div className="flex p-3 w-full h-20 justify-around">
-        <div className="flex justify-center items-center">
-          <img src={Logo} className="w-14" />
-        </div>
         <Link to="/">
-          <span className="text-3xl font-bold text-white flex justify-center items-center h-full">
-            BDBDg
+          <span className="text-lg font-bold text-white flex justify-center items-center h-full">
+            협회관리시스템
           </span>
         </Link>
       </div>
       <div className="flex bg-gray-600" style={{ height: "1px" }}></div>
-      <div
-        id="menuItemWrapper"
-        className="flex flex-col justify-start items-start p-5 gap-y-2"
-      >
-        {menuItems.map((item, idx) => (
-          <div
-            id="menuItemBox"
-            className={`flex w-full h-14 justify-start items-center px-2 rounded-xl hover:cursor-pointer ${
-              item.title === selected && " bg-stone-800"
-            }`}
-            onClick={() =>
-              handleMenuClick({ title: item.title, link: item.link })
-            }
-          >
-            <div
-              id="menuItemIconBox"
-              className={`flex w-8 h-8 justify-center items-center rounded-xl mr-2 ${
-                item.title === selected ? " bg-sky-500" : " bg-slate-800"
-              }`}
-            >
-              <FontAwesomeIcon
-                icon={item.icon}
-                className={` font-semibold text-sm ${
-                  item.title === selected ? "text-white " : "text-sky-500"
-                }`}
-              />
-            </div>
-            <span id="menuItemTitle" className="text-white font-medium">
-              {item.title}
-            </span>
-          </div>
-        ))}
+      <div className="flex flex-col items-center h-screen text-white">
+        <div className="flex w-full justify-start flex-col ">
+          {menus.map((menu, index) => (
+            <Fragment key={index}>
+              <button
+                className="px-2 py-1 flex w-full justify-start ml-2 h-12 items-center"
+                onClick={() =>
+                  setShowSubMenuId(showSubMenuId === index ? null : index)
+                }
+              >
+                {menu.title}
+              </button>
+              {menu.subMenus && (
+                <div className="pl-4 bg-gray-900">
+                  {showSubMenuId === index && (
+                    <div className="flex w-full flex-col justify-center items-start">
+                      {menu.subMenus.map((subMenu, subIndex) => (
+                        <button
+                          key={subIndex}
+                          className="pl-4 py-2 h-12"
+                          onClick={() => navigate(subMenu.link)}
+                        >
+                          {subMenu.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </Fragment>
+          ))}
+        </div>
       </div>
     </div>
   );

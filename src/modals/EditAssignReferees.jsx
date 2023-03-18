@@ -113,7 +113,7 @@ const EditAssignReferees = () => {
 
   const customList = (items) => {
     return (
-      <div className="flex w-full h-72 overflow-auto">
+      <div className="flex w-full overflow-auto" style={{ maxHeight: "600px" }}>
         <div className="flex flex-col gap-y-2 w-full p-1">
           {items.length > 0 &&
             items.map((value, idx) => (
@@ -163,10 +163,10 @@ const EditAssignReferees = () => {
   return (
     <div
       className="flex w-full h-full gap-x-16 box-border"
-      style={{ minWidth: "800px", maxWidth: "1000px" }}
+      style={{ maxHeight: "750px" }}
     >
       <div className="flex w-full">
-        <div className="flex w-full py-5">
+        <div className="flex w-full">
           <div className="flex flex-col w-5/12 bg-slate-900 rounded-lg p-2 gap-y-2">
             <div className="flex rounded-lg p-3 items-center">
               <span className="text-white font-semibold">

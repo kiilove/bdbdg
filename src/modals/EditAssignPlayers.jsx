@@ -20,6 +20,7 @@ import EditInvoice from "./EditInvoice";
 import { widgetTitle } from "../components/Titles";
 
 const EditAssignPlayers = ({ cupId, gameId, gameTitle, gameClass }) => {
+  console.log({ cupId, gameId, gameTitle, gameClass });
   const [isLoading, setIsLoading] = useState(true);
   const [getCupData, setGetCupData] = useState({});
   const [getJoinData, setGetJoinData] = useState([]);
@@ -186,8 +187,8 @@ const EditAssignPlayers = ({ cupId, gameId, gameTitle, gameClass }) => {
 
   return (
     <div
-      className="flex w-full h-full gap-x-16 box-border flex-col "
-      style={{ minWidth: "800px", maxWidth: "800px" }}
+      className="flex w-full h-full gap-x-16 box-border flex-col overflow-y-auto"
+      style={{ minWidth: "800px", maxWidth: "800px", maxHeight: "800px" }}
     >
       {isLoading && <Loading />}
       {cupError && console.log("some error")}

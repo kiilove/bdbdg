@@ -9,6 +9,9 @@ import { widgetTitle } from "./Titles";
 import { EditAssignGameCategory } from "../modals/EditAssignGamesCategory";
 import { EditCupManage } from "../modals/EditCupManage";
 import EditAssignPlayers from "../modals/EditAssignPlayers";
+import useFirestoreSearch from "../customhooks/useFirestoreSearch";
+import useFirestore from "../customhooks/useFirestore";
+import { getLCP } from "web-vitals";
 
 const GAME_HEADERS = [
   { title: "경기순서", size: "8%" },
@@ -18,12 +21,24 @@ const GAME_HEADERS = [
   { title: "심판배정", size: "10%" },
 ];
 
-const GameCategoryTable = (props) => {
+const GameCategoryTable = ({ cupId }) => {
   const [modal, setModal] = useState(false);
   const [modal2, setModal2] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [modalComponent, setModalComponent] = useState();
   const [gamesCategory, setGamesCategory] = useState([]);
+
+  const {
+    data: getGamesCategoryData,
+    error: GamesError,
+    getDocument: gamesGetDocument,
+  } = useFirestore();
+
+  const {
+    data: getInitGamesCategoryData,
+    error: initGamesError,
+    updateData: updateInitGamesCategoryData,
+  } = useFirestore();
 
   const handleOpenModal = ({ component }) => {
     setModalComponent(() => component);
@@ -46,11 +61,6 @@ const GameCategoryTable = (props) => {
   };
   const { dispatch, editCup } = useContext(EditcupContext);
 
-  useMemo(
-    () => setGamesCategory((prev) => (prev = editCup.gamesCategory)),
-    [editCup]
-  );
-
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -69,14 +79,34 @@ const GameCategoryTable = (props) => {
     return newOrder;
   };
 
-  useMemo(
-    () =>
-      dispatch({
-        type: "EDIT",
-        payload: { cupData: { ...editCup, gamesCategory } },
-      }),
-    [gamesCategory]
-  );
+  useEffect(() => {
+    if (!getGamesCategoryData || !getGamesCategoryData.gamesCategory) {
+      return;
+    }
+    setGamesCategory([...getGamesCategoryData.gamesCategory]);
+  }, [getGamesCategoryData?.gamesCategory]);
+
+  useMemo(() => {
+    //console.log(cupId);
+    if (cupId !== null) {
+      gamesGetDocument("cups", cupId);
+    }
+
+    // setGamesCategory((prev) => (prev = editCup.gamesCategory));
+  }, [cupId]);
+
+  const updateGamesCategory = async () => {
+    if (gamesCategory.length > 0) {
+      await updateInitGamesCategoryData("cups", editCup.id, {
+        ...editCup,
+        gamesCategory: [...gamesCategory],
+      });
+    }
+  };
+  useEffect(() => {
+    console.log(gamesCategory);
+    updateGamesCategory();
+  }, [gamesCategory]);
 
   return (
     <div
@@ -135,7 +165,7 @@ const GameCategoryTable = (props) => {
           {modalComponent}
         </div>
       </Modal>
-      <div className="flex items-center justify-start bg-slate-800 w-full h-12 rounded-xl px-5 gap-x-2">
+      {/* <div className="flex items-center justify-start bg-slate-800 w-full h-12 rounded-xl px-5 gap-x-2">
         <div className="flex justify-between w-full">
           <div className="flex justify-center items-center">
             <FontAwesomeIcon
@@ -145,8 +175,15 @@ const GameCategoryTable = (props) => {
             <span className="text-white text-base ">{props.data.title}</span>
           </div>
         </div>
-      </div>
-
+      </div> */}
+      {/* <div className="flex w-full h-12 bg-gray-900 justify-end items-center">
+        <button
+          className="bg-gray-900 border px-3 py-2 h-10"
+          onClick={() => handleInitGames()}
+        >
+          <span className="text-white">종목 초기화</span>
+        </button>
+      </div> */}
       <div className="flex items-center justify-start w-full h-full rounded-xl  gap-x-2 flex-wrap overflow-y-auto">
         <div className="flex w-full justify-center">
           <div className="flex w-full">
@@ -225,7 +262,7 @@ const GameCategoryTable = (props) => {
                                                 handleOpenModal({
                                                   component: (
                                                     <EditAssignPlayers
-                                                      cupId={editCup.id}
+                                                      cupId={cupId}
                                                       gameId={items.id}
                                                       gameTitle={items.title}
                                                       gameClass={item.title}

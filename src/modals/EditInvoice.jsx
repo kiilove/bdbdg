@@ -13,7 +13,7 @@ const inputTextStyle =
   "w-full border-0 outline-none bg-transparent px-3 text-white text-sm placeholder:text-white focus:ring-0";
 
 const EditInvoice = (props) => {
-  //console.log(props);
+  console.log(props);
   const [isLock, setIsLock] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -178,7 +178,7 @@ const EditInvoice = (props) => {
   }, [props.collectionId]);
 
   useEffect(() => {
-    // console.log(data);
+    console.log(data);
     data.joinGames && setJoinGames([...data.joinGames]);
     data.docuId && setJoinInfo({ ...data });
     data.docuId && setFeeInfo({ ...data.feeInfo });
@@ -205,7 +205,7 @@ const EditInvoice = (props) => {
   }, [joinInfo]);
 
   useMemo(() => {
-    //console.log(cupData);
+    console.log(cupData);
     if (cupData.id) {
       handleAddPlayerByGamesCategory();
     }

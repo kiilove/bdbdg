@@ -32,15 +32,15 @@ const CupList = () => {
   return (
     <div className="flex w-full h-full flex-col gap-y-5">
       <div className="flex w-full flex-col">
-        <div className="flex w-full p-5 h-36 justify-center align-middle">
+        {/* <div className="flex w-full p-5 h-36 justify-center align-middle">
           <div
             className="flex w-full h-full p-5 box-border items-center rounded-lg"
             style={{ backgroundColor: "rgba(7,11,41,0.7)" }}
           >
             <span className="text-white">협회</span>
           </div>
-        </div>
-        <div className="flex w-full px-5">
+        </div> */}
+        <div className="flex w-full px-5 mt-5">
           <div className="flex w-full flex-wrap box-border justify-between gap-y-5">
             {cupListsData.map((cup, idx) => (
               <div className="flex ">
