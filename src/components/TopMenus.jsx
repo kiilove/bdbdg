@@ -62,13 +62,6 @@ const TopMenus = () => {
                 icon={faCircleUser}
                 className={"text-white text-xl"}
               />
-              <span className="flex text-white">멤버가입</span>
-            </div>
-            <div id="topRightSetting" className="flex">
-              <FontAwesomeIcon icon={faGear} className={"text-white text-xl"} />
-            </div>
-            <div id="topRightAlarm" className="flex">
-              <FontAwesomeIcon icon={faBell} className={"text-white text-xl"} />
             </div>
           </div>
         </div>
