@@ -475,6 +475,7 @@ const EditInvoice = (props) => {
                 <div className="flex text-white ml-2 gap-2 flex-wrap justify-start items-center w-32">
                   <div className="flex flex-wrap h-full p-1">
                     <button
+                      className="w-28"
                       onClick={() => {
                         handleOpenModal({
                           component: (

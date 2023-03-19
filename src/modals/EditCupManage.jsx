@@ -24,7 +24,7 @@ export const EditCupManage = ({
   onUpdate,
 }) => {
   const { dispatch, editCup } = useContext(EditcupContext);
-  const [gameInfo, setGameInfo] = useState(editCup.gamesCategory[pIndex]);
+  const [gameInfo, setGameInfo] = useState(editCup?.gamesCategory[pIndex]);
   const [gamesCategory, setGamesCategory] = useState([
     ...editCup.gamesCategory,
   ]);

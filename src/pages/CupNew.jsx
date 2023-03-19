@@ -183,6 +183,7 @@ const CupNew = () => {
 
   useEffect(() => {
     orgsReadData("orgs");
+    dispatch({ type: "EDIT", payload: { cupData: "" } });
 
     return () => {};
   }, []);
@@ -236,7 +237,6 @@ const CupNew = () => {
                 <CupInfo
                   orgs={getOrgsData}
                   cupInfo={getCupInfoData}
-                  
                   updateOn={updateOn}
                 />
               </div>

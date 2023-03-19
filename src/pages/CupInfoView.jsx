@@ -154,6 +154,26 @@ const CupInfoView = ({ cupId }) => {
                   <span className="text-white text-base">
                     상태 : {getCupInfo.cupState}
                   </span>
+                  <div className="flex ml-3 text-white text-sm gap-x-2 justify-center items-center">
+                    <label htmlFor="cupState1">
+                      <input
+                        type="radio"
+                        id="cupState1"
+                        name="cupState"
+                        value="신청접수중"
+                      />
+                      <span className="ml-2">접수중</span>
+                    </label>
+                    <label htmlFor="cupState2">
+                      <input
+                        type="radio"
+                        id="cupState2"
+                        name="cupState"
+                        value="대회중"
+                      />
+                      <span className="ml-2">대회중</span>
+                    </label>
+                  </div>
                 </div>
                 <div className="flex justify-start items-top">
                   <span className="text-white text-base">
